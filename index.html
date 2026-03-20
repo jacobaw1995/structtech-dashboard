@@ -6,376 +6,195 @@
 <title>StructTech — Operations Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0d0f0e;
-    --surface: #141614;
-    --surface2: #1a1d1a;
-    --border: #2a2e2a;
-    --border2: #363b36;
-    --text: #e8ebe6;
-    --muted: #7a8278;
-    --accent: #c8f060;
-    --accent2: #4ade80;
-    --warn: #f59e0b;
-    --danger: #f87171;
-    --blue: #60a5fa;
-    --teal: #2dd4bf;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
-    min-height: 100vh;
-  }
+:root {
+  --bg:#0d0f0e; --surface:#141614; --surface2:#1a1d1a;
+  --border:#2a2e2a; --border2:#363b36;
+  --text:#e8ebe6; --muted:#7a8278;
+  --accent:#c8f060; --accent2:#4ade80;
+  --warn:#f59e0b; --danger:#f87171;
+  --blue:#60a5fa; --teal:#2dd4bf; --purple:#a78bfa;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;overflow-x:hidden;}
 
-  /* HEADER */
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    background: var(--bg);
-    z-index: 100;
-  }
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
-    color: var(--accent);
-  }
-  .logo span { color: var(--muted); }
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    font-size: 12px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-  }
-  .week-badge {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    padding: 4px 12px;
-    border-radius: 20px;
-    color: var(--accent);
-    font-weight: 500;
-  }
+/* HEADER */
+header{border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:200;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--accent);}
+.logo span{color:var(--muted);}
+.header-right{display:flex;align-items:center;gap:16px;font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;}
+.week-badge{background:var(--surface2);border:1px solid var(--border2);padding:4px 12px;border-radius:20px;color:var(--accent);font-weight:500;}
+.menu-btn{background:transparent;border:1px solid var(--border2);border-radius:8px;padding:6px 14px;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;}
+.menu-btn:hover{border-color:var(--accent);color:var(--accent);}
+.menu-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
 
-  /* LAYOUT */
-  .main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+/* SIDE PANEL */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:300;pointer-events:none;transition:background .3s;}
+.panel-overlay.open{background:rgba(0,0,0,0.55);pointer-events:all;}
+.side-panel{position:fixed;top:0;right:-520px;width:520px;height:100vh;background:var(--surface);border-left:1px solid var(--border2);z-index:400;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden;}
+.side-panel.open{right:0;}
+.panel-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.panel-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--accent);}
+.panel-close{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;padding:4px 8px;border-radius:4px;}
+.panel-close:hover{color:var(--text);}
+.panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+.panel-tab{flex:1;padding:12px 8px;font-family:'DM Mono',monospace;font-size:11px;text-align:center;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s;background:transparent;border-top:none;border-left:none;border-right:none;}
+.panel-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.panel-tab:hover{color:var(--text);}
+.panel-body{flex:1;overflow-y:auto;padding:20px 24px;}
 
-  /* TOP STATS */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0,1fr));
-    gap: 12px;
-    margin-bottom: 28px;
-  }
-  .stat {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px 20px;
-    position: relative;
-    overflow: hidden;
-  }
-  .stat::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--accent-color, var(--border2));
-  }
-  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 1px; color: var(--text); line-height: 1; }
-  .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .stat-change { font-size: 11px; margin-top: 6px; }
-  .stat-change.up { color: var(--accent2); }
-  .stat-change.warn { color: var(--warn); }
+/* PANEL SECTIONS */
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1.5px;color:var(--text);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.os-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;transition:border-color .15s;}
+.os-card:hover{border-color:var(--border2);}
+.os-card-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.os-card-meta{font-size:11px;color:var(--muted);}
+.os-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;margin-right:4px;margin-top:4px;}
+.tag-active{background:rgba(74,222,128,0.15);color:var(--accent2);}
+.tag-prospect{background:rgba(245,158,11,0.15);color:var(--warn);}
+.tag-done{background:rgba(122,130,120,0.15);color:var(--muted);}
+.tag-sop{background:rgba(96,160,250,0.15);color:var(--blue);}
+.tag-note{background:rgba(167,139,250,0.12);color:var(--purple);}
 
-  /* MAIN GRID */
-  .grid-main {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 20px;
-    margin-bottom: 20px;
-  }
+/* NOTE EDITOR */
+.note-editor{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:12px;resize:vertical;min-height:100px;outline:none;line-height:1.6;transition:border-color .15s;}
+.note-editor:focus{border-color:var(--accent);}
 
-  /* CARD */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .card-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 16px;
-    letter-spacing: 1.5px;
-    color: var(--text);
-  }
-  .card-body { padding: 20px; }
+/* SMALL BUTTON */
+.sm-btn{background:var(--accent);color:#0d0f0e;border:none;border-radius:6px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:12px;cursor:pointer;transition:opacity .15s;}
+.sm-btn:hover{opacity:.85;}
+.sm-btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--border2);}
+.sm-btn.ghost:hover{color:var(--text);opacity:1;}
+.sm-btn.danger{background:transparent;color:var(--danger);border:1px solid rgba(248,113,113,0.3);}
 
-  /* WEEK TIMELINE */
-  .week-nav {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-  .week-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 6px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    transition: all 0.15s;
-  }
-  .week-btn:hover { border-color: var(--border2); color: var(--text); }
-  .week-btn.active {
-    background: var(--accent);
-    color: #0d0f0e;
-    border-color: var(--accent);
-    font-weight: 500;
-  }
-  .week-btn.completed {
-    border-color: var(--accent2);
-    color: var(--accent2);
-  }
+/* ADD INPUT */
+.add-input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s;width:100%;}
+.add-input:focus{border-color:var(--accent);}
+.add-input::placeholder{color:var(--muted);}
+select.add-input option{background:var(--surface2);}
 
-  /* TASK LIST */
-  .task-list { display: flex; flex-direction: column; gap: 8px; }
-  .task {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 14px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: border-color 0.15s;
-    position: relative;
-  }
-  .task:hover { border-color: var(--border2); }
-  .task.done { opacity: 0.5; }
-  .task.done .task-title { text-decoration: line-through; color: var(--muted); }
-  .task-check {
-    width: 18px; height: 18px;
-    border: 1.5px solid var(--border2);
-    border-radius: 4px;
-    flex-shrink: 0;
-    margin-top: 2px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
-  }
-  .task.done .task-check {
-    background: var(--accent2);
-    border-color: var(--accent2);
-  }
-  .task-check svg { display: none; }
-  .task.done .task-check svg { display: block; }
-  .task-content { flex: 1; min-width: 0; }
-  .task-title { font-size: 13px; font-weight: 500; color: var(--text); }
-  .task-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .task-tag {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-weight: 500;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .tag-build { background: rgba(96,160,250,0.15); color: var(--blue); }
-  .tag-sales { background: rgba(200,240,96,0.15); color: var(--accent); }
-  .tag-learn { background: rgba(45,212,191,0.15); color: var(--teal); }
-  .tag-admin { background: rgba(245,158,11,0.15); color: var(--warn); }
-  .tag-content { background: rgba(167,139,250,0.12); color: #a78bfa; }
+/* MAIN LAYOUT */
+.main{padding:28px 32px;max-width:1400px;margin:0 auto;}
+.stats-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:28px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-color,var(--border2));}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;color:var(--text);line-height:1;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.stat-change{font-size:11px;margin-top:6px;}
+.stat-change.up{color:var(--accent2);}
+.stat-change.warn{color:var(--warn);}
+.grid-main{display:grid;grid-template-columns:1fr 340px;gap:20px;margin-bottom:20px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px;color:var(--text);}
+.card-body{padding:20px;}
+.grid-bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
 
-  /* WEEK FOCUS CARD */
-  .focus-card {
-    background: linear-gradient(135deg, rgba(200,240,96,0.06) 0%, transparent 60%);
-    border: 1px solid rgba(200,240,96,0.2);
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  .focus-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 6px; }
-  .focus-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; line-height: 1.2; }
-  .focus-desc { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+/* WEEK NAV */
+.week-nav{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.week-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:6px;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;transition:all .15s;}
+.week-btn:hover{border-color:var(--border2);color:var(--text);}
+.week-btn.active{background:var(--accent);color:#0d0f0e;border-color:var(--accent);font-weight:500;}
+.week-btn.completed{border-color:var(--accent2);color:var(--accent2);}
 
-  /* PROGRESS BAR */
-  .progress-wrap { margin-bottom: 16px; }
-  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.4s ease; }
-  .progress-fill.warn { background: var(--warn); }
-  .progress-fill.teal { background: var(--teal); }
+/* FOCUS CARD */
+.focus-card{background:linear-gradient(135deg,rgba(200,240,96,0.06) 0%,transparent 60%);border:1px solid rgba(200,240,96,0.2);border-radius:10px;padding:16px;margin-bottom:16px;}
+.focus-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:6px;}
+.focus-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;line-height:1.2;}
+.focus-desc{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;}
 
-  /* MILESTONES */
-  .milestone-list { display: flex; flex-direction: column; gap: 0; }
-  .milestone {
-    display: flex;
-    gap: 14px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
-  .milestone:last-child { border-bottom: none; }
-  .m-dot-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-  .m-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    border: 2px solid var(--border2);
-    background: var(--surface);
-    flex-shrink: 0;
-    margin-top: 4px;
-  }
-  .m-dot.active { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px rgba(200,240,96,0.4); }
-  .m-dot.done { background: var(--accent2); border-color: var(--accent2); }
-  .m-line { width: 1px; flex: 1; background: var(--border); margin: 4px 0; min-height: 20px; }
-  .m-content { flex: 1; min-width: 0; padding-bottom: 4px; }
-  .m-title { font-size: 13px; font-weight: 500; color: var(--text); }
-  .m-title.active { color: var(--accent); }
-  .m-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .m-week { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+/* WEEK SUMMARY */
+.week-summary{display:flex;gap:16px;align-items:center;padding:12px 16px;background:var(--surface2);border-radius:8px;margin-bottom:16px;font-size:12px;}
+.ws-num{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--accent);line-height:1;}
+.ws-label{color:var(--muted);font-size:11px;}
+.ws-divider{width:1px;height:32px;background:var(--border);}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;background:var(--accent);transition:width .4s ease;}
+.progress-fill.warn{background:var(--warn);}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;}
 
-  /* BOTTOM GRID */
-  .grid-bottom {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-  }
+/* TASKS */
+.task-list{display:flex;flex-direction:column;gap:8px;}
+.task{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;transition:border-color .15s;position:relative;}
+.task:hover{border-color:var(--border2);}
+.task.done{opacity:.5;}
+.task.done .task-title{text-decoration:line-through;color:var(--muted);}
+.task.editing{border-color:var(--accent);opacity:1;}
+.task-check{width:18px;height:18px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0;margin-top:3px;display:flex;align-items:center;justify-content:center;transition:all .15s;cursor:pointer;}
+.task.done .task-check{background:var(--accent2);border-color:var(--accent2);}
+.task-check svg{display:none;}
+.task.done .task-check svg{display:block;}
+.task-content{flex:1;min-width:0;}
+.task-title{font-size:13px;font-weight:500;color:var(--text);cursor:pointer;}
+.task-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.task-edit-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--accent);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;outline:none;padding:2px 0;margin-bottom:4px;}
+.task-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.task-tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap;flex-shrink:0;margin-top:3px;}
+.tag-build{background:rgba(96,160,250,0.15);color:var(--blue);}
+.tag-sales{background:rgba(200,240,96,0.15);color:var(--accent);}
+.tag-learn{background:rgba(45,212,191,0.15);color:var(--teal);}
+.tag-admin{background:rgba(245,158,11,0.15);color:var(--warn);}
+.tag-content{background:rgba(167,139,250,0.12);color:var(--purple);}
+.task-edit-btn{background:transparent;border:none;color:transparent;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;flex-shrink:0;margin-top:1px;line-height:1;transition:color .15s;}
+.task:hover .task-edit-btn{color:var(--muted);}
+.task-edit-btn:hover{color:var(--accent) !important;}
 
-  /* PIPELINE */
-  .pipeline-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .pipeline-item:last-child { border-bottom: none; }
-  .p-name { font-size: 13px; font-weight: 500; }
-  .p-status { font-size: 11px; color: var(--muted); }
-  .p-stage {
-    font-size: 10px; padding: 3px 10px;
-    border-radius: 20px; white-space: nowrap;
-  }
-  .stage-cold { background: rgba(122,130,120,0.15); color: var(--muted); }
-  .stage-warm { background: rgba(245,158,11,0.15); color: var(--warn); }
-  .stage-hot { background: rgba(200,240,96,0.15); color: var(--accent); }
-  .stage-won { background: rgba(74,222,128,0.15); color: var(--accent2); }
+/* ADD ROW */
+.add-row{display:flex;gap:8px;margin-top:12px;}
+.add-row .add-input{flex:1;}
+.add-btn{background:var(--accent);color:#0d0f0e;border:none;border-radius:6px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:opacity .15s;white-space:nowrap;}
+.add-btn:hover{opacity:.85;}
 
-  /* INCOME TRACKER */
-  .income-row {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-  .income-row:last-child { border-bottom: none; }
-  .income-amount { font-family: 'DM Mono', monospace; font-weight: 500; }
-  .income-amount.active { color: var(--accent); }
-  .income-amount.pending { color: var(--warn); }
-  .income-amount.goal { color: var(--muted); }
+/* MILESTONES */
+.milestone-list{display:flex;flex-direction:column;}
+.milestone{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);}
+.milestone:last-child{border-bottom:none;}
+.m-dot-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.m-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border2);background:var(--surface);flex-shrink:0;margin-top:4px;}
+.m-dot.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px rgba(200,240,96,.4);}
+.m-dot.done{background:var(--accent2);border-color:var(--accent2);}
+.m-line{width:1px;flex:1;background:var(--border);margin:4px 0;min-height:20px;}
+.m-content{flex:1;min-width:0;padding-bottom:4px;}
+.m-title{font-size:13px;font-weight:500;color:var(--text);}
+.m-title.active{color:var(--accent);}
+.m-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.m-week{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);}
 
-  /* TOOL BELT */
-  .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .tool-item {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-  .tool-name { font-weight: 500; color: var(--text); }
-  .tool-status { font-size: 10px; margin-top: 2px; }
-  .tool-status.active { color: var(--accent2); }
-  .tool-status.learn { color: var(--warn); }
-  .tool-status.next { color: var(--muted); }
+/* PIPELINE */
+.pipeline-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.pipeline-item:last-child{border-bottom:none;}
+.p-name{font-size:13px;font-weight:500;}
+.p-status{font-size:11px;color:var(--muted);}
+.p-stage{font-size:10px;padding:3px 10px;border-radius:20px;white-space:nowrap;cursor:pointer;}
+.stage-cold{background:rgba(122,130,120,.15);color:var(--muted);}
+.stage-warm{background:rgba(245,158,11,.15);color:var(--warn);}
+.stage-hot{background:rgba(200,240,96,.15);color:var(--accent);}
+.stage-won{background:rgba(74,222,128,.15);color:var(--accent2);}
 
-  /* ADD TASK FORM */
-  .add-row {
-    display: flex; gap: 8px; margin-top: 12px;
-  }
-  .add-input {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px 12px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .add-input:focus { border-color: var(--accent); }
-  .add-input::placeholder { color: var(--muted); }
-  .add-btn {
-    background: var(--accent);
-    color: #0d0f0e;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    font-size: 13px;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .add-btn:hover { opacity: 0.85; }
+/* INCOME */
+.income-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.income-row:last-child{border-bottom:none;}
+.income-amount{font-family:'DM Mono',monospace;font-weight:500;}
 
-  /* WEEK PROGRESS SUMMARY */
-  .week-summary {
-    display: flex; gap: 16px; align-items: center;
-    padding: 12px 16px;
-    background: var(--surface2);
-    border-radius: 8px;
-    margin-bottom: 16px;
-    font-size: 12px;
-  }
-  .ws-num { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--accent); line-height: 1; }
-  .ws-label { color: var(--muted); font-size: 11px; }
-  .ws-divider { width: 1px; height: 32px; background: var(--border); }
+/* TOOL GRID */
+.tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.tool-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;}
+.tool-name{font-weight:500;color:var(--text);}
+.tool-status{font-size:10px;margin-top:2px;}
+.tool-status.active{color:var(--accent2);}
+.tool-status.learn{color:var(--warn);}
+.tool-status.next{color:var(--muted);}
 
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--surface); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 
-  /* RESPONSIVE */
-  @media (max-width: 1100px) {
-    .grid-main { grid-template-columns: 1fr; }
-    .grid-bottom { grid-template-columns: 1fr 1fr; }
-    .stats-row { grid-template-columns: repeat(3, 1fr); }
-  }
-  @media (max-width: 700px) {
-    .main { padding: 16px; }
-    header { padding: 0 16px; }
-    .stats-row { grid-template-columns: 1fr 1fr; }
-    .grid-bottom { grid-template-columns: 1fr; }
-  }
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+
+@media(max-width:1100px){.grid-main{grid-template-columns:1fr;}.grid-bottom{grid-template-columns:1fr 1fr;}.stats-row{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:700px){.main{padding:16px;}header{padding:0 16px;}.stats-row{grid-template-columns:1fr 1fr;}.grid-bottom{grid-template-columns:1fr;}.side-panel{width:100%;right:-100%;}}
 </style>
 </head>
 <body>
@@ -383,95 +202,97 @@
 <header>
   <div class="logo">StructTech <span>/ OPS</span></div>
   <div class="header-right">
-    <span id="date-display"></span>
     <span id="sync-status" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">Loading...</span>
+    <span id="date-display"></span>
     <span class="week-badge" id="current-week-badge">Week 1</span>
+    <button class="menu-btn" onclick="togglePanel()">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      OS
+    </button>
   </div>
 </header>
 
-<div class="main">
+<!-- SIDE PANEL OVERLAY -->
+<div class="panel-overlay" id="panel-overlay" onclick="togglePanel()"></div>
 
+<!-- SIDE PANEL -->
+<div class="side-panel" id="side-panel">
+  <div class="panel-header">
+    <span class="panel-title">StructTech OS</span>
+    <button class="panel-close" onclick="togglePanel()">&times;</button>
+  </div>
+  <div class="panel-tabs">
+    <button class="panel-tab active" onclick="switchTab('workspace',this)">Workspace</button>
+    <button class="panel-tab" onclick="switchTab('clients',this)">Clients</button>
+    <button class="panel-tab" onclick="switchTab('sops',this)">SOPs</button>
+    <button class="panel-tab" onclick="switchTab('notes',this)">Notes</button>
+  </div>
+  <div class="panel-body" id="panel-body"></div>
+</div>
+
+<div class="main">
   <!-- STATS ROW -->
   <div class="stats-row">
-    <div class="stat" style="--accent-color: var(--accent);">
+    <div class="stat" style="--accent-color:var(--accent);">
       <div class="stat-label">Active week</div>
       <div class="stat-value" id="stat-week">1</div>
       <div class="stat-sub">of 16 planned</div>
     </div>
-    <div class="stat" style="--accent-color: var(--teal);">
+    <div class="stat" style="--accent-color:var(--teal);">
       <div class="stat-label">Tasks complete</div>
       <div class="stat-value" id="stat-done">0</div>
       <div class="stat-sub" id="stat-done-sub">this week</div>
     </div>
-    <div class="stat" style="--accent-color: var(--blue);">
+    <div class="stat" style="--accent-color:var(--blue);">
       <div class="stat-label">Prospects</div>
       <div class="stat-value" id="stat-prospects">0</div>
       <div class="stat-sub">in pipeline</div>
-      <div class="stat-change warn">→ Start outreach W2</div>
     </div>
-    <div class="stat" style="--accent-color: var(--warn);">
+    <div class="stat" style="--accent-color:var(--warn);">
       <div class="stat-label">Revenue MTD</div>
-      <div class="stat-value">$0</div>
+      <div class="stat-value" id="stat-revenue">$0</div>
       <div class="stat-sub">Target: $2,500 by W6</div>
-      <div class="stat-change warn" id="revenue-change">→ First audit W4–5</div>
     </div>
-    <div class="stat" style="--accent-color: var(--accent2);">
+    <div class="stat" style="--accent-color:var(--accent2);">
       <div class="stat-label">Retainer MRR</div>
-      <div class="stat-value">$0</div>
+      <div class="stat-value" id="stat-mrr">$0</div>
       <div class="stat-sub">Target: $2,500 by W12</div>
-      <div class="stat-change warn">→ Phase II converts</div>
     </div>
   </div>
 
   <!-- MAIN GRID -->
   <div class="grid-main">
-
-    <!-- LEFT: WEEKLY TASKS -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Weekly task board</div>
-        <div style="font-size:11px;color:var(--muted);">Click tasks to mark complete</div>
+        <div style="font-size:11px;color:var(--muted);">Click title to edit &middot; checkbox to complete</div>
       </div>
       <div class="card-body">
-
         <div class="week-nav" id="week-nav"></div>
-
-        <div class="focus-card" id="week-focus">
+        <div class="focus-card">
           <div class="focus-label">This week's mission</div>
-          <div class="focus-title" id="focus-title">Foundation & Identity</div>
-          <div class="focus-desc" id="focus-desc">Set up StructTech's operating infrastructure. By Friday you should have your offer defined, your tools configured, and your first outreach list ready.</div>
+          <div class="focus-title" id="focus-title"></div>
+          <div class="focus-desc" id="focus-desc"></div>
         </div>
-
         <div class="week-summary">
-          <div>
-            <div class="ws-num" id="ws-done">0</div>
-            <div class="ws-label">done</div>
-          </div>
+          <div><div class="ws-num" id="ws-done">0</div><div class="ws-label">done</div></div>
           <div class="ws-divider"></div>
-          <div>
-            <div class="ws-num" id="ws-total">0</div>
-            <div class="ws-label">total</div>
-          </div>
+          <div><div class="ws-num" id="ws-total">0</div><div class="ws-label">total</div></div>
           <div class="ws-divider"></div>
           <div style="flex:1;">
-            <div class="progress-bar" style="height:6px;">
-              <div class="progress-fill" id="week-progress-bar" style="width:0%"></div>
-            </div>
+            <div class="progress-bar" style="height:6px;"><div class="progress-fill" id="week-progress-bar" style="width:0%"></div></div>
             <div style="font-size:10px;color:var(--muted);margin-top:4px;" id="week-pct">0% complete</div>
           </div>
         </div>
-
         <div class="task-list" id="task-list"></div>
-
         <div class="add-row">
           <input class="add-input" id="add-input" placeholder="Add a task for this week..." />
           <button class="add-btn" onclick="addTask()">+ Add</button>
         </div>
-
       </div>
     </div>
 
-    <!-- RIGHT: MILESTONES -->
+    <!-- MILESTONES -->
     <div style="display:flex;flex-direction:column;gap:20px;">
       <div class="card">
         <div class="card-header">
@@ -483,13 +304,11 @@
         </div>
       </div>
     </div>
-
   </div>
 
   <!-- BOTTOM GRID -->
   <div class="grid-bottom">
-
-    <!-- PROSPECT PIPELINE -->
+    <!-- PIPELINE -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Prospect pipeline</div>
@@ -500,27 +319,20 @@
           <div style="display:flex;flex-direction:column;gap:8px;">
             <input class="add-input" id="p-name" placeholder="Name or company..." />
             <input class="add-input" id="p-type" placeholder="Trade type (e.g. Plumber, HVAC)..." />
-            <select id="p-stage" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
-              <option value="cold">Cold</option>
-              <option value="warm">Warm</option>
-              <option value="hot">Hot</option>
-              <option value="won">Won</option>
+            <select id="p-stage" class="add-input">
+              <option value="cold">Cold</option><option value="warm">Warm</option><option value="hot">Hot</option><option value="won">Won</option>
             </select>
             <div style="display:flex;gap:8px;">
-              <button class="add-btn" style="flex:1;" onclick="saveProspect()">Save prospect</button>
+              <button class="add-btn" style="flex:1;" onclick="saveProspect()">Save</button>
               <button onclick="toggleProspectForm()" style="flex:1;background:transparent;border:1px solid var(--border2);border-radius:6px;padding:8px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">Cancel</button>
             </div>
           </div>
         </div>
-        <div id="pipeline-list">
-          <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">
-            No prospects yet.<br>Start outreach in Week 2.
-          </div>
-        </div>
+        <div id="pipeline-list"></div>
       </div>
     </div>
 
-    <!-- INCOME TRACKER -->
+    <!-- INCOME -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Income tracker</div>
@@ -529,13 +341,10 @@
       <div class="card-body">
         <div id="income-form" style="display:none;margin-bottom:14px;padding:14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;">
           <div style="display:flex;flex-direction:column;gap:8px;">
-            <select id="inc-type" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;">
-              <option value="audit">Audit fee (one-time)</option>
-              <option value="retainer">Retainer (monthly)</option>
-              <option value="contracting">Contracting</option>
-              <option value="other">Other</option>
+            <select id="inc-type" class="add-input">
+              <option value="audit">Audit fee</option><option value="retainer">Retainer</option><option value="contracting">Contracting</option><option value="other">Other</option>
             </select>
-            <input class="add-input" id="inc-label" placeholder="Label (e.g. client name)..." />
+            <input class="add-input" id="inc-label" placeholder="Client or description..." />
             <input class="add-input" id="inc-amount" type="number" placeholder="Amount ($)..." min="0" />
             <div style="display:flex;gap:8px;">
               <button class="add-btn" style="flex:1;" onclick="saveIncome()">Save</button>
@@ -545,60 +354,30 @@
         </div>
         <div id="income-list"></div>
         <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
-          <div class="progress-label">
-            <span>Road to $2,500 MRR</span><span id="mrr-pct">0%</span>
-          </div>
+          <div class="progress-label"><span>Road to $2,500 MRR</span><span id="mrr-pct">0%</span></div>
           <div class="progress-bar"><div class="progress-fill warn" id="mrr-bar" style="width:0%;"></div></div>
           <div style="display:flex;justify-content:space-between;margin-top:10px;">
-            <div>
-              <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">MRR</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent2);" id="mrr-total">$0</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Total earned</div>
-              <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);" id="total-earned">$0</div>
-            </div>
+            <div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">MRR</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent2);" id="mrr-total">$0</div></div>
+            <div style="text-align:right;"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Total earned</div><div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);" id="total-earned">$0</div></div>
           </div>
         </div>
       </div>
     </div>
-
 
     <!-- TOOL STACK -->
     <div class="card">
-      <div class="card-header">
-        <div class="card-title">Tool stack</div>
-      </div>
+      <div class="card-header"><div class="card-title">Tool stack</div></div>
       <div class="card-body">
         <div class="tool-grid">
-          <div class="tool-item">
-            <div class="tool-name">Make.com</div>
-            <div class="tool-status learn">Learning — W1</div>
-          </div>
-          <div class="tool-item">
-            <div class="tool-name">Claude API</div>
-            <div class="tool-status learn">Setup — W1</div>
-          </div>
-          <div class="tool-item">
-            <div class="tool-name">Notion</div>
-            <div class="tool-status learn">Templates — W2</div>
-          </div>
-          <div class="tool-item">
-            <div class="tool-name">Typeform</div>
-            <div class="tool-status next">Intake form — W2</div>
-          </div>
-          <div class="tool-item">
-            <div class="tool-name">QuickBooks</div>
-            <div class="tool-status next">Integration — W4</div>
-          </div>
-          <div class="tool-item">
-            <div class="tool-name">n8n</div>
-            <div class="tool-status next">Advanced — W8+</div>
-          </div>
+          <div class="tool-item"><div class="tool-name">Make.com</div><div class="tool-status learn">Learning — W1</div></div>
+          <div class="tool-item"><div class="tool-name">Claude AI</div><div class="tool-status learn">Setup — W1</div></div>
+          <div class="tool-item"><div class="tool-name">Notion</div><div class="tool-status learn">Templates — W2</div></div>
+          <div class="tool-item"><div class="tool-name">Typeform</div><div class="tool-status next">Intake — W2</div></div>
+          <div class="tool-item"><div class="tool-name">QuickBooks</div><div class="tool-status next">Integration — W4</div></div>
+          <div class="tool-item"><div class="tool-name">n8n</div><div class="tool-status next">Advanced — W8+</div></div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
@@ -611,337 +390,669 @@ async function dbLoad() {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/structtech_state?id=eq.jacob&select=*`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const rows = await res.json();
     if (rows && rows.length > 0) {
-      const row = rows[0];
-      taskState    = row.task_state     || {};
-      prospects    = row.prospects      || [];
-      incomeEntries= row.income_entries || [];
-      currentWeek  = row.current_week   || 1;
-    }
-  } catch(e) { console.warn('Supabase load failed, using localStorage fallback', e); }
-}
-
-async function dbSave() {
-  setSyncStatus('saving');
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/structtech_state?id=eq.jacob`, {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        task_state:     taskState,
-        prospects:      prospects,
-        income_entries: incomeEntries,
-        current_week:   currentWeek,
-        updated_at:     new Date().toISOString()
-      })
-    });
-    if (res.ok) {
-      // also mirror to localStorage as fallback
-      try { localStorage.setItem('structtech_state', JSON.stringify({ taskState, prospects, incomeEntries, currentWeek })); } catch(e) {}
-      setSyncStatus('saved');
-    } else {
-      setSyncStatus('error');
+      const r = rows[0];
+      taskState     = r.task_state     || {};
+      prospects     = r.prospects      || [];
+      incomeEntries = r.income_entries || [];
+      currentWeek   = r.current_week   || 1;
+      osData        = r.os_data        || defaultOsData();
     }
   } catch(e) {
-    setSyncStatus('error');
-    // fallback to localStorage
-    try { localStorage.setItem('structtech_state', JSON.stringify({ taskState, prospects, incomeEntries, currentWeek })); } catch(e2) {}
+    console.warn('Supabase load failed, using localStorage fallback', e);
+    try {
+      const saved = JSON.parse(localStorage.getItem('structtech_state') || '{}');
+      taskState     = saved.taskState     || {};
+      prospects     = saved.prospects     || [];
+      incomeEntries = saved.incomeEntries || [];
+      currentWeek   = saved.currentWeek   || 1;
+      osData        = saved.osData        || defaultOsData();
+    } catch(e2) {}
   }
 }
 
 let saveTimer = null;
-function save() {
-  // Debounce rapid saves (e.g. checking many tasks quickly)
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(dbSave, 600);
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(dbSave, 600); }
+
+async function dbSave() {
+  setSyncStatus('saving');
+  const payload = { task_state: taskState, prospects, income_entries: incomeEntries, current_week: currentWeek, os_data: osData, updated_at: new Date().toISOString() };
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/structtech_state?id=eq.jacob`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) { setSyncStatus('saved'); try { localStorage.setItem('structtech_state', JSON.stringify({ taskState, prospects, incomeEntries, currentWeek, osData })); } catch(e) {} }
+    else setSyncStatus('error');
+  } catch(e) {
+    setSyncStatus('error');
+    try { localStorage.setItem('structtech_state', JSON.stringify({ taskState, prospects, incomeEntries, currentWeek, osData })); } catch(e2) {}
+  }
 }
 
-function setSyncStatus(state) {
+function setSyncStatus(s) {
   const el = document.getElementById('sync-status');
   if (!el) return;
-  if (state === 'saving') { el.textContent = 'Saving...'; el.style.color = 'var(--warn)'; }
-  else if (state === 'saved') { el.textContent = 'Saved'; el.style.color = 'var(--accent2)'; setTimeout(() => { el.textContent = 'Synced'; el.style.color = 'var(--muted)'; }, 2000); }
-  else if (state === 'error') { el.textContent = 'Save failed'; el.style.color = 'var(--danger)'; }
-  else { el.textContent = 'Synced'; el.style.color = 'var(--muted)'; }
+  if (s==='saving') { el.textContent='Saving...'; el.style.color='var(--warn)'; }
+  else if (s==='saved') { el.textContent='Saved'; el.style.color='var(--accent2)'; setTimeout(()=>{ el.textContent='Synced'; el.style.color='var(--muted)'; },2000); }
+  else if (s==='error') { el.textContent='Save failed'; el.style.color='var(--danger)'; }
+  else { el.textContent='Synced'; el.style.color='var(--muted)'; }
 }
 
+/* ── SUPABASE SCHEMA: add os_data column if missing ── */
+/* Run this in Supabase SQL editor:
+   ALTER TABLE structtech_state ADD COLUMN IF NOT EXISTS os_data jsonb DEFAULT '{}'::jsonb;
+*/
+
+// ── STATE ──
+let currentWeek = 1, taskState = {}, prospects = [], incomeEntries = [], osData = {};
+let editingTaskId = null;
+
+function defaultOsData() {
+  return {
+    clients: [],
+    sops: [
+      { id:'s1', title:'Phase I — Friction Audit', status:'draft', body:'1. Send intake checklist\n2. Book 60-90min discovery call\n3. Map every manual step in their workflow\n4. Identify top 3 bottlenecks by ROI\n5. Write report (3 bottlenecks + solutions)\n6. Deliver on 90-min presentation call\n7. Pitch Phase II on same call\n8. Request testimonial within 48hrs' },
+      { id:'s2', title:'Client Onboarding', status:'draft', body:'1. Collect signed proposal + payment\n2. Send welcome email with next steps\n3. Schedule intake call\n4. Create client folder in Notion\n5. Complete intake form together\n6. Set project timeline' },
+      { id:'s3', title:'Discovery Call Script', status:'draft', body:'Opening: "Tell me about your business — what does a typical week look like?"\n\nKey questions:\n- What takes the most time that feels unnecessary?\n- Where do things fall through the cracks?\n- What tools are you currently using?\n- What does your team look like?\n- What would a win look like in 90 days?\n\nClose: "Based on what I am hearing, I think we can fix [X]. I would like to put together a quick audit proposal."' },
+      { id:'s4', title:'Retainer Monthly Routine', status:'draft', body:'Week 1: Review automation performance\nWeek 2: Check in with client — any friction points?\nWeek 3: Implement one improvement\nWeek 4: Send monthly report\n\nMonthly report includes:\n- Automations running\n- Time saved estimate\n- Issues resolved\n- Recommendations for next month' },
+    ],
+    notes: [
+      { id:'n1', title:'StructTech positioning', body:'Not IT. Not consulting. Systems.\n\nWe speak job site, execute like software architects.\n\nTarget: trade contractors with 3-20 employees who feel like the business runs them.', pinned: true },
+      { id:'n2', title:'Pricing notes', body:'Phase I Audit: $1,500-2,500\nPhase II Build (Starter): $1,500\nPhase II Build (Growth): $2,250\nPhase II Build (Full): custom\nRetainer: $500-800/mo\n\nFounder discount: 40% off first audit in exchange for testimonial + case study rights.', pinned: false },
+    ]
+  };
+}
+
+// ── WEEKS DATA ──
 const WEEKS = [
-  {
-    num: 1, phase: "Phase 0",
-    title: "Foundation & Identity",
-    desc: "Set up StructTech's operating infrastructure. Define your offer, configure your tools, and build your first outreach list.",
-    tasks: [
-      { id:"w1t1", text:"Define the StructTech signature offer (1 page: what, who, price, timeline)", tag:"admin", done:false },
-      { id:"w1t2", text:"Set up Make.com free account + complete intro tutorial", tag:"learn", done:false },
-      { id:"w1t3", text:"Set up Claude.ai Pro + explore API basics", tag:"learn", done:false },
-      { id:"w1t4", text:"Create Notion workspace for StructTech (client tracker, SOPs folder, notes)", tag:"admin", done:false },
-      { id:"w1t5", text:"Write a list of 20 contractor contacts (past clients, suppliers, colleagues)", tag:"sales", done:false },
-      { id:"w1t6", text:"Draft StructTech one-liner: what you do, for whom, what outcome", tag:"admin", done:false },
-      { id:"w1t7", text:"Register structtek.com email in Google Workspace (professional email)", tag:"admin", done:false },
-    ]
-  },
-  {
-    num: 2, phase: "Phase 0",
-    title: "Offer + Outreach Begins",
-    desc: "Finalize your audit offer document. Send your first 10 outreach messages. Build the intake form prospects will fill out.",
-    tasks: [
-      { id:"w2t1", text:"Finalize Phase I Audit offer doc (1–2 pages with scope, price, deliverables)", tag:"admin", done:false },
-      { id:"w2t2", text:"Build Typeform intake questionnaire (10 questions about their workflow)", tag:"build", done:false },
-      { id:"w2t3", text:"Send first 10 warm outreach messages (text/DM, not cold email)", tag:"sales", done:false },
-      { id:"w2t4", text:"Build a simple Make automation: form submission → notify you via email/text", tag:"build", done:false },
-      { id:"w2t5", text:"Set up LinkedIn profile for Jacob Walker / StructTech", tag:"admin", done:false },
-      { id:"w2t6", text:"Join 2–3 contractor Facebook groups. Observe, don't pitch yet.", tag:"sales", done:false },
-    ]
-  },
-  {
-    num: 3, phase: "Phase 0",
-    title: "First Conversations",
-    desc: "Follow up on outreach. Book discovery calls. Build the Make automation template you'll demo.",
-    tasks: [
-      { id:"w3t1", text:"Follow up on all W2 outreach (every message gets 1 follow-up)", tag:"sales", done:false },
-      { id:"w3t2", text:"Send 10 more outreach messages (next batch from your list)", tag:"sales", done:false },
-      { id:"w3t3", text:"Build your first complete Make scenario: lead form → CRM → follow-up text", tag:"build", done:false },
-      { id:"w3t4", text:"Write your audit report template in Notion (structure, sections, formatting)", tag:"admin", done:false },
-      { id:"w3t5", text:"Record a 3-min Loom walking through a fake automation demo (for credibility)", tag:"content", done:false },
-      { id:"w3t6", text:"Book at least 1 discovery call from outreach", tag:"sales", done:false },
-    ]
-  },
-  {
-    num: 4, phase: "Phase I",
-    title: "First Discovery Call",
-    desc: "Run your first real discovery call. Deliver your audit pitch. Aim to close your founding client at a discounted rate.",
-    tasks: [
-      { id:"w4t1", text:"Run discovery call #1 — use your intake form as the script", tag:"sales", done:false },
-      { id:"w4t2", text:"Send audit proposal within 24hrs of call", tag:"sales", done:false },
-      { id:"w4t3", text:"Continue outreach: 10 more messages, 3 follow-ups", tag:"sales", done:false },
-      { id:"w4t4", text:"Build Make automation #2: invoice sent → payment reminder sequence", tag:"build", done:false },
-      { id:"w4t5", text:"Post first piece of content in contractor FB group (a tip, not a pitch)", tag:"content", done:false },
-      { id:"w4t6", text:"Study 1 real contractor business workflow (job costing or scheduling)", tag:"learn", done:false },
-    ]
-  },
-  {
-    num: 5, phase: "Phase I",
-    title: "Close First Client",
-    desc: "Close your first audit engagement. Deliver exceptional work. This case study will fund the next 6 months.",
-    tasks: [
-      { id:"w5t1", text:"Close founding client — collect payment before starting work", tag:"sales", done:false },
-      { id:"w5t2", text:"Begin audit: complete intake + discovery session with client", tag:"build", done:false },
-      { id:"w5t3", text:"Map their workflow in Notion (every manual step, every tool they use)", tag:"build", done:false },
-      { id:"w5t4", text:"Continue outreach to 2nd prospect", tag:"sales", done:false },
-      { id:"w5t5", text:"Post content tip #2 in contractor community", tag:"content", done:false },
-    ]
-  },
-  {
-    num: 6, phase: "Phase I",
-    title: "Deliver Audit #1",
-    desc: "Deliver your first audit report. Present findings. Plant the seed for Phase II implementation.",
-    tasks: [
-      { id:"w6t1", text:"Write audit report: 3 bottlenecks, ranked by ROI, with proposed solutions", tag:"build", done:false },
-      { id:"w6t2", text:"Deliver 90-min report presentation call", tag:"sales", done:false },
-      { id:"w6t3", text:"Pitch Phase II proposal on the same call", tag:"sales", done:false },
-      { id:"w6t4", text:"Request written testimonial within 48hrs of delivery", tag:"admin", done:false },
-      { id:"w6t5", text:"Document your audit process as a repeatable SOP in Notion", tag:"admin", done:false },
-      { id:"w6t6", text:"Send outreach batch to 10 new prospects (referrals or group members)", tag:"sales", done:false },
-    ]
-  },
-  {
-    num: 7, phase: "Phase I → II",
-    title: "Second Client + Phase II",
-    desc: "Begin Phase II if Client #1 converts. Run a second discovery call. The flywheel starts here.",
-    tasks: [
-      { id:"w7t1", text:"Begin Phase II build for Client #1 (if converted) — first automation sprint", tag:"build", done:false },
-      { id:"w7t2", text:"Run discovery call #2 with next prospect", tag:"sales", done:false },
-      { id:"w7t3", text:"Build Make scenario #3: job scheduling notifications + confirmation texts", tag:"build", done:false },
-      { id:"w7t4", text:"Publish case study snippet (no real names needed) as social proof post", tag:"content", done:false },
-      { id:"w7t5", text:"Review weekly: what took too long? What can be templatized?", tag:"admin", done:false },
-    ]
-  },
-  {
-    num: 8, phase: "Phase II",
-    title: "Systematize Delivery",
-    desc: "Two audits done or in progress. Document everything. Build your delivery engine so work gets faster.",
-    tasks: [
-      { id:"w8t1", text:"Finish Phase II build for Client #1 — deploy automations + test", tag:"build", done:false },
-      { id:"w8t2", text:"Close audit #2 with second prospect", tag:"sales", done:false },
-      { id:"w8t3", text:"Build your StructTech SOP library: audit checklist, delivery template, onboarding doc", tag:"admin", done:false },
-      { id:"w8t4", text:"Start learning n8n basics (YouTube: 2hrs total)", tag:"learn", done:false },
-      { id:"w8t5", text:"Introduce retainer concept to Client #1: ongoing oversight, $500–700/mo", tag:"sales", done:false },
-    ]
-  },
-  {
-    num: 9, phase: "Phase II",
-    title: "First Retainer Closed",
-    desc: "Convert Client #1 to a retainer. This is the income model. Everything else supports this.",
-    tasks: [
-      { id:"w9t1", text:"Close retainer contract with Client #1", tag:"sales", done:false },
-      { id:"w9t2", text:"Deliver Audit #2 report + Phase II pitch", tag:"build", done:false },
-      { id:"w9t3", text:"Set up monthly retainer reporting template (what you track, how you report)", tag:"admin", done:false },
-      { id:"w9t4", text:"Outreach batch: 10 new prospects, target HVAC or plumbing firms", tag:"sales", done:false },
-      { id:"w9t5", text:"Post content: before/after workflow story (anonymized)", tag:"content", done:false },
-    ]
-  },
-  {
-    num: 10, phase: "Phase II",
-    title: "Scale to 3 Clients",
-    desc: "Three clients in motion. Two audits, one retainer. Reduce contracting hours this week.",
-    tasks: [
-      { id:"w10t1", text:"Begin Audit #3 discovery", tag:"sales", done:false },
-      { id:"w10t2", text:"Build advanced Make scenario for Client #2 (QuickBooks integration)", tag:"build", done:false },
-      { id:"w10t3", text:"Formally reduce contracting to 3 days/week (protect StructTech time)", tag:"admin", done:false },
-      { id:"w10t4", text:"Review pricing: are you charging enough? Adjust tier pricing if needed", tag:"admin", done:false },
-      { id:"w10t5", text:"Document retainer service scope in a client-facing one-pager", tag:"admin", done:false },
-    ]
-  },
-  {
-    num: 11, phase: "Phase II–III",
-    title: "Two Retainers Running",
-    desc: "Close retainer #2. $1,000–1,400/mo recurring. You can see the finish line now.",
-    tasks: [
-      { id:"w11t1", text:"Close retainer contract with Client #2", tag:"sales", done:false },
-      { id:"w11t2", text:"Deliver Audit #3 report", tag:"build", done:false },
-      { id:"w11t3", text:"Build a simple website or landing page for StructTech (one offer, one CTA)", tag:"build", done:false },
-      { id:"w11t4", text:"Outreach: ask both retainer clients for referrals", tag:"sales", done:false },
-      { id:"w11t5", text:"Explore n8n advanced scenarios (webhook triggers, multi-step workflows)", tag:"learn", done:false },
-    ]
-  },
-  {
-    num: 12, phase: "Phase III",
-    title: "$2,500 MRR Target",
-    desc: "Three retainers = $1,500–2,100/mo. Plus audit fees. You've replaced a slow contracting week.",
-    tasks: [
-      { id:"w12t1", text:"Close retainer contract with Client #3", tag:"sales", done:false },
-      { id:"w12t2", text:"Reduce contracting to 1–2 days/week or pause entirely", tag:"admin", done:false },
-      { id:"w12t3", text:"Review all 3 client automations — upgrade anything underperforming", tag:"build", done:false },
-      { id:"w12t4", text:"Plan Q2: new niches, product ideas, or team expansion", tag:"admin", done:false },
-      { id:"w12t5", text:"Celebrate. Seriously. Document what worked.", tag:"admin", done:false },
-    ]
-  },
-  {
-    num: 13, phase: "Phase III+",
-    title: "Expand + Productize",
-    desc: "You have proof. Now package it. Start building toward passive income and scale.",
-    tasks: [
-      { id:"w13t1", text:"Outline a StructTech automation template pack (3–5 Make scenarios for contractors)", tag:"build", done:false },
-      { id:"w13t2", text:"Research Gumroad or Lemon Squeezy for digital product sales", tag:"learn", done:false },
-      { id:"w13t3", text:"Target new niche: HVAC or landscaping firms for outreach", tag:"sales", done:false },
-      { id:"w13t4", text:"Hire first VA (5–10 hrs/week) for outreach and admin if revenue allows", tag:"admin", done:false },
-    ]
-  },
-  {
-    num: 14, phase: "Phase III+",
-    title: "Product + 4th Client",
-    desc: "First digital product in development. Fourth client onboarded. Income diversifying.",
-    tasks: [
-      { id:"w14t1", text:"Build and list first Make template pack ($49–99)", tag:"build", done:false },
-      { id:"w14t2", text:"Onboard Client #4 audit", tag:"sales", done:false },
-      { id:"w14t3", text:"Update StructTech website with case studies and new testimonials", tag:"content", done:false },
-      { id:"w14t4", text:"Set up basic email list (ConvertKit free) for content marketing", tag:"admin", done:false },
-    ]
-  },
-  {
-    num: 15, phase: "Phase III+",
-    title: "Systems Running Themselves",
-    desc: "Your own business is now automated. Delivery is documented. Income is predictable.",
-    tasks: [
-      { id:"w15t1", text:"Audit StructTech's own internal workflows — eat your own cooking", tag:"admin", done:false },
-      { id:"w15t2", text:"Build lead magnet: '5 automations every contractor needs' (free PDF or video)", tag:"content", done:false },
-      { id:"w15t3", text:"Close Audit #4 and pitch retainer", tag:"sales", done:false },
-      { id:"w15t4", text:"Review 90-day numbers: revenue, hours worked, client satisfaction", tag:"admin", done:false },
-    ]
-  },
-  {
-    num: 16, phase: "Phase IV",
-    title: "Review + Set New Ceiling",
-    desc: "16 weeks in. Assess everything. Set the next 16-week target. The ceiling is gone.",
-    tasks: [
-      { id:"w16t1", text:"Full StructTech business review: revenue, clients, hours, energy level", tag:"admin", done:false },
-      { id:"w16t2", text:"Decide: grow agency, build SaaS product, or license methodology?", tag:"admin", done:false },
-      { id:"w16t3", text:"Update this dashboard with Week 17+ plan", tag:"admin", done:false },
-      { id:"w16t4", text:"Send a message to Claude with full update — new chapter begins", tag:"admin", done:false },
-    ]
-  },
+  { num:1, phase:'Phase 0', title:'Foundation & Identity', desc:'Set up StructTech\'s operating infrastructure. Define your offer, configure your tools, and build your first outreach list.',
+    tasks:[
+      {id:'w1t1',text:'Define the StructTech signature offer (1 page: what, who, price, timeline)',tag:'admin'},
+      {id:'w1t2',text:'Set up Make.com free account + complete intro tutorial',tag:'learn'},
+      {id:'w1t3',text:'Set up Claude.ai Pro + explore API basics',tag:'learn'},
+      {id:'w1t4',text:'Create StructTech OS in this dashboard (clients, SOPs, notes)',tag:'admin'},
+      {id:'w1t5',text:'Write a list of 20 contractor contacts (past clients, suppliers, colleagues)',tag:'sales'},
+      {id:'w1t6',text:'Draft StructTech one-liner: what you do, for whom, what outcome',tag:'admin'},
+      {id:'w1t7',text:'Register structtek.com email in Google Workspace',tag:'admin'},
+    ]},
+  { num:2, phase:'Phase 0', title:'Offer + Outreach Begins', desc:'Finalize your audit offer document. Send your first 10 outreach messages. Build the intake form.',
+    tasks:[
+      {id:'w2t1',text:'Finalize Phase I Audit offer doc (scope, price, deliverables)',tag:'admin'},
+      {id:'w2t2',text:'Build Typeform intake questionnaire (10 questions about their workflow)',tag:'build'},
+      {id:'w2t3',text:'Send first 10 warm outreach messages (text/DM, not cold email)',tag:'sales'},
+      {id:'w2t4',text:'Build Make automation: form submission → notify you via email/text',tag:'build'},
+      {id:'w2t5',text:'Set up LinkedIn profile for Jacob Walker / StructTech',tag:'admin'},
+      {id:'w2t6',text:'Join 2-3 contractor Facebook groups. Observe, don\'t pitch yet.',tag:'sales'},
+    ]},
+  { num:3, phase:'Phase 0', title:'First Conversations', desc:'Follow up on outreach. Book discovery calls. Build the Make automation template you\'ll demo.',
+    tasks:[
+      {id:'w3t1',text:'Follow up on all W2 outreach (every message gets 1 follow-up)',tag:'sales'},
+      {id:'w3t2',text:'Send 10 more outreach messages (next batch from your list)',tag:'sales'},
+      {id:'w3t3',text:'Build first complete Make scenario: lead form → CRM → follow-up text',tag:'build'},
+      {id:'w3t4',text:'Write audit report template (structure, sections, formatting)',tag:'admin'},
+      {id:'w3t5',text:'Record a 3-min Loom walking through a fake automation demo',tag:'content'},
+      {id:'w3t6',text:'Book at least 1 discovery call from outreach',tag:'sales'},
+    ]},
+  { num:4, phase:'Phase I', title:'First Discovery Call', desc:'Run your first real discovery call. Deliver your audit pitch. Aim to close your founding client.',
+    tasks:[
+      {id:'w4t1',text:'Run discovery call #1 — use intake form as the script',tag:'sales'},
+      {id:'w4t2',text:'Send audit proposal within 24hrs of call',tag:'sales'},
+      {id:'w4t3',text:'Continue outreach: 10 more messages, 3 follow-ups',tag:'sales'},
+      {id:'w4t4',text:'Build Make automation #2: invoice sent → payment reminder sequence',tag:'build'},
+      {id:'w4t5',text:'Post first content in contractor FB group (a tip, not a pitch)',tag:'content'},
+      {id:'w4t6',text:'Study 1 real contractor workflow (job costing or scheduling)',tag:'learn'},
+    ]},
+  { num:5, phase:'Phase I', title:'Close First Client', desc:'Close your first audit engagement. Collect payment. Begin the audit work.',
+    tasks:[
+      {id:'w5t1',text:'Close founding client — collect payment before starting work',tag:'sales'},
+      {id:'w5t2',text:'Begin audit: complete intake + discovery session with client',tag:'build'},
+      {id:'w5t3',text:'Map their workflow (every manual step, every tool they use)',tag:'build'},
+      {id:'w5t4',text:'Continue outreach to 2nd prospect',tag:'sales'},
+      {id:'w5t5',text:'Post content tip #2 in contractor community',tag:'content'},
+    ]},
+  { num:6, phase:'Phase I', title:'Deliver Audit #1', desc:'Deliver your first audit report. Present findings. Plant the seed for Phase II.',
+    tasks:[
+      {id:'w6t1',text:'Write audit report: 3 bottlenecks ranked by ROI with proposed solutions',tag:'build'},
+      {id:'w6t2',text:'Deliver 90-min report presentation call',tag:'sales'},
+      {id:'w6t3',text:'Pitch Phase II proposal on the same call',tag:'sales'},
+      {id:'w6t4',text:'Request written testimonial within 48hrs of delivery',tag:'admin'},
+      {id:'w6t5',text:'Document audit process as a repeatable SOP',tag:'admin'},
+      {id:'w6t6',text:'Send outreach batch to 10 new prospects',tag:'sales'},
+    ]},
+  { num:7, phase:'Phase I→II', title:'Second Client + Phase II', desc:'Begin Phase II if Client #1 converts. Run a second discovery call.',
+    tasks:[
+      {id:'w7t1',text:'Begin Phase II build for Client #1 — first automation sprint',tag:'build'},
+      {id:'w7t2',text:'Run discovery call #2 with next prospect',tag:'sales'},
+      {id:'w7t3',text:'Build Make scenario #3: job scheduling + confirmation texts',tag:'build'},
+      {id:'w7t4',text:'Publish case study snippet (anonymized) as social proof',tag:'content'},
+      {id:'w7t5',text:'Weekly review: what took too long? What can be templatized?',tag:'admin'},
+    ]},
+  { num:8, phase:'Phase II', title:'Systematize Delivery', desc:'Document everything. Build your delivery engine so work gets faster.',
+    tasks:[
+      {id:'w8t1',text:'Finish Phase II build for Client #1 — deploy + test',tag:'build'},
+      {id:'w8t2',text:'Close audit #2 with second prospect',tag:'sales'},
+      {id:'w8t3',text:'Build SOP library: audit checklist, delivery template, onboarding doc',tag:'admin'},
+      {id:'w8t4',text:'Start learning n8n basics (2hrs on YouTube)',tag:'learn'},
+      {id:'w8t5',text:'Introduce retainer to Client #1: $500-700/mo ongoing',tag:'sales'},
+    ]},
+  { num:9, phase:'Phase II', title:'First Retainer Closed', desc:'Convert Client #1 to a retainer. Recurring income begins.',
+    tasks:[
+      {id:'w9t1',text:'Close retainer contract with Client #1',tag:'sales'},
+      {id:'w9t2',text:'Deliver Audit #2 report + Phase II pitch',tag:'build'},
+      {id:'w9t3',text:'Set up monthly retainer reporting template',tag:'admin'},
+      {id:'w9t4',text:'Outreach batch: 10 new prospects, target HVAC or plumbing',tag:'sales'},
+      {id:'w9t5',text:'Post content: before/after workflow story (anonymized)',tag:'content'},
+    ]},
+  { num:10, phase:'Phase II', title:'Scale to 3 Clients', desc:'Three clients in motion. Reduce contracting hours.',
+    tasks:[
+      {id:'w10t1',text:'Begin Audit #3 discovery',tag:'sales'},
+      {id:'w10t2',text:'Build advanced Make scenario for Client #2 (QuickBooks integration)',tag:'build'},
+      {id:'w10t3',text:'Formally reduce contracting to 3 days/week',tag:'admin'},
+      {id:'w10t4',text:'Review pricing — are you charging enough?',tag:'admin'},
+      {id:'w10t5',text:'Document retainer service scope in a client-facing one-pager',tag:'admin'},
+    ]},
+  { num:11, phase:'Phase II→III', title:'Two Retainers Running', desc:'Close retainer #2. $1,000-1,400/mo recurring.',
+    tasks:[
+      {id:'w11t1',text:'Close retainer contract with Client #2',tag:'sales'},
+      {id:'w11t2',text:'Deliver Audit #3 report',tag:'build'},
+      {id:'w11t3',text:'Build a simple landing page for StructTech (one offer, one CTA)',tag:'build'},
+      {id:'w11t4',text:'Ask both retainer clients for referrals',tag:'sales'},
+      {id:'w11t5',text:'Explore n8n advanced scenarios (webhooks, multi-step)',tag:'learn'},
+    ]},
+  { num:12, phase:'Phase III', title:'$2,500 MRR Target', desc:'Three retainers. You have replaced a slow contracting week.',
+    tasks:[
+      {id:'w12t1',text:'Close retainer contract with Client #3',tag:'sales'},
+      {id:'w12t2',text:'Reduce contracting to 1-2 days/week or pause',tag:'admin'},
+      {id:'w12t3',text:'Review all 3 client automations — upgrade anything underperforming',tag:'build'},
+      {id:'w12t4',text:'Plan Q2: new niches, product ideas, or expansion',tag:'admin'},
+      {id:'w12t5',text:'Celebrate. Document what worked.',tag:'admin'},
+    ]},
+  { num:13, phase:'Phase III+', title:'Expand + Productize', desc:'You have proof. Package it. Build toward passive income.',
+    tasks:[
+      {id:'w13t1',text:'Outline a StructTech automation template pack (3-5 Make scenarios)',tag:'build'},
+      {id:'w13t2',text:'Research Gumroad or Lemon Squeezy for digital product sales',tag:'learn'},
+      {id:'w13t3',text:'Target new niche: HVAC or landscaping for outreach',tag:'sales'},
+      {id:'w13t4',text:'Hire first VA (5-10 hrs/week) for outreach and admin',tag:'admin'},
+    ]},
+  { num:14, phase:'Phase III+', title:'Product + 4th Client', desc:'First digital product live. Fourth client onboarded.',
+    tasks:[
+      {id:'w14t1',text:'Build and list first Make template pack ($49-99)',tag:'build'},
+      {id:'w14t2',text:'Onboard Client #4 audit',tag:'sales'},
+      {id:'w14t3',text:'Update StructTech website with case studies + testimonials',tag:'content'},
+      {id:'w14t4',text:'Set up email list (ConvertKit free) for content marketing',tag:'admin'},
+    ]},
+  { num:15, phase:'Phase III+', title:'Systems Running Themselves', desc:'Delivery documented. Income predictable. Eat your own cooking.',
+    tasks:[
+      {id:'w15t1',text:'Audit StructTech\'s own internal workflows',tag:'admin'},
+      {id:'w15t2',text:'Build lead magnet: 5 automations every contractor needs',tag:'content'},
+      {id:'w15t3',text:'Close Audit #4 and pitch retainer',tag:'sales'},
+      {id:'w15t4',text:'Review 90-day numbers: revenue, hours, client satisfaction',tag:'admin'},
+    ]},
+  { num:16, phase:'Phase IV', title:'Review + Set New Ceiling', desc:'16 weeks in. Assess everything. The ceiling is gone.',
+    tasks:[
+      {id:'w16t1',text:'Full StructTech business review: revenue, clients, hours, energy',tag:'admin'},
+      {id:'w16t2',text:'Decide: grow agency, build SaaS, or license methodology?',tag:'admin'},
+      {id:'w16t3',text:'Update dashboard with Week 17+ plan',tag:'admin'},
+      {id:'w16t4',text:'Send Claude a full update — new chapter begins',tag:'admin'},
+    ]},
 ];
 
 const MILESTONES = [
-  { week: 1, title: "StructTech officially operating", sub: "Offer defined, tools live, outreach list ready", phase: "Foundation" },
-  { week: 4, title: "First discovery call booked", sub: "Real prospect in the pipeline", phase: "Phase I" },
-  { week: 5, title: "First paying client closed", sub: "Audit #1 payment collected", phase: "Phase I" },
-  { week: 6, title: "First audit delivered", sub: "Testimonial + Phase II pitched", phase: "Phase I" },
-  { week: 8, title: "Delivery engine built", sub: "SOPs documented, 2nd client in progress", phase: "Phase II" },
-  { week: 9, title: "First retainer closed", sub: "Recurring income begins", phase: "Phase II" },
-  { week: 12, title: "$2,500 MRR target", sub: "3 retainers + audit income", phase: "Phase III" },
-  { week: 16, title: "Review + new ceiling", sub: "Full system running, scale decision made", phase: "Phase IV" },
+  {week:1,title:'StructTech officially operating',sub:'Offer defined, tools live, outreach list ready',phase:'Foundation'},
+  {week:4,title:'First discovery call booked',sub:'Real prospect in the pipeline',phase:'Phase I'},
+  {week:5,title:'First paying client closed',sub:'Audit #1 payment collected',phase:'Phase I'},
+  {week:6,title:'First audit delivered',sub:'Testimonial + Phase II pitched',phase:'Phase I'},
+  {week:8,title:'Delivery engine built',sub:'SOPs documented, 2nd client in progress',phase:'Phase II'},
+  {week:9,title:'First retainer closed',sub:'Recurring income begins',phase:'Phase II'},
+  {week:12,title:'$2,500 MRR target',sub:'3 retainers + audit income',phase:'Phase III'},
+  {week:16,title:'Review + new ceiling',sub:'Full system running, scale decision made',phase:'Phase IV'},
 ];
 
-// STATE
-let currentWeek = 1;
-let taskState = {};
-let prospects = [];
-let incomeEntries = [];
-
-function renderWeekNav() {
-  const nav = document.getElementById('week-nav');
-  nav.innerHTML = '';
-  WEEKS.forEach(w => {
-    const btn = document.createElement('button');
-    btn.className = 'week-btn' + (w.num === currentWeek ? ' active' : '');
-    // Check if all tasks done for this week
-    const weekDone = w.tasks.every(t => taskState[t.id]);
-    if (weekDone && w.num !== currentWeek) btn.classList.add('completed');
-    btn.textContent = 'W' + w.num;
-    btn.onclick = () => { currentWeek = w.num; renderAll(); save(); };
-    nav.appendChild(btn);
-  });
+// ── PANEL ──
+let panelOpen = false, activeTab = 'workspace';
+function togglePanel() {
+  panelOpen = !panelOpen;
+  document.getElementById('side-panel').classList.toggle('open', panelOpen);
+  document.getElementById('panel-overlay').classList.toggle('open', panelOpen);
+  if (panelOpen) renderPanelTab(activeTab);
+}
+function switchTab(tab, el) {
+  activeTab = tab;
+  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderPanelTab(tab);
 }
 
+function renderPanelTab(tab) {
+  const body = document.getElementById('panel-body');
+  if (tab === 'workspace') renderWorkspaceTab(body);
+  else if (tab === 'clients') renderClientsTab(body);
+  else if (tab === 'sops') renderSopsTab(body);
+  else if (tab === 'notes') renderNotesTab(body);
+}
+
+// ── WORKSPACE TAB ──
+function renderWorkspaceTab(body) {
+  const clients = (osData.clients||[]);
+  const activeClients = clients.filter(c=>c.status==='active');
+  const prospectClients = clients.filter(c=>c.status==='prospect');
+  const sops = (osData.sops||[]);
+  const notes = (osData.notes||[]);
+  const mrr = incomeEntries.filter(e=>e.type==='retainer').reduce((s,e)=>s+e.amount,0);
+
+  body.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Active clients</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent2);line-height:1;">${activeClients.length}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">of ${clients.length} total</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">MRR</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1;">$${mrr.toLocaleString()}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">target: $2,500</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">SOPs</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--blue);line-height:1;">${sops.length}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${sops.filter(s=>s.status==='active').length} active</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Notes</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--purple);line-height:1;">${notes.length}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${notes.filter(n=>n.pinned).length} pinned</div>
+      </div>
+    </div>
+
+    <div class="section-title">Client tracker
+      <button class="sm-btn" onclick="document.querySelectorAll('.panel-tab')[1].click()" style="font-size:10px;padding:4px 10px;">+ Add client</button>
+    </div>
+    ${activeClients.length===0 && prospectClients.length===0
+      ? '<div style="text-align:center;padding:20px 0;color:var(--muted);font-size:12px;line-height:1.6;">No clients yet.<br>Add one in the Clients tab.</div>'
+      : [...activeClients, ...prospectClients].map((c,i) => {
+          const realIdx = clients.findIndex(x=>x.id===c.id);
+          return \`<div class="os-card" style="cursor:pointer;" onclick="goToClientEdit(\${realIdx})">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div class="os-card-title">\${c.name}</div>
+                <div class="os-card-meta">\${c.trade||'Contractor'}\${c.location?' · '+c.location:''}</div>
+              </div>
+              <div style="text-align:right;">
+                <span class="os-tag \${c.status==='active'?'tag-active':'tag-prospect'}">\${c.status}</span>
+                <div class="os-card-meta" style="margin-top:4px;">\${c.phase||''}</div>
+              </div>
+            </div>
+            \${Number(c.retainer)>0?'<div style="font-size:11px;color:var(--accent2);margin-top:6px;">$'+Number(c.retainer).toLocaleString()+'/mo retainer</div>':''}          </div>\`;
+        }).join('')
+    }
+
+    <hr class="divider">
+    <div class="section-title" style="margin-bottom:12px;">Quick links</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <a href="https://make.com" target="_blank" class="os-card" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;"><div><div class="os-card-title">Make.com</div><div class="os-card-meta">Automation builder</div></div><span style="color:var(--accent);">→</span></a>
+      <a href="https://supabase.com/dashboard" target="_blank" class="os-card" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;"><div><div class="os-card-title">Supabase</div><div class="os-card-meta">Your database</div></div><span style="color:var(--accent);">→</span></a>
+      <a href="https://structtek.com" target="_blank" class="os-card" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;"><div><div class="os-card-title">structtek.com</div><div class="os-card-meta">Your website</div></div><span style="color:var(--accent);">→</span></a>
+    </div>
+    <hr class="divider">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Run once in Supabase SQL Editor:</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6;">
+      ALTER TABLE structtech_state<br>ADD COLUMN IF NOT EXISTS os_data jsonb DEFAULT '{}'::jsonb;
+    </div>
+  `;
+}
+
+function goToClientEdit(i) {
+  document.querySelectorAll('.panel-tab')[1].click();
+  setTimeout(()=>editClient(i), 50);
+}
+
+// ── CLIENTS TAB ──
+function renderClientsTab(body) {
+  const clients = osData.clients || [];
+  let html = `<div class="section-title">Clients <button class="sm-btn" onclick="addClient()" style="font-size:10px;padding:4px 10px;">+ New</button></div>`;
+  if (clients.length === 0) {
+    html += `<div style="text-align:center;padding:32px 0;color:var(--muted);font-size:12px;">No clients yet.<br>Your first one is coming — stay on the outreach tasks.</div>`;
+  } else {
+    clients.forEach((c, i) => {
+      const statusTag = c.status === 'active' ? 'tag-active' : c.status === 'prospect' ? 'tag-prospect' : 'tag-done';
+      html += `<div class="os-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+          <div>
+            <div class="os-card-title">${c.name}</div>
+            <div class="os-card-meta">${c.trade || ''} ${c.location ? '· ' + c.location : ''}</div>
+            <span class="os-tag ${statusTag}">${c.status || 'prospect'}</span>
+            ${c.phase ? `<span class="os-tag tag-sop">${c.phase}</span>` : ''}
+          </div>
+          <button class="sm-btn danger" onclick="deleteClient(${i})" style="font-size:10px;padding:3px 8px;flex-shrink:0;">×</button>
+        </div>
+        ${c.notes ? `<div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;">${c.notes}</div>` : ''}
+        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="sm-btn ghost" onclick="editClient(${i})" style="font-size:10px;padding:4px 10px;">Edit</button>
+          ${c.auditFee ? `<span style="font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;">Audit: $${c.auditFee}</span>` : ''}
+          ${c.retainer ? `<span style="font-size:11px;color:var(--accent2);font-family:'DM Mono',monospace;">Retainer: $${c.retainer}/mo</span>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+  body.innerHTML = html;
+}
+
+function addClient() {
+  const name = window.prompt ? prompt('Client name:') : null;
+  if (name === null) { showClientForm(); return; }
+  if (!name) return;
+  osData.clients = osData.clients || [];
+  osData.clients.push({ id: 'c_' + Date.now(), name, trade: '', status: 'prospect', phase: 'Phase I', notes: '', auditFee: '', retainer: '' });
+  save();
+  renderClientsTab(document.getElementById('panel-body'));
+}
+
+function showClientForm() {
+  const body = document.getElementById('panel-body');
+  body.innerHTML = `
+    <div class="section-title">New client</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <input class="add-input" id="cl-name" placeholder="Company or person name..." />
+      <input class="add-input" id="cl-trade" placeholder="Trade type (Plumber, HVAC...)" />
+      <input class="add-input" id="cl-location" placeholder="City, State" />
+      <select id="cl-status" class="add-input">
+        <option value="prospect">Prospect</option><option value="active">Active client</option><option value="done">Completed</option>
+      </select>
+      <select id="cl-phase" class="add-input">
+        <option value="Phase I">Phase I — Audit</option><option value="Phase II">Phase II — Build</option><option value="Phase III">Phase III — Retainer</option>
+      </select>
+      <input class="add-input" id="cl-audit" placeholder="Audit fee ($)" type="number" min="0" />
+      <input class="add-input" id="cl-retainer" placeholder="Retainer/mo ($)" type="number" min="0" />
+      <textarea class="note-editor" id="cl-notes" placeholder="Notes about this client..." style="min-height:80px;"></textarea>
+      <div style="display:flex;gap:8px;">
+        <button class="sm-btn" style="flex:1;" onclick="saveClientForm()">Save client</button>
+        <button class="sm-btn ghost" style="flex:1;" onclick="renderClientsTab(document.getElementById('panel-body'))">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function saveClientForm() {
+  const name = document.getElementById('cl-name').value.trim();
+  if (!name) return;
+  osData.clients = osData.clients || [];
+  osData.clients.push({
+    id: 'c_' + Date.now(),
+    name,
+    trade: document.getElementById('cl-trade').value.trim(),
+    location: document.getElementById('cl-location').value.trim(),
+    status: document.getElementById('cl-status').value,
+    phase: document.getElementById('cl-phase').value,
+    auditFee: document.getElementById('cl-audit').value,
+    retainer: document.getElementById('cl-retainer').value,
+    notes: document.getElementById('cl-notes').value.trim(),
+  });
+  save();
+  renderClientsTab(document.getElementById('panel-body'));
+}
+
+function editClient(i) {
+  const c = osData.clients[i];
+  const body = document.getElementById('panel-body');
+  body.innerHTML = `
+    <div class="section-title">Edit client</div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <input class="add-input" id="cl-name" value="${c.name || ''}" placeholder="Name..." />
+      <input class="add-input" id="cl-trade" value="${c.trade || ''}" placeholder="Trade type..." />
+      <input class="add-input" id="cl-location" value="${c.location || ''}" placeholder="City, State" />
+      <select id="cl-status" class="add-input">
+        <option value="prospect" ${c.status==='prospect'?'selected':''}>Prospect</option>
+        <option value="active" ${c.status==='active'?'selected':''}>Active client</option>
+        <option value="done" ${c.status==='done'?'selected':''}>Completed</option>
+      </select>
+      <select id="cl-phase" class="add-input">
+        <option value="Phase I" ${c.phase==='Phase I'?'selected':''}>Phase I — Audit</option>
+        <option value="Phase II" ${c.phase==='Phase II'?'selected':''}>Phase II — Build</option>
+        <option value="Phase III" ${c.phase==='Phase III'?'selected':''}>Phase III — Retainer</option>
+      </select>
+      <input class="add-input" id="cl-audit" value="${c.auditFee || ''}" placeholder="Audit fee ($)" type="number" min="0" />
+      <input class="add-input" id="cl-retainer" value="${c.retainer || ''}" placeholder="Retainer/mo ($)" type="number" min="0" />
+      <textarea class="note-editor" id="cl-notes" style="min-height:80px;">${c.notes || ''}</textarea>
+      <div style="display:flex;gap:8px;">
+        <button class="sm-btn" style="flex:1;" onclick="saveEditClient(${i})">Save</button>
+        <button class="sm-btn ghost" style="flex:1;" onclick="renderClientsTab(document.getElementById('panel-body'))">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function saveEditClient(i) {
+  osData.clients[i] = { ...osData.clients[i],
+    name: document.getElementById('cl-name').value.trim(),
+    trade: document.getElementById('cl-trade').value.trim(),
+    location: document.getElementById('cl-location').value.trim(),
+    status: document.getElementById('cl-status').value,
+    phase: document.getElementById('cl-phase').value,
+    auditFee: document.getElementById('cl-audit').value,
+    retainer: document.getElementById('cl-retainer').value,
+    notes: document.getElementById('cl-notes').value.trim(),
+  };
+  save();
+  renderClientsTab(document.getElementById('panel-body'));
+}
+
+function deleteClient(i) { osData.clients.splice(i,1); save(); renderClientsTab(document.getElementById('panel-body')); }
+
+// ── SOPs TAB ──
+function renderSopsTab(body) {
+  const sops = osData.sops || [];
+  let html = `<div class="section-title">SOPs <button class="sm-btn" onclick="addSop()" style="font-size:10px;padding:4px 10px;">+ New</button></div>`;
+  sops.forEach((s, i) => {
+    html += `<div class="os-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
+        <div>
+          <div class="os-card-title">${s.title}</div>
+          <span class="os-tag tag-sop">${s.status || 'draft'}</span>
+        </div>
+        <button class="sm-btn danger" onclick="deleteSop(${i})" style="font-size:10px;padding:3px 8px;">×</button>
+      </div>
+      <textarea class="note-editor" style="min-height:120px;" onchange="updateSopBody(${i},this.value)" onfocus="this.style.minHeight='160px'" onblur="this.style.minHeight='120px'">${s.body || ''}</textarea>
+      <div style="margin-top:8px;display:flex;gap:6px;">
+        <button class="sm-btn ghost" onclick="renameSop(${i})" style="font-size:10px;padding:4px 10px;">Rename</button>
+        <select onchange="updateSopStatus(${i},this.value)" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;outline:none;">
+          <option value="draft" ${s.status==='draft'?'selected':''}>Draft</option>
+          <option value="active" ${s.status==='active'?'selected':''}>Active</option>
+          <option value="archived" ${s.status==='archived'?'selected':''}>Archived</option>
+        </select>
+      </div>
+    </div>`;
+  });
+  body.innerHTML = html;
+}
+
+function addSop() {
+  osData.sops = osData.sops || [];
+  const title = 'New SOP ' + (osData.sops.length + 1);
+  osData.sops.push({ id:'s_'+Date.now(), title, status:'draft', body:'' });
+  save();
+  renderSopsTab(document.getElementById('panel-body'));
+}
+function updateSopBody(i,v) { osData.sops[i].body=v; save(); }
+function updateSopStatus(i,v) { osData.sops[i].status=v; save(); renderSopsTab(document.getElementById('panel-body')); }
+function renameSop(i) {
+  const n = prompt ? prompt('SOP title:', osData.sops[i].title) : null;
+  if (n) { osData.sops[i].title=n; save(); renderSopsTab(document.getElementById('panel-body')); }
+}
+function deleteSop(i) { osData.sops.splice(i,1); save(); renderSopsTab(document.getElementById('panel-body')); }
+
+// ── NOTES TAB ──
+function renderNotesTab(body) {
+  const notes = (osData.notes || []).slice().sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0));
+  let html = `<div class="section-title">Notes <button class="sm-btn" onclick="addNote()" style="font-size:10px;padding:4px 10px;">+ New</button></div>`;
+  notes.forEach((n, origI) => {
+    const i = osData.notes.findIndex(x=>x.id===n.id);
+    html += `<div class="os-card" style="${n.pinned?'border-color:rgba(200,240,96,0.3);':''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:13px;font-weight:500;color:${n.pinned?'var(--accent)':'var(--text)'};">${n.title}</span>
+          ${n.pinned?`<span class="os-tag" style="background:rgba(200,240,96,0.1);color:var(--accent);">pinned</span>`:''}
+        </div>
+        <div style="display:flex;gap:4px;">
+          <button class="sm-btn ghost" onclick="togglePin(${i})" style="font-size:10px;padding:3px 8px;">${n.pinned?'Unpin':'Pin'}</button>
+          <button class="sm-btn danger" onclick="deleteNote(${i})" style="font-size:10px;padding:3px 8px;">×</button>
+        </div>
+      </div>
+      <textarea class="note-editor" onchange="updateNote(${i},this.value)">${n.body||''}</textarea>
+    </div>`;
+  });
+  body.innerHTML = html;
+}
+
+function addNote() {
+  osData.notes = osData.notes || [];
+  osData.notes.unshift({ id:'n_'+Date.now(), title:'New note', body:'', pinned:false });
+  save();
+  renderNotesTab(document.getElementById('panel-body'));
+}
+function updateNote(i,v) { osData.notes[i].body=v; save(); }
+function togglePin(i) { osData.notes[i].pinned=!osData.notes[i].pinned; save(); renderNotesTab(document.getElementById('panel-body')); }
+function deleteNote(i) { osData.notes.splice(i,1); save(); renderNotesTab(document.getElementById('panel-body')); }
+
+// ── RESOURCES TAB ──
+function renderResourcesTab(body) {
+  body.innerHTML = `
+    <div class="section-title">Key resources</div>
+    <div class="os-card"><div class="os-card-title">Make.com</div><div class="os-card-meta">Your primary automation platform</div><a href="https://make.com" target="_blank" style="color:var(--accent);font-size:12px;">make.com →</a></div>
+    <div class="os-card"><div class="os-card-title">Supabase dashboard</div><div class="os-card-meta">Your database — view and manage all saved data</div><a href="https://supabase.com/dashboard" target="_blank" style="color:var(--accent);font-size:12px;">supabase.com/dashboard →</a></div>
+    <div class="os-card"><div class="os-card-title">structtek.com</div><div class="os-card-meta">Your website — update and maintain regularly</div><a href="https://structtek.com" target="_blank" style="color:var(--accent);font-size:12px;">structtek.com →</a></div>
+    <div class="os-card"><div class="os-card-title">StructTech offer doc</div><div class="os-card-meta">Phase I audit offer — your main sales tool</div><span class="os-tag tag-sop">In OS / SOPs</span></div>
+    <hr class="divider">
+    <div class="section-title">Quick contacts</div>
+    <div class="os-card"><div class="os-card-title">Jacob Walker</div><div class="os-card-meta">jacob@structtek.com · (937) 467-2660</div><div class="os-card-meta">Tipp City, OH 45371</div></div>
+    <hr class="divider">
+    <div class="section-title" style="font-size:13px;color:var(--muted);">Supabase: add os_data column</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6;">
+      ALTER TABLE structtech_state<br>ADD COLUMN IF NOT EXISTS os_data jsonb DEFAULT '{}'::jsonb;
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5;">Run this in your Supabase SQL Editor to enable saving clients, SOPs, and notes to the database.</div>`;
+}
+
+// ── TASK EDITING ──
+function startEditTask(taskId) {
+  if (editingTaskId && editingTaskId !== taskId) cancelEditTask();
+  editingTaskId = taskId;
+  renderTasks();
+}
+
+function cancelEditTask() {
+  editingTaskId = null;
+  renderTasks();
+}
+
+function saveTaskEdit(taskId, weekNum) {
+  const input = document.getElementById('task-edit-' + taskId);
+  const tagSel = document.getElementById('task-tag-' + taskId);
+  if (!input) return;
+  const newText = input.value.trim();
+  if (!newText) return;
+  const newTag = tagSel ? tagSel.value : 'admin';
+
+  // Check built-in tasks first
+  const week = WEEKS[weekNum - 1];
+  const builtIn = week.tasks.find(t => t.id === taskId);
+  if (builtIn) {
+    // Store override in taskState
+    taskState['override_' + taskId] = { text: newText, tag: newTag };
+  } else {
+    // Custom task — find and update
+    const custom = taskState['custom_w' + weekNum] || [];
+    const idx = custom.findIndex(t => t.id === taskId);
+    if (idx >= 0) { custom[idx].text = newText; custom[idx].tag = newTag; }
+    taskState['custom_w' + weekNum] = custom;
+  }
+  editingTaskId = null;
+  save();
+  renderTasks();
+}
+
+function deleteTask(taskId, weekNum) {
+  const week = WEEKS[weekNum - 1];
+  const builtIn = week.tasks.find(t => t.id === taskId);
+  if (builtIn) {
+    taskState['deleted_' + taskId] = true;
+    delete taskState[taskId];
+  } else {
+    const custom = taskState['custom_w' + weekNum] || [];
+    taskState['custom_w' + weekNum] = custom.filter(t => t.id !== taskId);
+  }
+  editingTaskId = null;
+  save();
+  renderTasks();
+}
+
+// ── RENDER TASKS ──
 function renderTasks() {
   const week = WEEKS[currentWeek - 1];
   document.getElementById('focus-title').textContent = week.title;
   document.getElementById('focus-desc').textContent = week.desc;
-
   const list = document.getElementById('task-list');
   list.innerHTML = '';
 
-  // Merge saved custom tasks
   const customTasks = taskState['custom_w' + currentWeek] || [];
-  const allTasks = [...week.tasks, ...customTasks];
+  const builtInTasks = week.tasks
+    .filter(t => !taskState['deleted_' + t.id])
+    .map(t => {
+      const ov = taskState['override_' + t.id];
+      return ov ? { ...t, text: ov.text, tag: ov.tag } : t;
+    });
+  const allTasks = [...builtInTasks, ...customTasks];
 
   let done = 0;
   allTasks.forEach(task => {
     const isDone = !!taskState[task.id];
     if (isDone) done++;
-
+    const isEditing = editingTaskId === task.id;
     const el = document.createElement('div');
-    el.className = 'task' + (isDone ? ' done' : '');
-    el.innerHTML = `
-      <div class="task-check">
-        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-          <path d="M1 4L3.5 6.5L9 1" stroke="#0d0f0e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="task-content">
-        <div class="task-title">${task.text}</div>
-        <div class="task-meta">${week.phase} · Week ${currentWeek}</div>
-      </div>
-      <span class="task-tag tag-${task.tag}">${task.tag}</span>
-    `;
-    el.onclick = () => {
-      taskState[task.id] = !taskState[task.id];
-      save();
-      renderAll();
-    };
+    el.className = 'task' + (isDone ? ' done' : '') + (isEditing ? ' editing' : '');
+
+    if (isEditing) {
+      el.innerHTML = `
+        <div class="task-check" onclick="toggleTask('${task.id}')">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#0d0f0e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="task-content">
+          <input class="task-edit-input" id="task-edit-${task.id}" value="${task.text.replace(/"/g,'&quot;')}" />
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+            <span style="font-size:11px;color:var(--muted);">Tag:</span>
+            <select id="task-tag-${task.id}" style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;padding:2px 6px;outline:none;">
+              <option value="admin" ${task.tag==='admin'?'selected':''}>admin</option>
+              <option value="sales" ${task.tag==='sales'?'selected':''}>sales</option>
+              <option value="build" ${task.tag==='build'?'selected':''}>build</option>
+              <option value="learn" ${task.tag==='learn'?'selected':''}>learn</option>
+              <option value="content" ${task.tag==='content'?'selected':''}>content</option>
+            </select>
+          </div>
+          <div class="task-actions">
+            <button class="sm-btn" onclick="saveTaskEdit('${task.id}',${currentWeek})" style="font-size:11px;padding:4px 12px;">Save</button>
+            <button class="sm-btn ghost" onclick="cancelEditTask()" style="font-size:11px;padding:4px 12px;">Cancel</button>
+            <button class="sm-btn danger" onclick="deleteTask('${task.id}',${currentWeek})" style="font-size:11px;padding:4px 12px;">Delete</button>
+          </div>
+        </div>`;
+      setTimeout(() => { const inp = document.getElementById('task-edit-' + task.id); if(inp){inp.focus();inp.select();} }, 30);
+    } else {
+      el.innerHTML = `
+        <div class="task-check" onclick="toggleTask('${task.id}')">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="#0d0f0e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="task-content">
+          <div class="task-title" onclick="startEditTask('${task.id}')" title="Click to edit">${task.text}</div>
+          <div class="task-meta">${week.phase} · Week ${currentWeek}</div>
+        </div>
+        <span class="task-tag tag-${task.tag}">${task.tag}</span>
+        <button class="task-edit-btn" onclick="startEditTask('${task.id}')" title="Edit task">&#9998;</button>`;
+    }
     list.appendChild(el);
   });
 
   const total = allTasks.length;
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-
+  const pct = total > 0 ? Math.round((done/total)*100) : 0;
   document.getElementById('ws-done').textContent = done;
   document.getElementById('ws-total').textContent = total;
   document.getElementById('week-progress-bar').style.width = pct + '%';
@@ -950,267 +1061,143 @@ function renderTasks() {
   document.getElementById('stat-done-sub').textContent = 'done in W' + currentWeek;
 }
 
+function toggleTask(id) {
+  if (editingTaskId === id) return;
+  taskState[id] = !taskState[id];
+  save();
+  renderTasks();
+  renderWeekNav();
+}
+
+// ── RENDER WEEK NAV ──
+function renderWeekNav() {
+  const nav = document.getElementById('week-nav');
+  nav.innerHTML = '';
+  WEEKS.forEach(w => {
+    const btn = document.createElement('button');
+    btn.className = 'week-btn' + (w.num===currentWeek?' active':'');
+    const builtIn = w.tasks.filter(t => !taskState['deleted_'+t.id]);
+    const custom = taskState['custom_w'+w.num] || [];
+    const allIds = [...builtIn.map(t=>t.id), ...custom.map(t=>t.id)];
+    const allDone = allIds.length > 0 && allIds.every(id => taskState[id]);
+    if (allDone && w.num !== currentWeek) btn.classList.add('completed');
+    btn.textContent = 'W' + w.num;
+    btn.onclick = () => { currentWeek = w.num; editingTaskId = null; save(); renderAll(); };
+    nav.appendChild(btn);
+  });
+}
+
+// ── MILESTONES ──
 function renderMilestones() {
   const list = document.getElementById('milestone-list');
   list.innerHTML = '';
-  MILESTONES.forEach((m, i) => {
-    const isActive = currentWeek === m.week;
-    const isDone = currentWeek > m.week;
+  MILESTONES.forEach((m,i) => {
+    const isActive = currentWeek === m.week, isDone = currentWeek > m.week;
     const el = document.createElement('div');
     el.className = 'milestone';
-    el.innerHTML = `
-      <div class="m-dot-wrap">
-        <div class="m-dot ${isDone ? 'done' : isActive ? 'active' : ''}"></div>
-        ${i < MILESTONES.length - 1 ? '<div class="m-line"></div>' : ''}
-      </div>
-      <div class="m-content">
-        <div class="m-week">${m.phase} · Week ${m.week}</div>
-        <div class="m-title ${isActive ? 'active' : ''}">${m.title}</div>
-        <div class="m-sub">${m.sub}</div>
-      </div>
-    `;
+    el.innerHTML = `<div class="m-dot-wrap"><div class="m-dot ${isDone?'done':isActive?'active':''}"></div>${i<MILESTONES.length-1?'<div class="m-line"></div>':''}</div><div class="m-content"><div class="m-week">${m.phase} · Week ${m.week}</div><div class="m-title ${isActive?'active':''}">${m.title}</div><div class="m-sub">${m.sub}</div></div>`;
     list.appendChild(el);
   });
 }
 
+// ── PIPELINE ──
 function cycleStage(i) {
-  const stages = ['cold','warm','hot','won'];
-  const cur = stages.indexOf(prospects[i].stage);
-  prospects[i].stage = stages[(cur + 1) % stages.length];
-  save();
-  renderPipeline();
+  const stages=['cold','warm','hot','won'];
+  prospects[i].stage = stages[(stages.indexOf(prospects[i].stage)+1)%stages.length];
+  save(); renderPipeline();
 }
-
-function deleteProspect(i) {
-  prospects.splice(i, 1);
-  save();
-  renderPipeline();
+function deleteProspect(i) { prospects.splice(i,1); save(); renderPipeline(); }
+function toggleProspectForm() {
+  const f = document.getElementById('prospect-form');
+  f.style.display = f.style.display==='none'?'block':'none';
+  if (f.style.display==='block') document.getElementById('p-name').focus();
 }
-
+function saveProspect() {
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) return;
+  prospects.push({ name, type: document.getElementById('p-type').value.trim()||'Contractor', stage: document.getElementById('p-stage').value });
+  document.getElementById('p-name').value=''; document.getElementById('p-type').value=''; document.getElementById('p-stage').value='cold';
+  document.getElementById('prospect-form').style.display='none';
+  save(); renderPipeline();
+}
 function renderPipeline() {
   const list = document.getElementById('pipeline-list');
-  if (prospects.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">No prospects yet.<br>Start outreach in Week 2.</div>';
-    document.getElementById('stat-prospects').textContent = 0;
-    return;
-  }
-  const stageLabels = { cold:'Cold', warm:'Warm', hot:'Hot — close this', won:'Won' };
-  list.innerHTML = '';
-  prospects.forEach((p, i) => {
-    const el = document.createElement('div');
-    el.className = 'pipeline-item';
-    el.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);';
-    el.innerHTML = `
-      <div style="flex:1;min-width:0;">
-        <div class="p-name">${p.name}</div>
-        <div class="p-status">${p.type || 'Contractor'}</div>
-      </div>
-      <span class="p-stage stage-${p.stage}" onclick="cycleStage(${i})" title="Click to advance stage" style="cursor:pointer;margin-right:8px;">${stageLabels[p.stage]}</span>
-      <span onclick="deleteProspect(${i})" style="color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 6px;border-radius:4px;" title="Remove">&times;</span>
-    `;
+  if (prospects.length===0) { list.innerHTML='<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">No prospects yet.<br>Start outreach in Week 2.</div>'; document.getElementById('stat-prospects').textContent=0; return; }
+  const labels={cold:'Cold',warm:'Warm',hot:'Hot — close this',won:'Won'};
+  list.innerHTML='';
+  prospects.forEach((p,i)=>{
+    const el=document.createElement('div'); el.className='pipeline-item';
+    el.innerHTML=`<div style="flex:1;min-width:0;"><div class="p-name">${p.name}</div><div class="p-status">${p.type||'Contractor'}</div></div><span class="p-stage stage-${p.stage}" onclick="cycleStage(${i})" title="Click to advance">${labels[p.stage]}</span><span onclick="deleteProspect(${i})" style="color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;" title="Remove">&times;</span>`;
     list.appendChild(el);
   });
   document.getElementById('stat-prospects').textContent = prospects.length;
 }
 
-function renderStats() {
+// ── INCOME ──
+function toggleIncomeForm() {
+  const f=document.getElementById('income-form');
+  f.style.display=f.style.display==='none'?'block':'none';
+  if(f.style.display==='block') document.getElementById('inc-label').focus();
+}
+function saveIncome() {
+  const label=document.getElementById('inc-label').value.trim();
+  const amount=parseFloat(document.getElementById('inc-amount').value);
+  const type=document.getElementById('inc-type').value;
+  if(!label||isNaN(amount)||amount<=0) return;
+  incomeEntries.push({id:'inc_'+Date.now(),label,amount,type,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+  document.getElementById('inc-label').value=''; document.getElementById('inc-amount').value='';
+  document.getElementById('income-form').style.display='none';
+  save(); renderIncome();
+}
+function deleteIncome(id) { incomeEntries=incomeEntries.filter(e=>e.id!==id); save(); renderIncome(); }
+function renderIncome() {
+  const list=document.getElementById('income-list');
+  if(!list) return;
+  const typeColors={audit:'var(--accent)',retainer:'var(--accent2)',contracting:'var(--blue)',other:'var(--muted)'};
+  list.innerHTML = incomeEntries.length===0
+    ? '<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:12px;">No income logged yet.</div>'
+    : incomeEntries.map(e=>`<div class="income-row" style="align-items:center;"><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;color:var(--text);">${e.label}</div><div style="font-size:10px;color:var(--muted);">${e.type} · ${e.date}</div></div><span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:${typeColors[e.type]||'var(--accent)'};margin:0 10px;">$${e.amount.toLocaleString()}</span><span onclick="deleteIncome('${e.id}')" style="color:var(--muted);cursor:pointer;font-size:16px;padding:2px 4px;">&times;</span></div>`).join('');
+  const mrr=incomeEntries.filter(e=>e.type==='retainer').reduce((s,e)=>s+e.amount,0);
+  const total=incomeEntries.reduce((s,e)=>s+e.amount,0);
+  const pct=Math.min(100,Math.round((mrr/2500)*100));
+  document.getElementById('mrr-total').textContent='$'+mrr.toLocaleString();
+  document.getElementById('total-earned').textContent='$'+total.toLocaleString();
+  document.getElementById('mrr-bar').style.width=pct+'%';
+  document.getElementById('mrr-pct').textContent=pct+'%';
+  document.getElementById('stat-mrr').textContent='$'+mrr.toLocaleString();
+  document.getElementById('stat-revenue').textContent='$'+total.toLocaleString();
+}
+
+// ── ADD TASK ──
+function addTask() {
+  const input=document.getElementById('add-input');
+  const text=input.value.trim();
+  if(!text) return;
+  const id='custom_'+Date.now();
+  const custom=taskState['custom_w'+currentWeek]||[];
+  custom.push({id,text,tag:'admin'});
+  taskState['custom_w'+currentWeek]=custom;
+  input.value='';
+  save(); renderAll();
+}
+document.getElementById('add-input').addEventListener('keydown',e=>{ if(e.key==='Enter') addTask(); });
+
+// ── RENDER ALL ──
+function renderAll() {
+  renderWeekNav(); renderTasks(); renderMilestones(); renderPipeline(); renderIncome();
   document.getElementById('stat-week').textContent = currentWeek;
   document.getElementById('current-week-badge').textContent = 'Week ' + currentWeek;
 }
 
-function renderAll() {
-  renderWeekNav();
-  renderTasks();
-  renderMilestones();
-  renderPipeline();
-  renderStats();
-  renderIncome();
-}
-
-function addTask() {
-  const input = document.getElementById('add-input');
-  const text = input.value.trim();
-  if (!text) return;
-  const id = 'custom_' + Date.now();
-  const custom = taskState['custom_w' + currentWeek] || [];
-  custom.push({ id, text, tag: 'admin', done: false });
-  taskState['custom_w' + currentWeek] = custom;
-  input.value = '';
-  save();
-  renderAll();
-}
-
-document.getElementById('add-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addTask();
-});
-
-function toggleProspectForm() {
-  const form = document.getElementById('prospect-form');
-  form.style.display = form.style.display === 'none' ? 'block' : 'none';
-  if (form.style.display === 'block') document.getElementById('p-name').focus();
-}
-
-function saveProspect() {
-  const name = document.getElementById('p-name').value.trim();
-  if (!name) { document.getElementById('p-name').focus(); return; }
-  const type = document.getElementById('p-type').value.trim() || 'Contractor';
-  const stage = document.getElementById('p-stage').value;
-  prospects.push({ name, type, stage });
-  document.getElementById('p-name').value = '';
-  document.getElementById('p-type').value = '';
-  document.getElementById('p-stage').value = 'cold';
-  document.getElementById('prospect-form').style.display = 'none';
-  save();
-  renderPipeline();
-}
-
-
-
-
-
-
-
-
-
-function toggleIncomeForm() {
-  const form = document.getElementById('income-form');
-  form.style.display = form.style.display === 'none' ? 'block' : 'none';
-  if (form.style.display === 'block') document.getElementById('inc-label').focus();
-}
-
-function saveIncome() {
-  const label = document.getElementById('inc-label').value.trim();
-  const amount = parseFloat(document.getElementById('inc-amount').value);
-  const type = document.getElementById('inc-type').value;
-  if (!label || isNaN(amount) || amount <= 0) return;
-  incomeEntries.push({ id: 'inc_' + Date.now(), label, amount, type, date: new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'}) });
-  document.getElementById('inc-label').value = '';
-  document.getElementById('inc-amount').value = '';
-  document.getElementById('inc-type').value = 'audit';
-  document.getElementById('income-form').style.display = 'none';
-  save();
-  renderIncome();
-}
-
-function deleteIncome(id) {
-  incomeEntries = incomeEntries.filter(e => e.id !== id);
-  save();
-  renderIncome();
-}
-
-function renderIncome() {
-  const list = document.getElementById('income-list');
-  if (!list) return;
-  if (incomeEntries.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:16px 0;color:var(--muted);font-size:12px;">No income logged yet.</div>';
-  } else {
-    const typeColors = { audit: 'var(--accent)', retainer: 'var(--accent2)', contracting: 'var(--blue)', other: 'var(--muted)' };
-    list.innerHTML = incomeEntries.map(e => `
-      <div class="income-row" style="align-items:center;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.label}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:1px;">${e.type} · ${e.date}</div>
-        </div>
-        <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:${typeColors[e.type] || 'var(--accent)'};margin:0 10px;">$${e.amount.toLocaleString()}</span>
-        <span onclick="deleteIncome('${e.id}')" style="color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;border-radius:4px;" title="Remove">&times;</span>
-      </div>
-    `).join('');
-  }
-  const mrr = incomeEntries.filter(e => e.type === 'retainer').reduce((s, e) => s + e.amount, 0);
-  const total = incomeEntries.reduce((s, e) => s + e.amount, 0);
-  const pct = Math.min(100, Math.round((mrr / 2500) * 100));
-  const mrrEl = document.getElementById('mrr-total');
-  const totalEl = document.getElementById('total-earned');
-  const barEl = document.getElementById('mrr-bar');
-  const pctEl = document.getElementById('mrr-pct');
-  if (mrrEl) mrrEl.textContent = '$' + mrr.toLocaleString();
-  if (totalEl) totalEl.textContent = '$' + total.toLocaleString();
-  if (barEl) barEl.style.width = pct + '%';
-  if (pctEl) pctEl.textContent = pct + '%';
-}
-
-function exportData() {
-  const state = { taskState, prospects, incomeEntries, currentWeek };
-  const json = JSON.stringify(state, null, 2);
-  document.getElementById('backup-json').value = json;
-  document.getElementById('backup-modal').style.display = 'flex';
-  setTimeout(() => {
-    const ta = document.getElementById('backup-json');
-    ta.select();
-    ta.setSelectionRange(0, 99999);
-  }, 50);
-}
-
-function closeBackupModal() {
-  document.getElementById('backup-modal').style.display = 'none';
-}
-
-function copyBackup() {
-  const ta = document.getElementById('backup-json');
-  ta.select();
-  ta.setSelectionRange(0, 99999);
-  try {
-    document.execCommand('copy');
-    const btn = document.getElementById('copy-btn');
-    btn.textContent = 'Copied!';
-    btn.style.background = 'var(--accent2)';
-    setTimeout(() => { btn.textContent = 'Copy all'; btn.style.background = 'var(--accent)'; }, 2000);
-  } catch(e) {}
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (data.taskState !== undefined) taskState = data.taskState;
-      if (data.prospects !== undefined) prospects = data.prospects;
-      if (data.incomeEntries !== undefined) incomeEntries = data.incomeEntries;
-      if (data.currentWeek !== undefined) currentWeek = data.currentWeek;
-      save();
-      renderAll();
-      const badge = document.getElementById('current-week-badge');
-      const orig = badge.textContent;
-      badge.textContent = 'Loaded!';
-      badge.style.background = 'var(--accent2)';
-      badge.style.color = '#0d0f0e';
-      setTimeout(() => { badge.textContent = orig; badge.style.background = ''; badge.style.color = ''; }, 2000);
-    } catch(err) {
-      alert('Could not load backup — file may be corrupted.');
-    }
-  };
-  reader.readAsText(file);
-  event.target.value = '';
-}
-
-// Date display
-const now = new Date();
-document.getElementById('date-display').textContent = now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
-
-// Boot: load from Supabase then render
-(async () => {
+// ── BOOT ──
+document.getElementById('date-display').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+(async()=>{
   setSyncStatus('saving');
-  document.getElementById('sync-status').textContent = 'Loading...';
+  document.getElementById('sync-status').textContent='Loading...';
   await dbLoad();
   setSyncStatus('synced');
   renderAll();
 })();
 </script>
-<div id="backup-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:100%;max-width:560px;padding:24px;display:flex;flex-direction:column;gap:14px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1.5px;color:var(--text);">Save Backup</span>
-      <span onclick="closeBackupModal()" style="color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:2px 6px;">&times;</span>
-    </div>
-    <p style="font-size:12px;color:var(--muted);line-height:1.6;">Copy this JSON and save it to a <code style="background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:11px;">.json</code> file on your computer or paste it into a Google Doc. To restore, click <strong style="color:var(--text);">Load backup</strong> and select the file.</p>
-    <textarea id="backup-json" readonly style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px;padding:12px;height:200px;resize:none;outline:none;width:100%;line-height:1.5;"></textarea>
-    <div style="display:flex;gap:8px;">
-      <button id="copy-btn" onclick="copyBackup()" style="flex:1;background:var(--accent);color:#0d0f0e;border:none;border-radius:6px;padding:10px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;">Copy all</button>
-      <button onclick="closeBackupModal()" style="flex:1;background:transparent;border:1px solid var(--border2);border-radius:6px;padding:10px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">Close</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
