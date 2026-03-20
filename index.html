@@ -387,10 +387,28 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 async function dbLoad() {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/structtech_state?id=eq.jacob&select=*`, {
+    // Select only columns we know exist — os_data added separately
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/structtech_state?id=eq.jacob&select=task_state,prospects,income_entries,current_week,os_data`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!res.ok) {
+      // Try without os_data in case column doesn't exist yet
+      const res2 = await fetch(`${SUPABASE_URL}/rest/v1/structtech_state?id=eq.jacob&select=task_state,prospects,income_entries,current_week`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      });
+      if (!res2.ok) throw new Error('HTTP ' + res2.status);
+      const rows2 = await res2.json();
+      if (rows2 && rows2.length > 0) {
+        const r = rows2[0];
+        taskState     = r.task_state     || {};
+        prospects     = r.prospects      || [];
+        incomeEntries = r.income_entries || [];
+        currentWeek   = r.current_week   || 1;
+        osData        = defaultOsData();
+      }
+      setSyncStatus('synced');
+      return;
+    }
     const rows = await res.json();
     if (rows && rows.length > 0) {
       const r = rows[0];
@@ -877,8 +895,24 @@ function addSop() {
 function updateSopBody(i,v) { osData.sops[i].body=v; save(); }
 function updateSopStatus(i,v) { osData.sops[i].status=v; save(); renderSopsTab(document.getElementById('panel-body')); }
 function renameSop(i) {
-  const n = prompt ? prompt('SOP title:', osData.sops[i].title) : null;
-  if (n) { osData.sops[i].title=n; save(); renderSopsTab(document.getElementById('panel-body')); }
+  const cur = osData.sops[i].title;
+  const card = document.querySelectorAll('#panel-body .os-card')[i];
+  if (!card) return;
+  const titleEl = card.querySelector('.os-card-title');
+  if (!titleEl) return;
+  const inp = document.createElement('input');
+  inp.className = 'add-input';
+  inp.value = cur;
+  inp.style.cssText = 'margin-bottom:6px;font-size:13px;font-weight:500;';
+  titleEl.replaceWith(inp);
+  inp.focus(); inp.select();
+  function commit() {
+    const val = inp.value.trim();
+    if (val) { osData.sops[i].title = val; save(); }
+    renderSopsTab(document.getElementById('panel-body'));
+  }
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); commit(); } if(e.key==='Escape') renderSopsTab(document.getElementById('panel-body')); });
 }
 function deleteSop(i) { osData.sops.splice(i,1); save(); renderSopsTab(document.getElementById('panel-body')); }
 
@@ -890,11 +924,11 @@ function renderNotesTab(body) {
     const i = osData.notes.findIndex(x=>x.id===n.id);
     html += `<div class="os-card" style="${n.pinned?'border-color:rgba(200,240,96,0.3);':''}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:500;color:${n.pinned?'var(--accent)':'var(--text)'};">${n.title}</span>
-          ${n.pinned?`<span class="os-tag" style="background:rgba(200,240,96,0.1);color:var(--accent);">pinned</span>`:''}
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+          <input class="note-title-input" value="${n.title.replace(/"/g,'&quot;')}" onchange="renameNote(${i},this.value)" style="background:transparent;border:none;border-bottom:1px solid transparent;color:${n.pinned?'var(--accent)':'var(--text)'};font-size:13px;font-weight:500;outline:none;flex:1;min-width:0;padding:1px 0;transition:border-color .15s;" onfocus="this.style.borderBottomColor='var(--accent)'" onblur="this.style.borderBottomColor='transparent'" />
+          ${n.pinned?`<span class="os-tag" style="background:rgba(200,240,96,0.1);color:var(--accent);flex-shrink:0;">pinned</span>`:''}
         </div>
-        <div style="display:flex;gap:4px;">
+        <div style="display:flex;gap:4px;flex-shrink:0;">
           <button class="sm-btn ghost" onclick="togglePin(${i})" style="font-size:10px;padding:3px 8px;">${n.pinned?'Unpin':'Pin'}</button>
           <button class="sm-btn danger" onclick="deleteNote(${i})" style="font-size:10px;padding:3px 8px;">×</button>
         </div>
@@ -907,9 +941,18 @@ function renderNotesTab(body) {
 
 function addNote() {
   osData.notes = osData.notes || [];
-  osData.notes.unshift({ id:'n_'+Date.now(), title:'New note', body:'', pinned:false });
+  const newNote = { id:'n_'+Date.now(), title:'New note', body:'', pinned:false };
+  osData.notes.unshift(newNote);
   save();
   renderNotesTab(document.getElementById('panel-body'));
+  // Auto-focus the title of the new note
+  setTimeout(() => {
+    const firstTitle = document.querySelector('#panel-body .note-title-input');
+    if (firstTitle) { firstTitle.focus(); firstTitle.select(); }
+  }, 50);
+}
+function renameNote(i, val) {
+  if (val.trim()) { osData.notes[i].title = val.trim(); save(); }
 }
 function updateNote(i,v) { osData.notes[i].body=v; save(); }
 function togglePin(i) { osData.notes[i].pinned=!osData.notes[i].pinned; save(); renderNotesTab(document.getElementById('panel-body')); }
