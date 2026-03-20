@@ -655,78 +655,62 @@ function renderPanelTab(tab) {
 
 // ── WORKSPACE TAB ──
 function renderWorkspaceTab(body) {
-  const clients = (osData.clients||[]);
-  const activeClients = clients.filter(c=>c.status==='active');
-  const prospectClients = clients.filter(c=>c.status==='prospect');
-  const sops = (osData.sops||[]);
-  const notes = (osData.notes||[]);
-  const mrr = incomeEntries.filter(e=>e.type==='retainer').reduce((s,e)=>s+e.amount,0);
+  const clients = osData.clients || [];
+  const activeClients = clients.filter(c => c.status === 'active');
+  const prospectClients = clients.filter(c => c.status === 'prospect');
+  const sops = osData.sops || [];
+  const notes = osData.notes || [];
+  const mrr = incomeEntries.filter(e => e.type === 'retainer').reduce((s, e) => s + e.amount, 0);
 
-  body.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Active clients</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent2);line-height:1;">${activeClients.length}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">of ${clients.length} total</div>
-      </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">MRR</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1;">$${mrr.toLocaleString()}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">target: $2,500</div>
-      </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">SOPs</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--blue);line-height:1;">${sops.length}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${sops.filter(s=>s.status==='active').length} active</div>
-      </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;">
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Notes</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--purple);line-height:1;">${notes.length}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${notes.filter(n=>n.pinned).length} pinned</div>
-      </div>
-    </div>
+  // Build stat cards
+  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">';
+  html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Active clients</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent2);line-height:1;">' + activeClients.length + '</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">of ' + clients.length + ' total</div></div>';
+  html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">MRR</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1;">$' + mrr.toLocaleString() + '</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">target: $2,500</div></div>';
+  html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">SOPs</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--blue);line-height:1;">' + sops.length + '</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">' + sops.filter(s => s.status === 'active').length + ' active</div></div>';
+  html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Notes</div><div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--purple);line-height:1;">' + notes.length + '</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">' + notes.filter(n => n.pinned).length + ' pinned</div></div>';
+  html += '</div>';
 
-    <div class="section-title">Client tracker
-      <button class="sm-btn" onclick="document.querySelectorAll('.panel-tab')[1].click()" style="font-size:10px;padding:4px 10px;">+ Add client</button>
-    </div>
-    ${activeClients.length===0 && prospectClients.length===0
-      ? '<div style="text-align:center;padding:20px 0;color:var(--muted);font-size:12px;line-height:1.6;">No clients yet.<br>Add one in the Clients tab.</div>'
-      : [...activeClients, ...prospectClients].map((c,i) => {
-          const realIdx = clients.findIndex(x=>x.id===c.id);
-          return \`<div class="os-card" style="cursor:pointer;" onclick="goToClientEdit(\${realIdx})">
-            <div style="display:flex;align-items:center;justify-content:space-between;">
-              <div>
-                <div class="os-card-title">\${c.name}</div>
-                <div class="os-card-meta">\${c.trade||'Contractor'}\${c.location?' · '+c.location:''}</div>
-              </div>
-              <div style="text-align:right;">
-                <span class="os-tag \${c.status==='active'?'tag-active':'tag-prospect'}">\${c.status}</span>
-                <div class="os-card-meta" style="margin-top:4px;">\${c.phase||''}</div>
-              </div>
-            </div>
-            \${Number(c.retainer)>0?'<div style="font-size:11px;color:var(--accent2);margin-top:6px;">$'+Number(c.retainer).toLocaleString()+'/mo retainer</div>':''}          </div>\`;
-        }).join('')
-    }
+  // Client tracker section
+  html += '<div class="section-title">Client tracker <button class="sm-btn" onclick="document.querySelectorAll(\'.panel-tab\')[1].click()" style="font-size:10px;padding:4px 10px;">+ Add client</button></div>';
 
-    <hr class="divider">
-    <div class="section-title" style="margin-bottom:12px;">Quick links</div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <a href="https://make.com" target="_blank" class="os-card" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;"><div><div class="os-card-title">Make.com</div><div class="os-card-meta">Automation builder</div></div><span style="color:var(--accent);">→</span></a>
-      <a href="https://supabase.com/dashboard" target="_blank" class="os-card" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;"><div><div class="os-card-title">Supabase</div><div class="os-card-meta">Your database</div></div><span style="color:var(--accent);">→</span></a>
-      <a href="https://structtek.com" target="_blank" class="os-card" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;"><div><div class="os-card-title">structtek.com</div><div class="os-card-meta">Your website</div></div><span style="color:var(--accent);">→</span></a>
-    </div>
-    <hr class="divider">
-    <div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Run once in Supabase SQL Editor:</div>
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6;">
-      ALTER TABLE structtech_state<br>ADD COLUMN IF NOT EXISTS os_data jsonb DEFAULT '{}'::jsonb;
-    </div>
-  `;
+  const showClients = [...activeClients, ...prospectClients];
+  if (showClients.length === 0) {
+    html += '<div style="text-align:center;padding:20px 0;color:var(--muted);font-size:12px;line-height:1.6;">No clients yet.<br>Add one in the Clients tab.</div>';
+  } else {
+    showClients.forEach(function(c) {
+      const realIdx = clients.findIndex(function(x) { return x.id === c.id; });
+      const tagClass = c.status === 'active' ? 'tag-active' : 'tag-prospect';
+      const retainerStr = Number(c.retainer) > 0 ? '<div style="font-size:11px;color:var(--accent2);margin-top:6px;">$' + Number(c.retainer).toLocaleString() + '/mo retainer</div>' : '';
+      html += '<div class="os-card" style="cursor:pointer;" onclick="goToClientEdit(' + realIdx + ')">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;">';
+      html += '<div><div class="os-card-title">' + c.name + '</div><div class="os-card-meta">' + (c.trade || 'Contractor') + (c.location ? ' · ' + c.location : '') + '</div></div>';
+      html += '<div style="text-align:right;"><span class="os-tag ' + tagClass + '">' + c.status + '</span><div class="os-card-meta" style="margin-top:4px;">' + (c.phase || '') + '</div></div>';
+      html += '</div>' + retainerStr + '</div>';
+    });
+  }
+
+  // Quick links
+  html += '<hr class="divider">';
+  html += '<div class="section-title" style="margin-bottom:12px;">Quick links</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+  html += '<a href="https://make.com" target="_blank" class="os-card" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;"><div><div class="os-card-title">Make.com</div><div class="os-card-meta">Automation builder</div></div><span style="color:var(--accent);">→</span></a>';
+  html += '<a href="https://supabase.com/dashboard" target="_blank" class="os-card" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;"><div><div class="os-card-title">Supabase</div><div class="os-card-meta">Your database</div></div><span style="color:var(--accent);">→</span></a>';
+  html += '<a href="https://structtek.com" target="_blank" class="os-card" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;"><div><div class="os-card-title">structtek.com</div><div class="os-card-meta">Your website</div></div><span style="color:var(--accent);">→</span></a>';
+  html += '</div>';
+
+  // Supabase SQL reminder
+  html += '<hr class="divider">';
+  html += '<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">Run once in Supabase SQL Editor to enable OS saving:</div>';
+  html += '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6;">ALTER TABLE structtech_state<br>ADD COLUMN IF NOT EXISTS os_data jsonb DEFAULT '{}'::jsonb;</div>';
+
+  body.innerHTML = html;
 }
 
 function goToClientEdit(i) {
   document.querySelectorAll('.panel-tab')[1].click();
-  setTimeout(()=>editClient(i), 50);
+  setTimeout(function() { editClient(i); }, 50);
 }
+
 
 // ── CLIENTS TAB ──
 function renderClientsTab(body) {
