@@ -25,6 +25,12 @@ function showToast(msg) {
   }, 2200);
 }
 
+// ── Called by inline onclick on soon top-nav links ───────────────────────
+function navSoonClick(e, label) {
+  e.preventDefault();
+  showToast('🚧 ' + label + ' — coming soon');
+}
+
 // ── Nav render ───────────────────────────────────────────────────────────
 function renderNav(activePage) {
   // 1. Top nav (desktop) → #app-nav
@@ -35,21 +41,12 @@ function renderNav(activePage) {
       var cls = 'nav-link' + (p.id === activePage ? ' active' : '') + (p.soon ? ' soon' : '');
       if (i > 0) html += '<div class="nav-divider"></div>';
       if (p.soon) {
-        html += '<a class="' + cls + '" data-soon="' + p.label + '" href="#">' + p.label + '</a>';
+        html += '<a class="' + cls + '" href="#" onclick="navSoonClick(event,\'' + p.label + '\')">' + p.label + '</a>';
       } else {
         html += '<a class="' + cls + '" href="' + p.href + '">' + p.label + '</a>';
       }
     });
     topEl.innerHTML = html;
-
-    // Intercept soon-link clicks in top nav
-    topEl.addEventListener('click', function (e) {
-      var a = e.target.closest('a[data-soon]');
-      if (a) {
-        e.preventDefault();
-        showToast('🚧 ' + a.dataset.soon + ' — coming soon');
-      }
-    });
   }
 
   // 2. Bottom nav (mobile) — injected into <body>

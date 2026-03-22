@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>StructTech — Clients</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ── Clients page layout ── */
+.cl-toolbar {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin-bottom: 18px;
+}
+.cl-filters { display: flex; gap: 4px; flex-wrap: wrap; }
+.cl-filter-btn {
+  font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 6px 12px; border-radius: 5px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--muted); cursor: pointer; transition: all 0.15s;
+}
+.cl-filter-btn:hover { color: var(--text); border-color: var(--border2); }
+.cl-filter-btn.active { background: var(--accent); color: #0d0f0e; border-color: var(--accent); }
+.cl-search {
+  flex: 1; min-width: 140px; max-width: 280px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 5px; padding: 7px 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+}
+.cl-search:focus { border-color: var(--accent); }
+.cl-empty {
+  text-align: center; padding: 48px 24px;
+  color: var(--muted); font-size: 14px;
+}
+.cl-empty-icon { font-size: 32px; margin-bottom: 10px; }
+
+/* ── Client card ── */
+.client-full-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; margin-bottom: 12px; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.client-full-card:hover { border-color: var(--border2); }
+.client-full-card.active-client { border-left: 3px solid var(--accent2); }
+.client-full-card.prospect-client { border-left: 3px solid var(--blue); }
+.client-full-card.completed-client { border-left: 3px solid var(--purple); }
+
+/* Card header row */
+.cfc-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; cursor: pointer; user-select: none;
+}
+.cfc-name { font-size: 15px; font-weight: 600; flex: 1; }
+.cfc-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cfc-detail { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.cfc-chevron {
+  font-size: 12px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0;
+}
+.cfc-chevron.open { transform: rotate(180deg); }
+.cfc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* Card body (expandable) */
+.cfc-body { display: none; border-top: 1px solid var(--border); }
+.cfc-body.open { display: block; }
+
+/* Profile tabs inside card */
+.profile-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  background: var(--surface2); overflow-x: auto;
+}
+.profile-tab {
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 10px 16px; border: none;
+  background: none; color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all 0.15s;
+  white-space: nowrap; flex-shrink: 0;
+}
+.profile-tab:hover { color: var(--text); }
+.profile-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.profile-tab-content { padding: 16px; }
+
+/* Phase progress bar */
+.phase-track {
+  display: flex; align-items: center; gap: 0; margin: 12px 0;
+}
+.phase-node {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;
+}
+.phase-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--border2); border: 2px solid var(--border2);
+  transition: all 0.2s;
+}
+.phase-dot.done { background: var(--accent2); border-color: var(--accent2); }
+.phase-dot.current { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.phase-line { flex: 1; height: 2px; background: var(--border2); transition: background 0.2s; }
+.phase-line.done { background: var(--accent2); }
+.phase-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; }
+.phase-label.current { color: var(--accent); }
+.phase-label.done { color: var(--accent2); }
+
+/* ── Proposal builder ── */
+.proposal-section { margin-bottom: 16px; }
+.proposal-label {
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px;
+}
+.proposal-field {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 5px; padding: 8px 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+  transition: border-color 0.15s;
+}
+.proposal-field:focus { border-color: var(--accent); }
+.proposal-textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 5px; padding: 8px 10px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+  resize: vertical; min-height: 80px; transition: border-color 0.15s; line-height: 1.6;
+}
+.proposal-textarea:focus { border-color: var(--accent); }
+.proposal-row { display: flex; gap: 10px; }
+.proposal-row > * { flex: 1; }
+.proposal-preview {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 16px; font-size: 13px; line-height: 1.7; color: var(--text);
+  white-space: pre-wrap; font-family: 'DM Sans', sans-serif; margin-top: 12px;
+}
+.proposal-preview-title {
+  font-family: 'Bebas Neue', cursive; font-size: 20px; color: var(--accent);
+  letter-spacing: 0.05em; margin-bottom: 8px;
+}
+.proposal-preview-meta {
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
+  margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+
+/* ── Audit entries ── */
+.audit-item {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 12px; margin-bottom: 8px;
+}
+.audit-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.audit-item-title { flex: 1; font-size: 13px; font-weight: 600; }
+.audit-item-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.audit-status-badge { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 3px; text-transform: uppercase; }
+.audit-draft { background: rgba(245,158,11,0.15); color: var(--warn); }
+.audit-delivered { background: rgba(74,222,128,0.15); color: var(--accent2); }
+.audit-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.audit-bottleneck {
+  background: var(--bg); border-left: 2px solid var(--warn);
+  padding: 6px 10px; margin: 4px 0; border-radius: 0 4px 4px 0;
+  font-size: 12px; color: var(--text);
+}
+
+/* ── Documents ── */
+.doc-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.doc-item:last-child { border-bottom: none; }
+.doc-icon { font-size: 18px; flex-shrink: 0; }
+.doc-name { flex: 1; font-size: 13px; font-weight: 500; }
+.doc-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.doc-del { background: none; border: none; color: var(--border2); cursor: pointer; font-size: 14px; padding: 4px 6px; transition: color 0.15s; }
+.doc-del:hover { color: var(--danger); }
+.doc-add-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+/* ── Overview fields ── */
+.ov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.ov-field { background: var(--surface2); border-radius: 6px; padding: 10px 12px; }
+.ov-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
+.ov-value { font-size: 13px; font-weight: 500; }
+.ov-value.money { font-family: 'Bebas Neue', cursive; font-size: 20px; color: var(--accent2); }
+
+/* ── Stats row override for clients page ── */
+.cl-stats-row { grid-template-columns: repeat(4, 1fr); margin-bottom: 18px; }
+
+/* ── Add/Edit form ── */
+.cl-add-form {
+  background: var(--surface); border: 1px solid var(--accent);
+  border-radius: 8px; padding: 20px; margin-bottom: 18px;
+}
+.cl-form-title {
+  font-family: 'Bebas Neue', cursive; font-size: 18px; color: var(--accent);
+  letter-spacing: 0.04em; margin-bottom: 14px;
+}
+.cl-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.cl-form-group { display: flex; flex-direction: column; gap: 4px; }
+.cl-form-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+
+/* ── Mobile responsive ── */
+@media (max-width: 768px) {
+  .cl-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .cl-toolbar { gap: 8px; }
+  .cl-search { max-width: 100%; width: 100%; }
+  .ov-grid { grid-template-columns: 1fr 1fr; }
+  .cl-form-grid { grid-template-columns: 1fr; }
+  .proposal-row { flex-direction: column; }
+  .profile-tabs { gap: 0; }
+  .profile-tab { padding: 10px 10px; font-size: 9px; }
+}
+@media (max-width: 480px) {
+  .cl-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .ov-grid { grid-template-columns: 1fr; }
+  .cfc-header { flex-wrap: wrap; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <span class="logo-main">STRUCTTECH</span>
+    <span class="logo-div">/</span>
+    <span class="logo-ops">OPS</span>
+  </div>
+  <div id="sync-status" class="sync-status sync-loading">● Loading</div>
+  <div id="header-date" class="header-date"></div>
+  <div class="week-badge" style="font-size:13px;padding:4px 10px;color:var(--muted);border-color:var(--border)">Clients</div>
+</header>
+
+<div id="app-nav" class="app-nav"></div>
+
+<main>
+  <!-- Stats row -->
+  <div id="cl-stats" class="stats-row cl-stats-row"></div>
+
+  <!-- Toolbar -->
+  <div class="cl-toolbar">
+    <div class="cl-filters" id="cl-filters">
+      <button class="cl-filter-btn active" onclick="setFilter('all')">All</button>
+      <button class="cl-filter-btn" onclick="setFilter('prospect')">Prospects</button>
+      <button class="cl-filter-btn" onclick="setFilter('active')">Active</button>
+      <button class="cl-filter-btn" onclick="setFilter('completed')">Completed</button>
+    </div>
+    <input id="cl-search" class="cl-search" placeholder="Search clients..." oninput="renderClients()">
+    <button class="btn btn-primary" onclick="toggleAddForm()">+ Add Client</button>
+  </div>
+
+  <!-- Add / Edit form -->
+  <div id="cl-form-wrap"></div>
+
+  <!-- Client list -->
+  <div id="cl-list"></div>
+</main>
+
+<script src="shared.js"></script>
+<script src="nav.js"></script>
+<script>
+// ── Page state ─────────────────────────────────────────────────────────────
+var filterStatus = 'all';
+var showAddForm  = false;
+var editingId    = null;
+var openCards    = {};      // id → true/false (expanded)
+var openTabs     = {};      // id → tab name
+var proposalData = {};      // id → { title, trade, pain, solution, deliverables, price, timeline }
+var auditData    = {};      // id → [ { id, title, date, status, bottlenecks, notes } ]
+var docData      = {};      // id → [ { id, name, type, date, url } ]
+
+// ── After state loaded, seed per-client maps ──────────────────────────────
+function seedClientData() {
+  state.os_data.clients.forEach(function(c) {
+    if (!c.proposals)    c.proposals    = [];
+    if (!c.audits)       c.audits       = [];
+    if (!c.documents)    c.documents    = [];
+  });
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────────
+function renderStats() {
+  var el = document.getElementById('cl-stats');
+  if (!el) return;
+  var clients = state.os_data.clients;
+  var active = clients.filter(function(c){ return c.status === 'active'; });
+  var mrr = active.reduce(function(sum, c){ return sum + (parseFloat(c.retainer) || 0); }, 0);
+  var fees = clients.filter(function(c){ return parseFloat(c.auditFee) > 0; });
+  var avgFee = fees.length ? fees.reduce(function(s,c){ return s + (parseFloat(c.auditFee)||0); }, 0) / fees.length : 0;
+  function sc(label, val, cls) {
+    return '<div class="stat-card"><div class="stat-label">' + label + '</div>' +
+      '<div class="stat-value ' + (cls||'') + '">' + val + '</div></div>';
+  }
+  el.innerHTML =
+    sc('Total Clients', clients.length) +
+    sc('Active', active.length, 'accent') +
+    sc('Client MRR', '$' + Math.round(mrr).toLocaleString(), 'green') +
+    sc('Avg Audit Fee', fees.length ? '$' + Math.round(avgFee) : '—');
+}
+
+// ── Filter ─────────────────────────────────────────────────────────────────
+function setFilter(s) {
+  filterStatus = s;
+  document.querySelectorAll('.cl-filter-btn').forEach(function(b) {
+    b.classList.toggle('active', b.textContent.toLowerCase() === s || (s === 'all' && b.textContent === 'All'));
+  });
+  renderClients();
+}
+
+// ── Phase track ────────────────────────────────────────────────────────────
+function buildPhaseTrack(phase) {
+  var phases = ['Phase I', 'Phase II', 'Phase III'];
+  var cur = phases.indexOf(phase);
+  var html = '<div class="phase-track">';
+  phases.forEach(function(p, i) {
+    var dotCls = i < cur ? 'phase-dot done' : i === cur ? 'phase-dot current' : 'phase-dot';
+    var lblCls = i < cur ? 'phase-label done' : i === cur ? 'phase-label current' : 'phase-label';
+    if (i > 0) {
+      var lineCls = i <= cur ? 'phase-line done' : 'phase-line';
+      html += '<div class="' + lineCls + '"></div>';
+    }
+    html += '<div class="phase-node"><div class="' + dotCls + '"></div>' +
+      '<div class="' + lblCls + '">' + p.replace('Phase ', 'Ph.') + '</div></div>';
+  });
+  return html + '</div>';
+}
+
+// ── Profile tabs content ───────────────────────────────────────────────────
+function buildOverviewTab(c) {
+  var phases = buildPhaseTrack(c.phase || 'Phase I');
+  var ov = '<div class="ov-grid">' +
+    '<div class="ov-field"><div class="ov-label">Trade</div><div class="ov-value">' + escHtml(c.trade||'—') + '</div></div>' +
+    '<div class="ov-field"><div class="ov-label">Location</div><div class="ov-value">' + escHtml(c.location||'—') + '</div></div>' +
+    '<div class="ov-field"><div class="ov-label">Audit Fee</div><div class="ov-value money">' + (c.auditFee ? '$'+c.auditFee : '—') + '</div></div>' +
+    '<div class="ov-field"><div class="ov-label">Retainer/mo</div><div class="ov-value money">' + (c.retainer ? '$'+c.retainer : '—') + '</div></div>' +
+    '</div>' + phases +
+    (c.notes ? '<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:5px">' + escHtml(c.notes) + '</div>' : '');
+  return '<div class="profile-tab-content">' + ov + '</div>';
+}
+
+function buildProposalTab(c) {
+  var p = c.proposals && c.proposals.length > 0 ? c.proposals[0] : null;
+  var pid = p ? p.id : 'new';
+  return '<div class="profile-tab-content">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+    '<span style="font-family:\'DM Mono\',monospace;font-size:10px;text-transform:uppercase;color:var(--muted)">' + (c.proposals && c.proposals.length > 0 ? c.proposals.length + ' proposal(s)' : 'No proposals yet') + '</span>' +
+    '<button class="btn btn-primary btn-sm" onclick="openProposalForm(' + c.id + ')">+ New Proposal</button>' +
+    '</div>' +
+    buildProposalList(c) + '</div>';
+}
+
+function buildProposalList(c) {
+  if (!c.proposals || c.proposals.length === 0) {
+    return '<div class="cl-empty"><div class="cl-empty-icon">📄</div><div>No proposals yet.<br>Click "+ New Proposal" to build one.</div></div>';
+  }
+  return c.proposals.map(function(p) {
+    return '<div class="audit-item">' +
+      '<div class="audit-item-header">' +
+      '<span class="audit-item-title">' + escHtml(p.title || 'Untitled Proposal') + '</span>' +
+      '<span class="audit-item-date">' + (p.date||'').slice(0,10) + '</span>' +
+      '<span class="audit-status-badge ' + (p.sent ? 'audit-delivered' : 'audit-draft') + '">' + (p.sent ? 'Sent' : 'Draft') + '</span>' +
+      '<button class="btn btn-ghost btn-xs" onclick="viewProposal(' + c.id + ',' + p.id + ')">View</button>' +
+      '<button class="btn btn-danger btn-xs" onclick="deleteProposal(' + c.id + ',' + p.id + ')">×</button>' +
+      '</div>' +
+      (p.summary ? '<div class="audit-body">' + escHtml(p.summary) + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+function buildAuditTab(c) {
+  return '<div class="profile-tab-content">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+    '<span style="font-family:\'DM Mono\',monospace;font-size:10px;text-transform:uppercase;color:var(--muted)">' + (c.audits && c.audits.length > 0 ? c.audits.length + ' audit(s)' : 'No audits yet') + '</span>' +
+    '<button class="btn btn-primary btn-sm" onclick="addAudit(' + c.id + ')">+ New Audit</button>' +
+    '</div>' +
+    buildAuditList(c) + '</div>';
+}
+
+function buildAuditList(c) {
+  if (!c.audits || c.audits.length === 0) {
+    return '<div class="cl-empty"><div class="cl-empty-icon">🔍</div><div>No audits logged yet.<br>Click "+ New Audit" to start one.</div></div>';
+  }
+  return c.audits.map(function(a) {
+    var bnHtml = (a.bottlenecks||[]).map(function(b) {
+      return '<div class="audit-bottleneck">⚠ ' + escHtml(b) + '</div>';
+    }).join('');
+    return '<div class="audit-item">' +
+      '<div class="audit-item-header">' +
+      '<span class="audit-item-title">' + escHtml(a.title||'Audit') + '</span>' +
+      '<span class="audit-item-date">' + (a.date||'').slice(0,10) + '</span>' +
+      '<span class="audit-status-badge ' + (a.status==='delivered'?'audit-delivered':'audit-draft') + '">' + (a.status||'draft') + '</span>' +
+      '<button class="btn btn-ghost btn-xs" onclick="editAudit(' + c.id + ',' + a.id + ')">Edit</button>' +
+      '<button class="btn btn-danger btn-xs" onclick="deleteAudit(' + c.id + ',' + a.id + ')">×</button>' +
+      '</div>' +
+      (a.notes ? '<div class="audit-body" style="margin-bottom:6px">' + escHtml(a.notes) + '</div>' : '') +
+      bnHtml + '</div>';
+  }).join('');
+}
+
+function buildDocsTab(c) {
+  var items = (c.documents||[]).map(function(d) {
+    var icons = { pdf:'📄', link:'🔗', doc:'📝', sheet:'📊', other:'📎' };
+    return '<div class="doc-item">' +
+      '<span class="doc-icon">' + (icons[d.type]||'📎') + '</span>' +
+      '<div class="flex-1"><div class="doc-name">' + escHtml(d.name) + '</div>' +
+      '<div class="doc-meta">' + escHtml(d.type||'file') + ' · ' + (d.date||'').slice(0,10) + '</div></div>' +
+      (d.url ? '<a href="' + escAttr(d.url) + '" target="_blank" class="btn btn-ghost btn-xs">Open</a>' : '') +
+      '<button class="doc-del" onclick="deleteDoc(' + c.id + ',' + d.id + ')">×</button>' +
+      '</div>';
+  }).join('');
+
+  var addRow = '<div class="doc-add-row">' +
+    '<input class="form-input" id="doc-name-' + c.id + '" placeholder="Document name" style="flex:2">' +
+    '<select class="form-select" id="doc-type-' + c.id + '" style="flex:1">' +
+    '<option value="pdf">PDF</option><option value="doc">Doc</option>' +
+    '<option value="sheet">Sheet</option><option value="link">Link</option><option value="other">Other</option>' +
+    '</select>' +
+    '<input class="form-input" id="doc-url-' + c.id + '" placeholder="URL (optional)" style="flex:2">' +
+    '<button class="btn btn-primary btn-sm" onclick="addDoc(' + c.id + ')">+ Add</button>' +
+    '</div>';
+
+  return '<div class="profile-tab-content">' +
+    (items || '<div class="cl-empty"><div class="cl-empty-icon">📁</div><div>No documents yet. Add links or files below.</div></div>') +
+    addRow + '</div>';
+}
+
+// ── Build a full client card ───────────────────────────────────────────────
+function buildClientCard(c) {
+  var isOpen = !!openCards[c.id];
+  var tab = openTabs[c.id] || 'overview';
+  var statusCls = { prospect:'prospect-client', active:'active-client', completed:'completed-client' }[c.status] || '';
+  var badgeCls = { prospect:'status-prospect', active:'status-active', completed:'status-completed' }[c.status] || '';
+
+  // Header
+  var header = '<div class="cfc-header" onclick="toggleCard(' + c.id + ')">' +
+    '<span class="cfc-name">' + escHtml(c.name) + '</span>' +
+    '<div class="cfc-meta">' +
+    '<span class="badge ' + badgeCls + '">' + (c.status||'prospect') + '</span>' +
+    (c.trade ? '<span class="cfc-detail">' + escHtml(c.trade) + '</span>' : '') +
+    (c.location ? '<span class="cfc-detail">📍 ' + escHtml(c.location) + '</span>' : '') +
+    (c.retainer ? '<span class="cfc-detail" style="color:var(--accent2)">$' + c.retainer + '/mo</span>' : '') +
+    '</div>' +
+    '<div class="cfc-actions" onclick="event.stopPropagation()">' +
+    '<button class="btn btn-ghost btn-xs" onclick="startEdit(' + c.id + ')">Edit</button>' +
+    '<button class="btn btn-danger btn-xs" onclick="deleteClient(' + c.id + ')">Delete</button>' +
+    '</div>' +
+    '<span class="cfc-chevron ' + (isOpen ? 'open' : '') + '">▼</span>' +
+    '</div>';
+
+  if (!isOpen) return '<div class="client-full-card ' + statusCls + '" id="cfc-' + c.id + '">' + header + '</div>';
+
+  // Profile tabs
+  var tabs = [
+    { id:'overview', label:'Overview' },
+    { id:'proposal', label:'Proposals' },
+    { id:'audits',   label:'Audits' },
+    { id:'docs',     label:'Documents' }
+  ];
+  var tabsHtml = '<div class="profile-tabs">' +
+    tabs.map(function(t) {
+      return '<button class="profile-tab ' + (tab === t.id ? 'active' : '') + '" onclick="switchTab(' + c.id + ',\'' + t.id + '\')">' + t.label + '</button>';
+    }).join('') + '</div>';
+
+  var tabContent = '';
+  if (tab === 'overview') tabContent = buildOverviewTab(c);
+  else if (tab === 'proposal') tabContent = buildProposalTab(c);
+  else if (tab === 'audits')   tabContent = buildAuditTab(c);
+  else if (tab === 'docs')     tabContent = buildDocsTab(c);
+
+  return '<div class="client-full-card ' + statusCls + '" id="cfc-' + c.id + '">' +
+    header +
+    '<div class="cfc-body open">' + tabsHtml + tabContent + '</div>' +
+    '</div>';
+}
+
+// ── Add/Edit form ──────────────────────────────────────────────────────────
+function buildClientForm(c) {
+  var isNew = !c;
+  var v = c || { name:'', trade:'', location:'', status:'prospect', phase:'Phase I', auditFee:'', retainer:'', notes:'' };
+  var fid = isNew ? 'new' : String(c.id);
+  var statusOpts = ['prospect','active','completed'].map(function(s) {
+    return '<option value="' + s + '"' + (v.status===s?' selected':'') + '>' + s + '</option>';
+  }).join('');
+  var phaseOpts = ['Phase I','Phase II','Phase III'].map(function(p) {
+    return '<option value="' + p + '"' + (v.phase===p?' selected':'') + '>' + p + '</option>';
+  }).join('');
+
+  return '<div class="cl-add-form">' +
+    '<div class="cl-form-title">' + (isNew ? 'Add New Client' : 'Edit — ' + escHtml(v.name)) + '</div>' +
+    '<div class="cl-form-grid">' +
+    '<div class="cl-form-group"><label class="cl-form-label">Client Name *</label>' +
+    '<input class="form-input" id="f-name-' + fid + '" value="' + escAttr(v.name) + '" placeholder="Company or person name"></div>' +
+    '<div class="cl-form-group"><label class="cl-form-label">Trade / Industry</label>' +
+    '<input class="form-input" id="f-trade-' + fid + '" value="' + escAttr(v.trade||'') + '" placeholder="e.g. HVAC, Plumbing"></div>' +
+    '<div class="cl-form-group"><label class="cl-form-label">Location</label>' +
+    '<input class="form-input" id="f-location-' + fid + '" value="' + escAttr(v.location||'') + '" placeholder="City, State"></div>' +
+    '<div class="cl-form-group"><label class="cl-form-label">Status</label>' +
+    '<select class="form-select" id="f-status-' + fid + '">' + statusOpts + '</select></div>' +
+    '<div class="cl-form-group"><label class="cl-form-label">Phase</label>' +
+    '<select class="form-select" id="f-phase-' + fid + '">' + phaseOpts + '</select></div>' +
+    '<div class="cl-form-group"><label class="cl-form-label">Audit Fee $</label>' +
+    '<input class="form-input" id="f-audit-' + fid + '" type="number" value="' + escAttr(v.auditFee||'') + '" placeholder="500"></div>' +
+    '<div class="cl-form-group"><label class="cl-form-label">Retainer $/mo</label>' +
+    '<input class="form-input" id="f-retainer-' + fid + '" type="number" value="' + escAttr(v.retainer||'') + '" placeholder="750"></div>' +
+    '</div>' +
+    '<div class="cl-form-group" style="margin-bottom:12px"><label class="cl-form-label">Notes</label>' +
+    '<textarea class="form-textarea" id="f-notes-' + fid + '" placeholder="Discovery notes, context, goals...">' + escHtml(v.notes||'') + '</textarea></div>' +
+    '<div style="display:flex;gap:8px">' +
+    '<button class="btn btn-primary" onclick="saveClient(\'' + fid + '\')">' + (isNew ? 'Add Client' : 'Save Changes') + '</button>' +
+    '<button class="btn btn-ghost" onclick="cancelForm()">Cancel</button>' +
+    '</div></div>';
+}
+
+// ── Render client list ─────────────────────────────────────────────────────
+function renderClients() {
+  var listEl = document.getElementById('cl-list');
+  if (!listEl) return;
+  var search = (document.getElementById('cl-search') || {}).value || '';
+  var q = search.toLowerCase().trim();
+
+  var filtered = state.os_data.clients.filter(function(c) {
+    if (filterStatus !== 'all' && c.status !== filterStatus) return false;
+    if (q && !(c.name||'').toLowerCase().includes(q) && !(c.trade||'').toLowerCase().includes(q) && !(c.location||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<div class="cl-empty"><div class="cl-empty-icon">◎</div><div>No clients match this filter.<br><span style="font-size:12px">Try a different filter or add a new client.</span></div></div>';
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(buildClientCard).join('');
+}
+
+function renderAll() {
+  renderHeader();
+  renderStats();
+  renderClients();
+}
+
+function renderHeader() {
+  var d = new Date();
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('header-date');
+  if (el) el.textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
+}
+
+// ── Toggle card open/closed ────────────────────────────────────────────────
+function toggleCard(id) {
+  openCards[id] = !openCards[id];
+  if (!openTabs[id]) openTabs[id] = 'overview';
+  renderClients();
+}
+
+function switchTab(id, tab) {
+  openTabs[id] = tab;
+  renderClients();
+}
+
+// ── Add/Edit form toggles ──────────────────────────────────────────────────
+function toggleAddForm() {
+  showAddForm = !showAddForm;
+  editingId = null;
+  renderFormArea();
+  if (showAddForm) setTimeout(function() { var el = document.getElementById('f-name-new'); if(el) el.focus(); }, 50);
+}
+
+function startEdit(id) {
+  editingId = id;
+  showAddForm = false;
+  renderFormArea();
+  setTimeout(function() { var el = document.getElementById('f-name-' + id); if(el) el.focus(); }, 50);
+}
+
+function cancelForm() {
+  showAddForm = false;
+  editingId = null;
+  renderFormArea();
+}
+
+function renderFormArea() {
+  var wrap = document.getElementById('cl-form-wrap');
+  if (!wrap) return;
+  if (showAddForm) { wrap.innerHTML = buildClientForm(null); }
+  else if (editingId !== null) {
+    var c = state.os_data.clients.find(function(x) { return x.id === editingId; });
+    wrap.innerHTML = c ? buildClientForm(c) : '';
+  } else { wrap.innerHTML = ''; }
+}
+
+// ── Save / Delete client ───────────────────────────────────────────────────
+function saveClient(fid) {
+  var name     = (document.getElementById('f-name-' + fid)     || {}).value || '';
+  var trade    = (document.getElementById('f-trade-' + fid)    || {}).value || '';
+  var location = (document.getElementById('f-location-' + fid) || {}).value || '';
+  var status   = (document.getElementById('f-status-' + fid)   || {}).value || 'prospect';
+  var phase    = (document.getElementById('f-phase-' + fid)    || {}).value || 'Phase I';
+  var auditFee = (document.getElementById('f-audit-' + fid)    || {}).value || '';
+  var retainer = (document.getElementById('f-retainer-' + fid) || {}).value || '';
+  var notes    = (document.getElementById('f-notes-' + fid)    || {}).value || '';
+  if (!name.trim()) { showToast('⚠ Client name is required'); return; }
+
+  if (fid === 'new') {
+    state.os_data.clients.push({
+      id: genId(), name: name.trim(), trade: trade.trim(), location: location.trim(),
+      status: status, phase: phase, auditFee: auditFee, retainer: retainer,
+      notes: notes.trim(), proposals: [], audits: [], documents: []
+    });
+  } else {
+    var numId = parseInt(fid);
+    var c = state.os_data.clients.find(function(x) { return x.id === numId; });
+    if (c) {
+      c.name = name.trim(); c.trade = trade.trim(); c.location = location.trim();
+      c.status = status; c.phase = phase; c.auditFee = auditFee;
+      c.retainer = retainer; c.notes = notes.trim();
+    }
+  }
+  showAddForm = false; editingId = null;
+  scheduleSave(); renderFormArea(); renderAll();
+}
+
+function deleteClient(id) {
+  delete openCards[id];
+  state.os_data.clients = state.os_data.clients.filter(function(c) { return c.id !== id; });
+  scheduleSave(); renderAll();
+}
+
+// ── Proposal actions ───────────────────────────────────────────────────────
+function openProposalForm(clientId) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (!c) return;
+  var pid = genId();
+  var today = new Date().toISOString().slice(0,10);
+  // Build a proposal modal/inline form
+  var formHtml = buildProposalFormHtml(c, pid);
+  var tabContent = document.querySelector('#cfc-' + clientId + ' .profile-tab-content');
+  if (tabContent) tabContent.innerHTML = formHtml;
+}
+
+function buildProposalFormHtml(c, pid) {
+  return '<div style="padding:4px 0">' +
+    '<div class="proposal-section"><div class="proposal-label">Proposal Title</div>' +
+    '<input class="proposal-field" id="prop-title-' + pid + '" placeholder="e.g. Phase I Audit — ' + escAttr(c.name) + '"></div>' +
+    '<div class="proposal-row">' +
+    '<div class="proposal-section"><div class="proposal-label">Client Pain Point</div>' +
+    '<textarea class="proposal-textarea" id="prop-pain-' + pid + '" placeholder="What problem are we solving?"></textarea></div>' +
+    '<div class="proposal-section"><div class="proposal-label">Proposed Solution</div>' +
+    '<textarea class="proposal-textarea" id="prop-solution-' + pid + '" placeholder="How StructTech fixes it..."></textarea></div>' +
+    '</div>' +
+    '<div class="proposal-section"><div class="proposal-label">Deliverables</div>' +
+    '<textarea class="proposal-textarea" id="prop-deliverables-' + pid + '" placeholder="1. Workflow audit report&#10;2. Top 3 automation builds&#10;3. Team training session" style="min-height:60px"></textarea></div>' +
+    '<div class="proposal-row">' +
+    '<div class="proposal-section"><div class="proposal-label">Investment</div>' +
+    '<input class="proposal-field" id="prop-price-' + pid + '" placeholder="$500 audit + $750/mo retainer"></div>' +
+    '<div class="proposal-section"><div class="proposal-label">Timeline</div>' +
+    '<input class="proposal-field" id="prop-timeline-' + pid + '" placeholder="e.g. 2 weeks audit, 30 days build"></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:12px">' +
+    '<button class="btn btn-primary btn-sm" onclick="saveProposal(' + c.id + ',' + pid + ',false)">Save Draft</button>' +
+    '<button class="btn btn-secondary btn-sm" onclick="saveProposal(' + c.id + ',' + pid + ',true)">Mark as Sent</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="switchTab(' + c.id + ',\'proposal\')">Cancel</button>' +
+    '</div></div>';
+}
+
+function saveProposal(clientId, pid, sent) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (!c) return;
+  var title       = (document.getElementById('prop-title-' + pid)       || {}).value || '';
+  var pain        = (document.getElementById('prop-pain-' + pid)        || {}).value || '';
+  var solution    = (document.getElementById('prop-solution-' + pid)    || {}).value || '';
+  var deliverables= (document.getElementById('prop-deliverables-' + pid)|| {}).value || '';
+  var price       = (document.getElementById('prop-price-' + pid)       || {}).value || '';
+  var timeline    = (document.getElementById('prop-timeline-' + pid)    || {}).value || '';
+  var summary = [pain, solution].filter(Boolean).join(' · ').slice(0, 120);
+  if (!c.proposals) c.proposals = [];
+  c.proposals.push({ id: pid, title: title, pain: pain, solution: solution, deliverables: deliverables, price: price, timeline: timeline, sent: sent, summary: summary, date: new Date().toISOString() });
+  scheduleSave();
+  openTabs[clientId] = 'proposal';
+  renderClients();
+}
+
+function deleteProposal(clientId, pid) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (c && c.proposals) { c.proposals = c.proposals.filter(function(p) { return p.id !== pid; }); scheduleSave(); renderClients(); }
+}
+
+function viewProposal(clientId, pid) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (!c) return;
+  var p = (c.proposals||[]).find(function(x) { return x.id === pid; });
+  if (!p) return;
+  var tabContent = document.querySelector('#cfc-' + clientId + ' .profile-tab-content');
+  if (!tabContent) return;
+  var today = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
+  tabContent.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="switchTab(' + clientId + ',\'proposal\')" style="margin-bottom:12px">← Back to Proposals</button>' +
+    '<div class="proposal-preview">' +
+    '<div class="proposal-preview-title">' + escHtml(p.title || 'Proposal') + '</div>' +
+    '<div class="proposal-preview-meta">Prepared for: ' + escHtml(c.name) + ' &nbsp;|&nbsp; ' + today + ' &nbsp;|&nbsp; StructTech LLC</div>' +
+    (p.pain ? '<strong>The Challenge</strong>\n' + escHtml(p.pain) + '\n\n' : '') +
+    (p.solution ? '<strong>Our Approach</strong>\n' + escHtml(p.solution) + '\n\n' : '') +
+    (p.deliverables ? '<strong>Deliverables</strong>\n' + escHtml(p.deliverables) + '\n\n' : '') +
+    (p.price ? '<strong>Investment</strong>\n' + escHtml(p.price) + '\n\n' : '') +
+    (p.timeline ? '<strong>Timeline</strong>\n' + escHtml(p.timeline) : '') +
+    '</div>';
+}
+
+// ── Audit actions ──────────────────────────────────────────────────────────
+function addAudit(clientId) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (!c) return;
+  var aid = genId();
+  var tabContent = document.querySelector('#cfc-' + clientId + ' .profile-tab-content');
+  if (!tabContent) return;
+  tabContent.innerHTML = buildAuditFormHtml(c, aid, null);
+}
+
+function editAudit(clientId, aid) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (!c) return;
+  var a = (c.audits||[]).find(function(x) { return x.id === aid; });
+  var tabContent = document.querySelector('#cfc-' + clientId + ' .profile-tab-content');
+  if (tabContent && a) tabContent.innerHTML = buildAuditFormHtml(c, aid, a);
+}
+
+function buildAuditFormHtml(c, aid, existing) {
+  var v = existing || { title:'', notes:'', status:'draft', bottlenecks:[] };
+  var bns = (v.bottlenecks||[]).join('\n');
+  var statusOpts = ['draft','delivered'].map(function(s) {
+    return '<option value="' + s + '"' + (v.status===s?' selected':'') + '>' + s + '</option>';
+  }).join('');
+  return '<div style="padding:4px 0">' +
+    '<div class="proposal-section"><div class="proposal-label">Audit Title</div>' +
+    '<input class="proposal-field" id="aud-title-' + aid + '" value="' + escAttr(v.title) + '" placeholder="e.g. Workflow Audit — Round 1"></div>' +
+    '<div class="proposal-row">' +
+    '<div class="proposal-section"><div class="proposal-label">Status</div>' +
+    '<select class="proposal-field" id="aud-status-' + aid + '">' + statusOpts + '</select></div>' +
+    '</div>' +
+    '<div class="proposal-section"><div class="proposal-label">Bottlenecks Found (one per line)</div>' +
+    '<textarea class="proposal-textarea" id="aud-bns-' + aid + '" placeholder="Manual invoice entry taking 2hrs/wk&#10;No follow-up system for estimates&#10;Scheduling done by phone only">' + escHtml(bns) + '</textarea></div>' +
+    '<div class="proposal-section"><div class="proposal-label">Audit Notes / Findings</div>' +
+    '<textarea class="proposal-textarea" id="aud-notes-' + aid + '" style="min-height:100px" placeholder="Detailed findings, observations, recommendations...">' + escHtml(v.notes||'') + '</textarea></div>' +
+    '<div style="display:flex;gap:8px;margin-top:12px">' +
+    '<button class="btn btn-primary btn-sm" onclick="saveAudit(' + c.id + ',' + aid + ')">Save Audit</button>' +
+    '<button class="btn btn-ghost btn-sm" onclick="switchTab(' + c.id + ',\'audits\')">Cancel</button>' +
+    '</div></div>';
+}
+
+function saveAudit(clientId, aid) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (!c) return;
+  var title  = (document.getElementById('aud-title-' + aid)  || {}).value || '';
+  var status = (document.getElementById('aud-status-' + aid) || {}).value || 'draft';
+  var bnsRaw = (document.getElementById('aud-bns-' + aid)    || {}).value || '';
+  var notes  = (document.getElementById('aud-notes-' + aid)  || {}).value || '';
+  var bottlenecks = bnsRaw.split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  if (!c.audits) c.audits = [];
+  var existing = c.audits.find(function(a) { return a.id === aid; });
+  if (existing) { existing.title = title; existing.status = status; existing.bottlenecks = bottlenecks; existing.notes = notes; }
+  else { c.audits.push({ id: aid, title: title, status: status, bottlenecks: bottlenecks, notes: notes, date: new Date().toISOString() }); }
+  scheduleSave(); openTabs[clientId] = 'audits'; renderClients();
+}
+
+function deleteAudit(clientId, aid) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (c && c.audits) { c.audits = c.audits.filter(function(a) { return a.id !== aid; }); scheduleSave(); renderClients(); }
+}
+
+// ── Document actions ───────────────────────────────────────────────────────
+function addDoc(clientId) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (!c) return;
+  var name = (document.getElementById('doc-name-' + clientId) || {}).value || '';
+  var type = (document.getElementById('doc-type-' + clientId) || {}).value || 'other';
+  var url  = (document.getElementById('doc-url-' + clientId)  || {}).value || '';
+  if (!name.trim()) { showToast('⚠ Document name required'); return; }
+  if (!c.documents) c.documents = [];
+  c.documents.push({ id: genId(), name: name.trim(), type: type, url: url.trim(), date: new Date().toISOString() });
+  scheduleSave(); renderClients();
+}
+
+function deleteDoc(clientId, did) {
+  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
+  if (c && c.documents) { c.documents = c.documents.filter(function(d) { return d.id !== did; }); scheduleSave(); renderClients(); }
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function init() {
+  await loadState();
+  seedClientData();
+  renderNav('clients');
+  renderAll();
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
