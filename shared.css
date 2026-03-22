@@ -303,7 +303,8 @@ main { max-width: 1440px; margin: 0 auto; padding: 20px 24px; }
 }
 .nav-link:hover { color: var(--text); background: var(--surface2); }
 .nav-link.active { color: var(--accent); background: rgba(200,240,96,0.08); }
-.nav-link.soon { opacity: 0.4; pointer-events: none; }
+.nav-link.soon { opacity: 0.45; cursor: pointer; }
+.nav-link.soon:hover { color: var(--muted); background: transparent; }
 .nav-divider { width: 1px; height: 16px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
 
 /* ── Bottom nav (mobile only) ── */
@@ -319,7 +320,7 @@ main { max-width: 1440px; margin: 0 auto; padding: 20px 24px; }
   padding: 6px 4px; transition: color 0.15s; min-width: 0;
 }
 .bnav-item.active { color: var(--accent); }
-.bnav-item.soon { opacity: 0.35; pointer-events: none; }
+.bnav-item.soon { opacity: 0.4; cursor: pointer; }
 .bnav-icon { font-size: 17px; line-height: 1; }
 .bnav-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
 
@@ -392,6 +393,23 @@ main { max-width: 1440px; margin: 0 auto; padding: 20px 24px; }
 
   /* os stat grid */
   .os-stat-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Toast notification ── */
+.st-toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(12px);
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px;
+  padding: 10px 18px; border-radius: 6px; white-space: nowrap;
+  opacity: 0; pointer-events: none; z-index: 999;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.st-toast.show {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+@media (min-width: 641px) {
+  .st-toast { bottom: 24px; }
 }
 
 /* ── Small mobile (≤ 400px) ── */
