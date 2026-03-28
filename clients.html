@@ -3,209 +3,290 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>StructTech — Clients</title>
+<title>StructTech — Pipeline</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
-/* ── Clients page layout ── */
-.cl-toolbar {
-  display: flex; align-items: center; gap: 10px;
-  flex-wrap: wrap; margin-bottom: 18px;
+/* ── Sub-nav ── */
+.df-subnav {
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 24px; height: 38px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  overflow-x: auto; flex-shrink: 0;
 }
-.cl-filters { display: flex; gap: 4px; flex-wrap: wrap; }
-.cl-filter-btn {
-  font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase;
-  letter-spacing: 0.06em; padding: 6px 12px; border-radius: 5px;
-  border: 1px solid var(--border); background: var(--surface2);
-  color: var(--muted); cursor: pointer; transition: all 0.15s;
+.df-subnav-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.07em; padding: 5px 12px; border-radius: 4px;
+  border: none; background: transparent; color: var(--muted);
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
 }
-.cl-filter-btn:hover { color: var(--text); border-color: var(--border2); }
-.cl-filter-btn.active { background: var(--accent); color: #0d0f0e; border-color: var(--accent); }
-.cl-search {
-  flex: 1; min-width: 140px; max-width: 280px;
-  background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text); border-radius: 5px; padding: 7px 10px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
-}
-.cl-search:focus { border-color: var(--accent); }
-.cl-empty {
-  text-align: center; padding: 48px 24px;
-  color: var(--muted); font-size: 14px;
-}
-.cl-empty-icon { font-size: 32px; margin-bottom: 10px; }
+.df-subnav-btn:hover { color: var(--text); }
+.df-subnav-btn.active { background: var(--surface2); color: var(--accent); }
 
-/* ── Client card ── */
-.client-full-card {
+/* ── Pipeline kanban ── */
+.pl-board {
+  display: flex; gap: 12px; overflow-x: auto;
+  padding: 4px 0 16px 0; align-items: flex-start;
+}
+.pl-col { flex-shrink: 0; width: 210px; }
+.pl-col-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 0 10px 0; margin-bottom: 6px;
+  border-bottom: 2px solid var(--border);
+}
+.pl-col-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pl-col-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); flex: 1; }
+.pl-col-count { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--border2); }
+
+/* ── Pipeline cards ── */
+.pl-card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; margin-bottom: 12px; overflow: hidden;
-  transition: border-color 0.2s;
+  border-radius: 7px; padding: 11px 12px; margin-bottom: 8px;
+  cursor: pointer; transition: border-color 0.15s;
 }
-.client-full-card:hover { border-color: var(--border2); }
-.client-full-card.active-client { border-left: 3px solid var(--accent2); }
-.client-full-card.prospect-client { border-left: 3px solid var(--blue); }
-.client-full-card.completed-client { border-left: 3px solid var(--purple); }
-
-/* Card header row */
-.cfc-header {
-  display: flex; align-items: center; gap: 10px;
-  padding: 14px 16px; cursor: pointer; user-select: none;
-}
-.cfc-name { font-size: 15px; font-weight: 600; flex: 1; }
-.cfc-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.cfc-detail { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
-.cfc-chevron {
-  font-size: 12px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0;
-}
-.cfc-chevron.open { transform: rotate(180deg); }
-.cfc-actions { display: flex; gap: 6px; flex-shrink: 0; }
-
-/* Card body (expandable) */
-.cfc-body { display: none; border-top: 1px solid var(--border); }
-.cfc-body.open { display: block; }
-
-/* Profile tabs inside card */
-.profile-tabs {
-  display: flex; border-bottom: 1px solid var(--border);
-  background: var(--surface2); overflow-x: auto;
-}
-.profile-tab {
-  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
-  letter-spacing: 0.06em; padding: 10px 16px; border: none;
-  background: none; color: var(--muted); cursor: pointer;
-  border-bottom: 2px solid transparent; transition: all 0.15s;
-  white-space: nowrap; flex-shrink: 0;
-}
-.profile-tab:hover { color: var(--text); }
-.profile-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.profile-tab-content { padding: 16px; }
-
-/* Phase progress bar */
-.phase-track {
-  display: flex; align-items: center; gap: 0; margin: 12px 0;
-}
-.phase-node {
-  display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;
-}
-.phase-dot {
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--border2); border: 2px solid var(--border2);
-  transition: all 0.2s;
-}
-.phase-dot.done { background: var(--accent2); border-color: var(--accent2); }
-.phase-dot.current { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
-.phase-line { flex: 1; height: 2px; background: var(--border2); transition: background 0.2s; }
-.phase-line.done { background: var(--accent2); }
-.phase-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; }
-.phase-label.current { color: var(--accent); }
-.phase-label.done { color: var(--accent2); }
-
-/* ── Proposal builder ── */
-.proposal-section { margin-bottom: 16px; }
-.proposal-label {
-  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
-  letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px;
-}
-.proposal-field {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text); border-radius: 5px; padding: 8px 10px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
-  transition: border-color 0.15s;
-}
-.proposal-field:focus { border-color: var(--accent); }
-.proposal-textarea {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text); border-radius: 5px; padding: 8px 10px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
-  resize: vertical; min-height: 80px; transition: border-color 0.15s; line-height: 1.6;
-}
-.proposal-textarea:focus { border-color: var(--accent); }
-.proposal-row { display: flex; gap: 10px; }
-.proposal-row > * { flex: 1; }
-.proposal-preview {
-  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
-  padding: 16px; font-size: 13px; line-height: 1.7; color: var(--text);
-  white-space: pre-wrap; font-family: 'DM Sans', sans-serif; margin-top: 12px;
-}
-.proposal-preview-title {
-  font-family: 'Bebas Neue', cursive; font-size: 20px; color: var(--accent);
-  letter-spacing: 0.05em; margin-bottom: 8px;
-}
-.proposal-preview-meta {
-  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted);
-  margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+.pl-card:hover { border-color: var(--border2); }
+.pl-card.selected { border-color: var(--accent); background: var(--surface2); }
+.pl-card-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.pl-card-owner { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.pl-card-trade { font-size: 10px; color: var(--border2); margin-bottom: 8px; }
+.pl-card-icp { display: flex; align-items: center; gap: 6px; }
+.pl-card-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; }
+.pl-card-bar-fill { height: 3px; border-radius: 2px; transition: width 0.3s; }
+.pl-card-score { font-family: 'DM Mono', monospace; font-size: 9px; }
+.pl-sup-badge {
+  font-family: 'DM Mono', monospace; font-size: 8px; padding: 1px 4px;
+  border-radius: 2px; background: rgba(96,165,250,0.12); color: var(--blue);
+  float: right; margin-left: 4px;
 }
 
-/* ── Audit entries ── */
-.audit-item {
+/* ── Detail panel ── */
+.pl-detail {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 18px; margin-bottom: 16px;
+}
+.pl-detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+.pl-detail-name { font-size: 16px; font-weight: 700; }
+.pl-detail-owner { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.pl-detail-biz { font-size: 11px; color: var(--accent); margin-top: 3px; }
+.pl-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.pl-detail-field { background: var(--surface2); border-radius: 5px; padding: 8px 10px; }
+.pl-detail-flabel { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.pl-detail-fval { font-size: 12px; }
+.pl-detail-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+.pl-icp-bar-wrap { background: var(--bg); border-radius: 4px; height: 6px; margin-bottom: 6px; }
+.pl-icp-bar-fill { height: 6px; border-radius: 4px; transition: width 0.3s; }
+
+/* ── Intake form ── */
+.intake-icp-panel {
   background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 6px; padding: 12px; margin-bottom: 8px;
+  border-radius: 7px; padding: 14px 16px; margin-bottom: 18px;
 }
-.audit-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.audit-item-title { flex: 1; font-size: 13px; font-weight: 600; }
-.audit-item-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
-.audit-status-badge { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 7px; border-radius: 3px; text-transform: uppercase; }
-.audit-draft { background: rgba(245,158,11,0.15); color: var(--warn); }
-.audit-delivered { background: rgba(74,222,128,0.15); color: var(--accent2); }
-.audit-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
-.audit-bottleneck {
-  background: var(--bg); border-left: 2px solid var(--warn);
-  padding: 6px 10px; margin: 4px 0; border-radius: 0 4px 4px 0;
-  font-size: 12px; color: var(--text);
+.intake-icp-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.intake-icp-score { font-family: 'Bebas Neue', cursive; font-size: 28px; line-height: 1; }
+.intake-icp-verdict { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.intake-icp-bar { height: 5px; background: var(--border); border-radius: 3px; margin-bottom: 10px; }
+.intake-icp-bar-fill { height: 5px; border-radius: 3px; transition: width 0.3s; }
+.intake-icp-signals { display: flex; gap: 10px; }
+.intake-icp-signal { font-size: 11px; }
+.intake-icp-good { color: var(--accent2); }
+.intake-icp-warn { color: var(--warn); }
+
+.intake-section-label {
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--muted); margin-bottom: 6px;
+}
+.intake-biz-row { display: flex; gap: 6px; margin-bottom: 14px; }
+.intake-biz-btn {
+  flex: 1; padding: 8px 6px; border-radius: 5px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted);
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.05em; cursor: pointer; transition: all 0.15s; text-align: center;
+}
+.intake-biz-btn.active {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(200,240,96,0.08);
+}
+.intake-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.intake-grid.full { grid-template-columns: 1fr; }
+.intake-group { display: flex; flex-direction: column; gap: 4px; }
+.intake-check-row {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  background: var(--surface2); border-radius: 5px; border: 1px solid var(--border);
+  cursor: pointer; margin-bottom: 6px;
+}
+.intake-check-row input { accent-color: var(--accent2); }
+.leak-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.leak-tag {
+  font-size: 11px; padding: 4px 9px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--surface2); color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.leak-tag.active {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(200,240,96,0.08);
 }
 
-/* ── Documents ── */
-.doc-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 0; border-bottom: 1px solid var(--border);
+/* ── Audit view ── */
+.audit-progress { display: flex; gap: 4px; margin-bottom: 18px; }
+.audit-prog-seg { flex: 1; height: 4px; border-radius: 2px; background: var(--border); cursor: pointer; transition: background 0.2s; }
+.audit-prog-seg.done { background: var(--accent); }
+.audit-prog-seg.current { background: var(--blue); }
+.audit-area-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+.audit-area-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+.audit-area-icon { font-size: 20px; }
+.audit-area-title { font-size: 13px; font-weight: 600; }
+.audit-area-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.audit-area-count { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-left: auto; }
+.audit-question { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.audit-question:last-child { border-bottom: none; }
+.audit-q-text { font-size: 13px; color: var(--text); margin-bottom: 10px; line-height: 1.5; }
+.audit-opts { display: flex; flex-direction: column; gap: 6px; }
+.audit-opt {
+  padding: 9px 12px; border-radius: 5px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--muted); font-size: 12px;
+  cursor: pointer; text-align: left; transition: all 0.15s;
 }
-.doc-item:last-child { border-bottom: none; }
-.doc-icon { font-size: 18px; flex-shrink: 0; }
-.doc-name { flex: 1; font-size: 13px; font-weight: 500; }
-.doc-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
-.doc-del { background: none; border: none; color: var(--border2); cursor: pointer; font-size: 14px; padding: 4px 6px; transition: color 0.15s; }
-.doc-del:hover { color: var(--danger); }
-.doc-add-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.audit-opt:hover { border-color: var(--border2); color: var(--text); }
+.audit-opt.selected { border-color: var(--accent); color: var(--accent); background: rgba(200,240,96,0.07); }
 
-/* ── Overview fields ── */
-.ov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.ov-field { background: var(--surface2); border-radius: 6px; padding: 10px 12px; }
-.ov-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 4px; }
-.ov-value { font-size: 13px; font-weight: 500; }
-.ov-value.money { font-family: 'Bebas Neue', cursive; font-size: 20px; color: var(--accent2); }
-
-/* ── Stats row override for clients page ── */
-.cl-stats-row { grid-template-columns: repeat(4, 1fr); margin-bottom: 18px; }
-
-/* ── Add/Edit form ── */
-.cl-add-form {
-  background: var(--surface); border: 1px solid var(--accent);
-  border-radius: 8px; padding: 20px; margin-bottom: 18px;
+/* ── Audit results ── */
+.audit-result-tier {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 18px; margin-bottom: 16px;
 }
-.cl-form-title {
-  font-family: 'Bebas Neue', cursive; font-size: 18px; color: var(--accent);
-  letter-spacing: 0.04em; margin-bottom: 14px;
-}
-.cl-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-.cl-form-group { display: flex; flex-direction: column; gap: 4px; }
-.cl-form-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.audit-tier-name { font-family: 'Bebas Neue', cursive; font-size: 26px; color: var(--text); }
+.audit-tier-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.audit-ranking-card { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 12px 14px; margin-bottom: 8px; }
+.audit-rank-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-right: 6px; }
+.audit-rank-title { font-size: 13px; font-weight: 600; }
+.audit-rank-label { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; float: right; }
+.audit-rank-bar { height: 3px; background: var(--border); border-radius: 2px; margin: 8px 0 6px; }
+.audit-rank-fill { height: 3px; border-radius: 2px; }
+.audit-rank-why { font-size: 11px; color: var(--muted); margin-bottom: 6px; line-height: 1.5; }
+.audit-tool-tag { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; background: var(--surface2); color: var(--accent); margin-right: 4px; display: inline-block; margin-bottom: 3px; }
 
-/* ── Mobile responsive ── */
-@media (max-width: 768px) {
-  .cl-stats-row { grid-template-columns: repeat(2, 1fr); }
-  .cl-toolbar { gap: 8px; }
-  .cl-search { max-width: 100%; width: 100%; }
-  .ov-grid { grid-template-columns: 1fr 1fr; }
-  .cl-form-grid { grid-template-columns: 1fr; }
-  .proposal-row { flex-direction: column; }
-  .profile-tabs { gap: 0; }
-  .profile-tab { padding: 10px 10px; font-size: 9px; }
+/* ── Proposal ── */
+.prop-doc {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 28px; max-width: 720px;
 }
-@media (max-width: 480px) {
-  .cl-stats-row { grid-template-columns: repeat(2, 1fr); }
-  .ov-grid { grid-template-columns: 1fr; }
-  .cfc-header { flex-wrap: wrap; gap: 8px; }
+.prop-doc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.prop-brand { font-family: 'Bebas Neue', cursive; font-size: 22px; color: var(--accent); letter-spacing: 0.05em; }
+.prop-tagline { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.prop-contact { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--border2); margin-top: 3px; }
+.prop-to { text-align: right; font-size: 12px; color: var(--muted); }
+.prop-to strong { color: var(--text); }
+.prop-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.prop-section-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+.prop-intro { font-size: 13px; line-height: 1.75; color: var(--text); opacity: 0.9; margin-bottom: 20px; }
+.prop-finding { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; margin-bottom: 8px; }
+.prop-finding-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.prop-finding-why { font-size: 11px; color: var(--muted); }
+.prop-scope-box { background: var(--surface2); border: 1px solid var(--accent); border-radius: 7px; padding: 16px; margin-bottom: 20px; }
+.prop-tier-name { font-family: 'Bebas Neue', cursive; font-size: 24px; color: var(--text); }
+.prop-price { font-family: 'Bebas Neue', cursive; font-size: 28px; color: var(--accent); }
+.prop-includes { list-style: none; margin-top: 12px; }
+.prop-includes li { font-size: 12px; color: var(--text); padding: 3px 0; display: flex; gap: 8px; }
+.prop-includes li::before { content: '✓'; color: var(--accent2); flex-shrink: 0; font-weight: 700; }
+.prop-process-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.prop-step { text-align: center; }
+.prop-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #0d0f0e; font-family: 'Bebas Neue', cursive; font-size: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; }
+.prop-step-label { font-size: 10px; color: var(--muted); }
+
+/* ── Objections ── */
+.obj-layout { display: flex; gap: 0; }
+.obj-sidebar {
+  width: 200px; flex-shrink: 0; border-right: 1px solid var(--border);
+  padding: 0 12px 0 0; margin-right: 20px;
+}
+.obj-cat-btn {
+  width: 100%; text-align: left; padding: 7px 10px; border-radius: 5px;
+  border: none; background: transparent; color: var(--muted);
+  font-size: 12px; cursor: pointer; margin-bottom: 2px; transition: all 0.15s;
+}
+.obj-cat-btn:hover { color: var(--text); background: var(--surface2); }
+.obj-cat-btn.active { color: var(--accent); background: var(--surface2); }
+.obj-content { flex: 1; min-width: 0; }
+.obj-item {
+  border: 1px solid var(--border); border-radius: 7px;
+  overflow: hidden; margin-bottom: 8px;
+}
+.obj-item.open { border-color: var(--accent); }
+.obj-item-trigger {
+  width: 100%; text-align: left; padding: 13px 14px;
+  background: var(--surface); border: none; cursor: pointer;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+}
+.obj-item-trigger:hover { background: var(--surface2); }
+.obj-trigger-text { font-size: 13px; color: var(--text); font-style: italic; }
+.obj-chevron { font-size: 10px; color: var(--muted); flex-shrink: 0; margin-top: 2px; }
+.obj-body { padding: 14px; background: var(--bg); border-top: 1px solid var(--border); display: none; }
+.obj-body.open { display: block; }
+.obj-response-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 8px; }
+.obj-response-text { font-size: 12px; color: var(--text); line-height: 1.75; white-space: pre-line; margin-bottom: 12px; }
+.obj-followup-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--blue); margin-bottom: 6px; }
+.obj-followup-text { font-size: 12px; color: var(--muted); line-height: 1.65; font-style: italic; }
+@media (max-width: 640px) {
+  .obj-layout { flex-direction: column; }
+  .obj-sidebar { width: 100%; border-right: none; padding: 0 0 12px 0; margin-right: 0; border-bottom: 1px solid var(--border); margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .obj-cat-btn { width: auto; }
+}
+
+/* ── Close guide ── */
+.close-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+.close-tab-btn {
+  padding: 8px 14px; border: none; background: transparent; font-size: 12px;
+  cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent;
+  font-family: 'DM Mono', monospace; text-transform: uppercase; font-size: 10px;
+  letter-spacing: 0.06em; transition: all 0.15s;
+}
+.close-tab-btn:hover { color: var(--text); }
+.close-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.close-check-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
+  border-radius: 6px; border: 1px solid var(--border); background: var(--surface2);
+  margin-bottom: 6px; cursor: pointer; transition: all 0.15s;
+}
+.close-check-item.checked { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.25); }
+.close-check-icon { font-size: 12px; flex-shrink: 0; margin-top: 1px; color: var(--border2); font-family: 'DM Mono', monospace; }
+.close-check-item.checked .close-check-icon { color: var(--accent2); }
+.close-check-text { font-size: 12px; color: var(--text); }
+.close-check-item.checked .close-check-text { color: var(--muted); }
+.close-script-setup { background: var(--surface2); border: 1px solid var(--accent); border-radius: 6px; padding: 12px 14px; margin-bottom: 14px; }
+.close-script-title { font-family: 'Bebas Neue', cursive; font-size: 18px; color: var(--accent); }
+.close-script-subtitle { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.close-step { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+.close-step-label { padding: 7px 12px; background: var(--surface2); font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.close-step-body { padding: 12px 14px; background: var(--bg); font-size: 12px; color: var(--text); line-height: 1.7; font-style: italic; }
+
+/* ── Shared view styles ── */
+.view-header { margin-bottom: 20px; }
+.view-title { font-family: 'Bebas Neue', cursive; font-size: 22px; color: var(--text); letter-spacing: 0.04em; margin-bottom: 4px; }
+.view-sub { font-size: 12px; color: var(--muted); }
+.max-600 { max-width: 600px; }
+.max-760 { max-width: 760px; }
+
+/* ── Empty state ── */
+.df-empty { text-align: center; padding: 40px 24px; color: var(--muted); font-size: 13px; }
+.df-empty-icon { font-size: 28px; margin-bottom: 10px; }
+
+/* ── Print styles for proposal ── */
+@media print {
+  header, .df-subnav, #app-nav, .no-print { display: none !important; }
+  body { background: #fff !important; color: #111 !important; }
+  .prop-doc { background: white; color: #111; border: none; padding: 0; }
+  .prop-brand { color: #c25000 !important; }
+  .prop-price { color: #c25000 !important; }
+  .prop-includes li::before { color: #1a7a3b !important; }
+}
+
+@media (max-width: 640px) {
+  .intake-grid { grid-template-columns: 1fr; }
+  .pl-detail-grid { grid-template-columns: 1fr; }
+  .prop-doc { padding: 16px; }
+  .prop-process-steps { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -219,315 +300,1327 @@
   </div>
   <div id="sync-status" class="sync-status sync-loading">● Loading</div>
   <div id="header-date" class="header-date"></div>
-  <div class="week-badge" style="font-size:13px;padding:4px 10px;color:var(--muted);border-color:var(--border)">Clients</div>
+  <div class="week-badge" style="font-size:13px;padding:4px 10px;color:var(--muted);border-color:var(--border)">Pipeline</div>
 </header>
 
 <div id="app-nav" class="app-nav"></div>
 
+<div class="df-subnav">
+  <button class="df-subnav-btn active" data-view="pipeline" onclick="showView('pipeline')">Pipeline</button>
+  <button class="df-subnav-btn" data-view="intake" onclick="showView('intake')">New Lead</button>
+  <button class="df-subnav-btn" data-view="audit" onclick="showView('audit')">Audit</button>
+  <button class="df-subnav-btn" data-view="proposal" onclick="showView('proposal')">Proposal</button>
+  <button class="df-subnav-btn" data-view="objections" onclick="showView('objections')">Objections</button>
+  <button class="df-subnav-btn" data-view="close" onclick="showView('close')">Close</button>
+</div>
+
 <main>
-  <!-- Stats row -->
-  <div id="cl-stats" class="stats-row cl-stats-row"></div>
-
-  <!-- Toolbar -->
-  <div class="cl-toolbar">
-    <div class="cl-filters" id="cl-filters">
-      <button class="cl-filter-btn active" onclick="setFilter('all')">All</button>
-      <button class="cl-filter-btn" onclick="setFilter('prospect')">Prospects</button>
-      <button class="cl-filter-btn" onclick="setFilter('active')">Active</button>
-      <button class="cl-filter-btn" onclick="setFilter('completed')">Completed</button>
-    </div>
-    <input id="cl-search" class="cl-search" placeholder="Search clients..." oninput="renderClients()">
-    <button class="btn btn-primary" onclick="toggleAddForm()">+ Add Client</button>
-  </div>
-
-  <!-- Add / Edit form -->
-  <div id="cl-form-wrap"></div>
-
-  <!-- Client list -->
-  <div id="cl-list"></div>
+  <div id="view-pipeline" class="df-view"></div>
+  <div id="view-intake" class="df-view hidden"></div>
+  <div id="view-audit" class="df-view hidden"></div>
+  <div id="view-proposal" class="df-view hidden"></div>
+  <div id="view-objections" class="df-view hidden"></div>
+  <div id="view-close" class="df-view hidden"></div>
 </main>
 
 <script src="shared.js"></script>
 <script src="nav.js"></script>
 <script>
-// ── Page state ─────────────────────────────────────────────────────────────
-var filterStatus = 'all';
-var showAddForm  = false;
-var editingId    = null;
-var openCards    = {};      // id → true/false (expanded)
-var openTabs     = {};      // id → tab name
-var proposalData = {};      // id → { title, trade, pain, solution, deliverables, price, timeline }
-var auditData    = {};      // id → [ { id, title, date, status, bottlenecks, notes } ]
-var docData      = {};      // id → [ { id, name, type, date, url } ]
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
-// ── After state loaded, seed per-client maps ──────────────────────────────
-function seedClientData() {
-  state.os_data.clients.forEach(function(c) {
-    if (!c.proposals)    c.proposals    = [];
-    if (!c.audits)       c.audits       = [];
-    if (!c.documents)    c.documents    = [];
-  });
-}
+var STAGES = ['Cold','Warm','Audit Scheduled','Proposal Sent','Closed'];
+var STAGE_COLORS = {
+  'Cold':             'var(--muted)',
+  'Warm':             'var(--warn)',
+  'Audit Scheduled':  'var(--blue)',
+  'Proposal Sent':    'var(--accent)',
+  'Closed':           'var(--accent2)'
+};
 
-// ── Stats ──────────────────────────────────────────────────────────────────
-function renderStats() {
-  var el = document.getElementById('cl-stats');
-  if (!el) return;
-  var clients = state.os_data.clients;
-  var active = clients.filter(function(c){ return c.status === 'active'; });
-  var mrr = active.reduce(function(sum, c){ return sum + (parseFloat(c.retainer) || 0); }, 0);
-  var fees = clients.filter(function(c){ return parseFloat(c.auditFee) > 0; });
-  var avgFee = fees.length ? fees.reduce(function(s,c){ return s + (parseFloat(c.auditFee)||0); }, 0) / fees.length : 0;
-  function sc(label, val, cls) {
-    return '<div class="stat-card"><div class="stat-label">' + label + '</div>' +
-      '<div class="stat-value ' + (cls||'') + '">' + val + '</div></div>';
+var BUSINESS_TYPES = ['Trade Contractor','Building / Material Supplier','Other'];
+
+var TRADE_TYPES = [
+  'Residential Remodeling (Kitchen/Bath)','Framing Contractor','Custom Home Builder',
+  'HVAC','Electrical','Plumbing','Roofing','General Contractor','Other'
+];
+var SUPPLIER_TYPES = [
+  'Lumber / Building Materials','Metal / Steel Supplier','Roofing Materials',
+  'Flooring / Tile Supplier','Plumbing / HVAC Supply','Electrical Supply',
+  'Concrete / Masonry Supply','Hardware / Fasteners','Equipment Rental','Other Supplier'
+];
+var ICP_TRADES = ['Residential Remodeling (Kitchen/Bath)','Framing Contractor','Custom Home Builder','HVAC','Electrical','Plumbing'];
+var ICP_SUPPLIER_TYPES = ['Lumber / Building Materials','Metal / Steel Supplier','Roofing Materials','Plumbing / HVAC Supply','Electrical Supply'];
+var ICP_CITIES = ['Dayton','Cincinnati','Indianapolis','Nashville'];
+
+var LEAK_SIGNALS_CONTRACTOR = [
+  'Contact-form only estimating (no automation)',
+  'Owner handles all follow-up and projects',
+  'No automated estimate workflow visible',
+  'Call/form-only intake process',
+  'Manual quote intake, owner-led operations',
+  'Owner directly handles sales, estimating & billing',
+  'Small team, owner heavily in the field',
+  'No CRM or follow-up system on website',
+  'Outdated or minimal web presence',
+  'Phone call only intake process'
+];
+var LEAK_SIGNALS_SUPPLIER = [
+  'Manual order intake (phone/email only)',
+  'No online ordering or quote system',
+  'Owner or one person handles all customer orders',
+  'No delivery tracking or dispatch system',
+  'Inventory managed on spreadsheets or paper',
+  'No CRM — contractor relationships tracked manually',
+  'AR follow-up done manually / slow collections',
+  'No automated re-order or low-stock alerts',
+  'Outdated or minimal web presence',
+  'No pricing visibility or self-serve quote tool'
+];
+
+var AUDIT_AREAS = [
+  {
+    id:'scheduling', title:'Job Scheduling & Dispatch', icon:'📅',
+    desc:'Manual crew assignments, missed updates, rescheduling chaos',
+    questions:[
+      { q:'How are crew assignments communicated to field staff?', opts:[
+        {l:'Digital dispatch system — crews auto-notified',s:0},
+        {l:'Group text or messaging app',s:1},
+        {l:'Individual phone calls each morning',s:3},
+        {l:'Owner manually calls/texts each person',s:4}
+      ]},
+      { q:'How is real-time job status tracked during the day?', opts:[
+        {l:'Real-time app with field check-ins',s:0},
+        {l:'Crew texts updates when done',s:2},
+        {l:'End-of-day summary call',s:3},
+        {l:'No formal process — owner manually checks in',s:4}
+      ]},
+      { q:'When a job gets rescheduled or delayed, how is the team notified?', opts:[
+        {l:'Automated notification through scheduling system',s:0},
+        {l:'Group message sent manually',s:1},
+        {l:'Individual calls to affected crew members',s:3},
+        {l:'Often chaotic — people show up wrong day/time',s:4}
+      ]}
+    ]
+  },
+  {
+    id:'communication', title:'Field-to-Office Communication', icon:'📱',
+    desc:'Phone tag, lost texts, no single source of truth on job status',
+    questions:[
+      { q:'Where does job information (notes, photos, issues) live after a field day?', opts:[
+        {l:'Centralized project management tool',s:0},
+        {l:'Shared cloud folder or drive',s:1},
+        {l:'Individual phones and texts',s:3},
+        {l:'Nowhere — oral communication only',s:4}
+      ]},
+      { q:'How do field crews report issues or change orders back to the office?', opts:[
+        {l:'Structured form or app submission',s:0},
+        {l:'Text or call to owner/office manager',s:2},
+        {l:'Tell the owner in person later',s:3},
+        {l:'No consistent process — things regularly get missed',s:4}
+      ]},
+      { q:'How often does the owner have to call to find out what\'s happening on a job?', opts:[
+        {l:'Rarely — system keeps them informed',s:0},
+        {l:'A few times per week',s:2},
+        {l:'Daily',s:3},
+        {l:'Multiple times per day, per job',s:4}
+      ]}
+    ]
+  },
+  {
+    id:'invoicing', title:'Invoicing & Payment Follow-Up', icon:'💵',
+    desc:'Delayed billing, forgotten invoices, slow collections',
+    questions:[
+      { q:'How quickly are invoices sent after job completion?', opts:[
+        {l:'Same day — automated on completion',s:0},
+        {l:'Within 1–2 days',s:1},
+        {l:'3–7 days later',s:3},
+        {l:'Varies widely — sometimes weeks',s:4}
+      ]},
+      { q:'How are overdue invoices followed up on?', opts:[
+        {l:'Automated reminders at set intervals',s:0},
+        {l:'Manual weekly review then a call/email',s:2},
+        {l:'When we notice it — no set schedule',s:3},
+        {l:'Rarely followed up — invoices go unpaid',s:4}
+      ]},
+      { q:'Do you have a clear picture of what\'s outstanding at any given moment?', opts:[
+        {l:'Yes — live accounts receivable dashboard',s:0},
+        {l:'Mostly — check QuickBooks occasionally',s:1},
+        {l:'Not really — have to dig for it',s:3},
+        {l:'No idea without calling the accountant',s:4}
+      ]}
+    ]
+  },
+  {
+    id:'jobcosting', title:'Job Costing & Expense Tracking', icon:'📊',
+    desc:'Untracked materials and labor bleeding margin',
+    questions:[
+      { q:'How are labor hours tracked per job?', opts:[
+        {l:'Digital time tracking app with job codes',s:0},
+        {l:'Weekly timesheets submitted',s:2},
+        {l:'Estimated — no real tracking',s:3},
+        {l:'Not tracked at all',s:4}
+      ]},
+      { q:'How are material costs tied back to specific jobs?', opts:[
+        {l:'PO system linked to job codes',s:0},
+        {l:'Receipts saved and manually entered',s:2},
+        {l:'Estimated at quote — actuals rarely tracked',s:3},
+        {l:'Not tied to jobs — just general expenses',s:4}
+      ]},
+      { q:'Do you know the actual profit margin on completed jobs?', opts:[
+        {l:'Yes — per-job profitability report available',s:0},
+        {l:'Roughly — based on estimates',s:2},
+        {l:'No — only know overall business P&L',s:3},
+        {l:'No — we don\'t track it',s:4}
+      ]}
+    ]
+  },
+  {
+    id:'materials', title:'Materials & Procurement', icon:'🔧',
+    desc:'Over-ordering, supply delays, no visibility into what\'s on-site',
+    questions:[
+      { q:'How are material orders managed across jobs?', opts:[
+        {l:'Centralized procurement system with job linkage',s:0},
+        {l:'Spreadsheet or list per job',s:1},
+        {l:'Foreman handles their own ordering',s:3},
+        {l:'Order as needed — no system',s:4}
+      ]},
+      { q:'How often do jobs get delayed due to material issues?', opts:[
+        {l:'Rarely — pre-ordered and tracked',s:0},
+        {l:'Occasionally (once a month or less)',s:1},
+        {l:'Frequently (weekly)',s:3},
+        {l:'Constant problem',s:4}
+      ]},
+      { q:'Do you know what materials/inventory you have on hand right now?', opts:[
+        {l:'Yes — live inventory tracking',s:0},
+        {l:'Roughly — periodic manual count',s:2},
+        {l:'Not really — best guess',s:3},
+        {l:'No visibility at all',s:4}
+      ]}
+    ]
+  },
+  {
+    id:'leads', title:'Lead & Client Follow-Up', icon:'🎯',
+    desc:'Estimates going dark, no CRM, lost repeat and referral business',
+    questions:[
+      { q:'How are new leads captured and tracked?', opts:[
+        {l:'CRM with automated follow-up sequences',s:0},
+        {l:'Spreadsheet or notes app',s:2},
+        {l:'Mental note / phone contacts',s:3},
+        {l:'No system — respond when people call',s:4}
+      ]},
+      { q:'What happens to an estimate after it\'s sent?', opts:[
+        {l:'Automated follow-up sequence until response',s:0},
+        {l:'Manual follow-up call after a few days',s:2},
+        {l:'Wait for client to respond — no follow-up',s:3},
+        {l:'Estimates regularly go cold with no follow-up',s:4}
+      ]},
+      { q:'How is repeat and referral business generated?', opts:[
+        {l:'Automated past-client outreach campaigns',s:0},
+        {l:'Periodic manual reach-outs',s:2},
+        {l:'Word of mouth only — no active effort',s:3},
+        {l:'No system — hope they call back',s:4}
+      ]}
+    ]
   }
-  el.innerHTML =
-    sc('Total Clients', clients.length) +
-    sc('Active', active.length, 'accent') +
-    sc('Client MRR', '$' + Math.round(mrr).toLocaleString(), 'green') +
-    sc('Avg Audit Fee', fees.length ? '$' + Math.round(avgFee) : '—');
-}
+];
 
-// ── Filter ─────────────────────────────────────────────────────────────────
-function setFilter(s) {
-  filterStatus = s;
-  document.querySelectorAll('.cl-filter-btn').forEach(function(b) {
-    b.classList.toggle('active', b.textContent.toLowerCase() === s || (s === 'all' && b.textContent === 'All'));
-  });
-  renderClients();
-}
+var TOOL_RECS = {
+  scheduling:    { tools:['Jobber','Buildertrend','ServiceTitan'],      why:'Automates crew dispatch, real-time job status, and schedule change alerts.' },
+  communication: { tools:['Buildertrend','Procore','Monday.com'],        why:'Creates a centralized job feed for all field updates, photos, and notes.' },
+  invoicing:     { tools:['Jobber','QuickBooks + GoHighLevel','Stripe'], why:'Triggers invoices on job completion and sends automated payment reminders.' },
+  jobcosting:    { tools:['Buildertrend','Knowify','QB Projects'],       why:'Ties labor, materials, and sub costs to job codes in real time.' },
+  materials:     { tools:['Buildertrend','myCOI','Lumber'],              why:'Procurement tracking and inventory visibility tied to active jobs.' },
+  leads:         { tools:['GoHighLevel','HubSpot','Jobber CRM'],         why:'Automates lead follow-up, estimate tracking, and past-client re-engagement.' }
+};
 
-// ── Phase track ────────────────────────────────────────────────────────────
-function buildPhaseTrack(phase) {
-  var phases = ['Phase I', 'Phase II', 'Phase III'];
-  var cur = phases.indexOf(phase);
-  var html = '<div class="phase-track">';
-  phases.forEach(function(p, i) {
-    var dotCls = i < cur ? 'phase-dot done' : i === cur ? 'phase-dot current' : 'phase-dot';
-    var lblCls = i < cur ? 'phase-label done' : i === cur ? 'phase-label current' : 'phase-label';
-    if (i > 0) {
-      var lineCls = i <= cur ? 'phase-line done' : 'phase-line';
-      html += '<div class="' + lineCls + '"></div>';
-    }
-    html += '<div class="phase-node"><div class="' + dotCls + '"></div>' +
-      '<div class="' + lblCls + '">' + p.replace('Phase ', 'Ph.') + '</div></div>';
-  });
-  return html + '</div>';
-}
-
-// ── Profile tabs content ───────────────────────────────────────────────────
-function buildOverviewTab(c) {
-  var phases = buildPhaseTrack(c.phase || 'Phase I');
-  var ov = '<div class="ov-grid">' +
-    '<div class="ov-field"><div class="ov-label">Trade</div><div class="ov-value">' + escHtml(c.trade||'—') + '</div></div>' +
-    '<div class="ov-field"><div class="ov-label">Location</div><div class="ov-value">' + escHtml(c.location||'—') + '</div></div>' +
-    '<div class="ov-field"><div class="ov-label">Audit Fee</div><div class="ov-value money">' + (c.auditFee ? '$'+c.auditFee : '—') + '</div></div>' +
-    '<div class="ov-field"><div class="ov-label">Retainer/mo</div><div class="ov-value money">' + (c.retainer ? '$'+c.retainer : '—') + '</div></div>' +
-    '</div>' + phases +
-    (c.notes ? '<div style="font-size:12px;color:var(--muted);line-height:1.7;margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:5px">' + escHtml(c.notes) + '</div>' : '');
-  return '<div class="profile-tab-content">' + ov + '</div>';
-}
-
-function buildProposalTab(c) {
-  var p = c.proposals && c.proposals.length > 0 ? c.proposals[0] : null;
-  var pid = p ? p.id : 'new';
-  return '<div class="profile-tab-content">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
-    '<span style="font-family:\'DM Mono\',monospace;font-size:10px;text-transform:uppercase;color:var(--muted)">' + (c.proposals && c.proposals.length > 0 ? c.proposals.length + ' proposal(s)' : 'No proposals yet') + '</span>' +
-    '<button class="btn btn-primary btn-sm" onclick="openProposalForm(' + c.id + ')">+ New Proposal</button>' +
-    '</div>' +
-    buildProposalList(c) + '</div>';
-}
-
-function buildProposalList(c) {
-  if (!c.proposals || c.proposals.length === 0) {
-    return '<div class="cl-empty"><div class="cl-empty-icon">📄</div><div>No proposals yet.<br>Click "+ New Proposal" to build one.</div></div>';
+var OBJECTIONS = [
+  {
+    cat:'💰 Price / Budget', items:[
+      {
+        t:'"That\'s more than I budgeted / I can\'t afford that right now."',
+        r:'Totally fair — and I want to be straight with you. The Starter package is $1,500. Let me ask: how many hours a week are you personally spending on scheduling, chasing payments, or tracking down job status? Most owners I work with are losing 10–15 hours a week doing things a system handles in minutes. At your billing rate, that\'s $2,000–$4,000/month in recovered time — every month going forward. This isn\'t a cost, it\'s a return. And if we can only fix one thing right now, the Starter is designed exactly for that.',
+        f:'"If we could eliminate just the one thing costing you the most time right now, what would that be?" → Connect it directly to the Starter scope.'
+      },
+      {
+        t:'"I need to see ROI before I commit."',
+        r:'That\'s exactly the right question — and I can give you a real answer. During the audit, we identified your top drains. The invoicing delay alone — based on what you told me — is probably costing you 15–20 days in cash flow per job. On a $15,000 job, that\'s real money sitting on the table. The proposal I put together only fixes what we verified is broken. If the numbers don\'t work, I\'ll tell you.',
+        f:'Walk them back to a specific audit finding and assign a dollar value to it before going further.'
+      },
+      {
+        t:'"Can you do it cheaper / give me a discount?"',
+        r:'I keep my pricing fixed because every project is already scoped to deliver more than it costs. What I can do is make sure we\'re solving the right thing for the budget you have. If $1,500 is the ceiling right now, we do the Starter — pick your #1 pain point and we fix it completely. If that works and you see the return, we build from there. I\'d rather start right-sized than cut corners on a bigger scope.',
+        f:'Offer to re-scope to the Starter tier if they\'re hesitating on Growth or Full Integration.'
+      }
+    ]
+  },
+  {
+    cat:'💻 "We Already Have Software"', items:[
+      {
+        t:'"We already use [QuickBooks / Jobber / etc.] — we\'re covered."',
+        r:'That\'s actually a great starting point. I work around what\'s already there — I\'m not here to replace software you\'re invested in. What I find with most contractors is that the tool is in place but the workflow around it is missing. QuickBooks has job costing, but if labor and materials aren\'t being logged to job codes, the data isn\'t there. Jobber can automate follow-up, but if the sequences aren\'t built, estimates still go cold. The software is the skeleton — I build the muscle around it.',
+        f:'"What does your team actually use day-to-day in [tool name]?" → They\'ll usually reveal they only use 20% of it.'
+      },
+      {
+        t:'"We tried [software] before and it didn\'t stick."',
+        r:'That\'s the most common thing I hear — and it\'s rarely the software\'s fault. The gap is always in setup and training. A tool that isn\'t configured for your specific workflow is just noise. What I do differently is I start with your operation, map it out, and then build the system to fit it — not the other way around. I also do role-specific training and 6 weeks of check-ins after handoff. That\'s exactly why things didn\'t stick before: no one stood behind the implementation.',
+        f:'"What was the last tool you tried, and what broke down specifically?" → Shows you listen, lets you contrast your training/handoff model.'
+      }
+    ]
+  },
+  {
+    cat:'⏰ "Not The Right Time"', items:[
+      {
+        t:'"We\'re too busy right now — maybe after the season."',
+        r:'I hear that a lot — and it makes sense on the surface. But here\'s the reality: the chaos you\'re in right now is exactly what we\'d be fixing. The busiest seasons are when the leaks cost the most. Delayed invoices during a peak month aren\'t a small deal — they\'re your cash flow at the worst possible time. Implementation is built around your schedule. I\'ve done builds while owners were running 8 jobs at once. You don\'t go offline. We do it alongside your operation.',
+        f:'"When does your busy season end?" → Set a specific follow-up date. Don\'t let "after the season" stay open-ended.'
+      },
+      {
+        t:'"Now isn\'t a good time — we have some things going on."',
+        r:'Totally understand — no pressure. Can I ask: is there a specific reason for the timing, or is it more about bandwidth? I ask because if it\'s bandwidth, the whole point of this is to free that up. If there\'s something else going on, I\'d rather know so I can come back when it actually makes sense. I don\'t want to push the wrong timing.',
+        f:'Listen for what the real objection is — "things going on" is usually code for budget, a partner disagreement, or a specific project stress. Dig gently.'
+      }
+    ]
+  },
+  {
+    cat:'🤔 "I Need To Think About It"', items:[
+      {
+        t:'"Let me think about it / I\'ll get back to you."',
+        r:'Of course — this is a real decision and I want you to make it right. Help me understand: is there something specific you\'re unsure about, or do you just need time to sit with it? Because if there\'s a question I haven\'t answered, I\'d rather handle it now than have it be the thing that holds you back. What\'s the main thing you\'re weighing?',
+        f:'Never let "I\'ll think about it" close the call. Always surface the real hesitation before hanging up.'
+      },
+      {
+        t:'"I need to run it by my wife / partner / accountant."',
+        r:'Absolutely — that makes sense for a decision like this. What would be most helpful: should I send a written summary they can review? I can put together a one-pager that lays out what we found, what we\'d fix, the price, and the expected return — something they can read on their own time. Would that make it easier?',
+        f:'Use this as your proposal email trigger. Send the PDF proposal with a short personal note. Set a follow-up call for 48 hours out.'
+      }
+    ]
+  },
+  {
+    cat:'👷 "My Team Won\'t Adopt It"', items:[
+      {
+        t:'"My guys aren\'t tech-savvy — they won\'t use it."',
+        r:'That\'s the most real concern I hear, and I take it seriously. The tools I recommend are built for field crews who don\'t want to learn software — simple tap-to-update, photo upload from their phone, one-button check-in. But more importantly, I build the training around your crew, not around the tool. Role-specific, hands-on, recorded sessions they can re-watch. And 6 weeks of check-ins after handoff exist specifically to catch the person reverting to old habits and course-correct before it becomes a pattern.',
+        f:'"Who\'s your most tech-resistant person on the crew?" → Talk about that specific person and how the process handles them.'
+      },
+      {
+        t:'"Last time we tried to change things, no one followed through."',
+        r:'That\'s a failure of the implementation, not the people. Most change initiatives fail because they ask too much too fast and then leave the team alone with it. My process is staged — we start with one workflow, get it to 100% adoption, then add the next. Nobody gets overwhelmed. I build simplified how-to guides specific to each role. And I check in weekly for 6 weeks. The handoff protocol exists exactly because change without follow-through doesn\'t last.',
+        f:'Reinforce the training model and check-in structure. Offer to walk them through the Phase 4 training process in detail.'
+      }
+    ]
+  },
+  {
+    cat:'🔄 "We\'ve Tried This Before"', items:[
+      {
+        t:'"We hired a consultant before and it was a waste of money."',
+        r:'That\'s fair — and I want to earn the right to be different, not just claim I am. What typically makes consulting a bad investment is when someone comes in, tells you what\'s wrong, and hands you a report. I\'m not that. The audit is free. You only pay when I start building something. And what I build is yours — systems you own, tools you pay for directly, no lock-in with me. If something I build doesn\'t work, we fix it. That\'s what the 30/60/90-day support window is for.',
+        f:'"What did they deliver and what happened after?" — Understanding the past failure helps you contrast specifically.'
+      }
+    ]
+  },
+  {
+    cat:'📧 "Send Me Info First"', items:[
+      {
+        t:'"Just send me some information and I\'ll take a look."',
+        r:'Happy to — but I want to make sure what I send is actually relevant to what you\'ve got going on, not just a generic overview. Can I ask two quick questions so I know what to put in front of you? [Ask about biggest pain point and company size.] That way what I send is worth your time to read. I\'ll get it to you today.',
+        f:'Send the audit overview + one relevant scenario (scheduling, invoicing, or leads) that matches what they told you. Follow up in 48 hours.'
+      },
+      {
+        t:'"Do you have a website I can check out?"',
+        r:'Yes — structtek.com. But honestly, the most useful thing on there is the free audit form. It takes about 5 minutes and shows you exactly where your operation has gaps. No obligation — it just gives me what I need to put together something specific for your situation. Want me to walk you through it right now, or would you rather check it out on your own first?',
+        f:'If they say they\'ll check on their own, send a direct link to the audit form. Follow up in 48 hours.'
+      }
+    ]
   }
-  return c.proposals.map(function(p) {
-    return '<div class="audit-item">' +
-      '<div class="audit-item-header">' +
-      '<span class="audit-item-title">' + escHtml(p.title || 'Untitled Proposal') + '</span>' +
-      '<span class="audit-item-date">' + (p.date||'').slice(0,10) + '</span>' +
-      '<span class="audit-status-badge ' + (p.sent ? 'audit-delivered' : 'audit-draft') + '">' + (p.sent ? 'Sent' : 'Draft') + '</span>' +
-      '<button class="btn btn-ghost btn-xs" onclick="viewProposal(' + c.id + ',' + p.id + ')">View</button>' +
-      '<button class="btn btn-danger btn-xs" onclick="deleteProposal(' + c.id + ',' + p.id + ')">×</button>' +
-      '</div>' +
-      (p.summary ? '<div class="audit-body">' + escHtml(p.summary) + '</div>' : '') +
-      '</div>';
-  }).join('');
-}
+];
 
-function buildAuditTab(c) {
-  return '<div class="profile-tab-content">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
-    '<span style="font-family:\'DM Mono\',monospace;font-size:10px;text-transform:uppercase;color:var(--muted)">' + (c.audits && c.audits.length > 0 ? c.audits.length + ' audit(s)' : 'No audits yet') + '</span>' +
-    '<button class="btn btn-primary btn-sm" onclick="addAudit(' + c.id + ')">+ New Audit</button>' +
-    '</div>' +
-    buildAuditList(c) + '</div>';
-}
-
-function buildAuditList(c) {
-  if (!c.audits || c.audits.length === 0) {
-    return '<div class="cl-empty"><div class="cl-empty-icon">🔍</div><div>No audits logged yet.<br>Click "+ New Audit" to start one.</div></div>';
+var CLOSING_SCRIPTS = {
+  starter:{
+    title:'Starter Close — $1,500',
+    setup:'You\'ve completed the audit and identified their #1 pain point. The proposal has been delivered. You\'re on the closing call.',
+    steps:[
+      { label:'Recap & Confirm the Problem', s:'"Based on what we went through, the biggest thing costing you right now is [TOP BOTTLENECK]. Is that still the thing you want to fix first?"' },
+      { label:'Present the Solution Simply', s:'"The Starter is designed to fix exactly that. One workflow, fully built out, integrated with what you\'re already using where possible. $1,500. We can be live in about 7–10 business days."' },
+      { label:'Handle the Pause', s:'If they go quiet: "What are you thinking right now?" — Let them talk. Don\'t fill the silence.' },
+      { label:'The Ask', s:'"If this is the right fit, I\'d like to get started this week. The first step is a 30-minute kickoff call where we map out exactly what we\'re building. Does [day/time] work for you?"' },
+      { label:'Confirm & Next Steps', s:'"Perfect. I\'ll send you the agreement today — it\'s one page. Once that\'s signed, I\'ll send a calendar invite for the kickoff. Any questions before then?"' }
+    ]
+  },
+  growth:{
+    title:'Growth Close — $2,250',
+    setup:'Audit is done. Client has 3–4 high-pain areas. Proposal delivered showing connected workflows.',
+    steps:[
+      { label:'Recap the Full Picture', s:'"The audit showed three areas where you\'re losing the most: [BOTTLENECK 1], [BOTTLENECK 2], and [BOTTLENECK 3]. The Growth package connects all three — so fixing scheduling also triggers invoicing, which cleans up your cash flow reporting. It\'s not three separate things — it\'s one system."' },
+      { label:'Frame the Alternative', s:'"You could fix one at a time, and there\'s nothing wrong with that. But fixing them connected is what makes it permanent. Otherwise you\'re patching holes one at a time while the boat keeps moving."' },
+      { label:'Address Price', s:'"$2,250 total. That\'s everything built, integrated, your team trained, and 60 days of support. If you need it split — half at kickoff, half at delivery — I can do that."' },
+      { label:'The Ask', s:'"Are you ready to move forward? I want to get your kickoff scheduled this week so we can have your first workflow live by [date]."' }
+    ]
+  },
+  full:{
+    title:'Full Integration Close — Custom Pricing',
+    setup:'All 6 areas are in play. This is a full-scope engagement. Custom pricing based on operation size.',
+    steps:[
+      { label:'Acknowledge the Scale', s:'"What we talked through isn\'t a quick fix — it\'s a full rebuild of how your operation runs. That\'s not a bad thing. It means the business can handle more, but the systems haven\'t kept up. That\'s the gap I close."' },
+      { label:'Reframe the Investment', s:'"Custom pricing means I\'ve scoped it to your operation — not a menu item. What I\'ve built for companies at your scale has returned that investment in recovered time, recovered invoices, and reduced owner dependency within 90 days. I put the numbers in the proposal so you can verify it."' },
+      { label:'Propose the Scoping Call', s:'"The next step isn\'t signing anything. It\'s a 45-minute scoping call where I walk through exactly what we\'d build, in what order, and give you a final number. If it makes sense, we go. If not, you\'ve got a roadmap you can use regardless. Want to schedule that this week?"' }
+    ]
   }
-  return c.audits.map(function(a) {
-    var bnHtml = (a.bottlenecks||[]).map(function(b) {
-      return '<div class="audit-bottleneck">⚠ ' + escHtml(b) + '</div>';
+};
+
+var TIER_DATA = {
+  starter:{ name:'Starter', price:'$1,500', timeline:'7–10 business days', support:'30 days',
+    includes:['Single workflow design, build, and configuration','Tool selection and setup — matched to your budget and team','Integration with existing tools where applicable','Team walkthrough and handoff documentation','30-day post-delivery support window'] },
+  growth:{ name:'Growth', price:'$2,250', timeline:'10–14 business days', support:'60 days',
+    includes:['2–3 workflow designs, builds, and configurations','Cross-workflow integration — data flows automatically between systems','Tool selection and full setup across all workflows','Role-specific, hands-on team training','Handoff documentation and quick-reference guides per role','60-day post-delivery support window'] },
+  full:{ name:'Full Integration', price:'Custom', timeline:'Individually scoped', support:'90 days',
+    includes:['Full audit across all 6 Field-to-Office categories','Complete system design and build — every workflow, fully connected','Custom tool suite based on tech readiness and budget','Full team training with role-specific hands-on sessions','System admin handoff and backend documentation','Comprehensive SOPs and quick-reference guides','90-day post-delivery support window'] }
+};
+
+var PRE_CLOSE_ITEMS = [
+  'Audit completed and results shared with prospect',
+  'Proposal delivered (email or in-person)',
+  'Prospect had 24–48 hours to review',
+  'Decision-maker will be on this call',
+  'You know their #1 pain point cold',
+  'Top anticipated objection — response ready',
+  'You\'ve reviewed their audit findings in the last hour'
+];
+
+var POST_CLOSE_ITEMS = [
+  'One-page agreement sent',
+  'Deposit / first payment received',
+  'Kickoff call scheduled (within 48 hrs)',
+  'System Administrator identified at client site',
+  'Existing tools & login list requested',
+  'Client data/file access arranged',
+  'Full project timeline confirmed and shared',
+  'Client added to weekly check-in calendar (6 wks)',
+  'Client added to 60/90-day support reminder'
+];
+
+// ─── SCORING ─────────────────────────────────────────────────────────────────
+
+function scoreICP(p) {
+  var score = 0; var good = []; var warn = [];
+  var isSupplier = p.business_type === 'Building / Material Supplier';
+
+  if (isSupplier) {
+    if (ICP_SUPPLIER_TYPES.indexOf(p.trade_type) !== -1) { score += 25; good.push('Supplier type is high-value'); }
+    else if (p.trade_type) { score += 10; warn.push('Supplier type — verify they serve trade contractors'); }
+    var e = parseInt(p.employee_count) || 0;
+    if (e >= 2 && e <= 20) { score += 25; good.push('Team size in sweet spot (2–20)'); }
+    else if (e > 20 && e <= 50) { score += 12; good.push('Larger supplier — still viable'); warn.push('May have some dedicated ops staff already'); }
+    else if (e < 2 && e > 0) { score += 5; warn.push('Very small — owner likely handles everything manually'); }
+    else if (e > 50) { warn.push('Large supplier — may have dedicated systems team'); }
+    if (p.serves_contractors) { score += 20; good.push('Confirmed serves trade contractors'); }
+    else { warn.push('Verify primary customers are trade contractors'); }
+    if (p.owner_operated) { score += 15; good.push('Owner-operated — owner is the bottleneck'); }
+    var cityMatch = ICP_CITIES.some(function(c){ return (p.city||'').toLowerCase().indexOf(c.toLowerCase()) !== -1; });
+    if (cityMatch) { score += 15; good.push('Target geography match'); }
+    else { score += 5; warn.push('Outside primary target geo — still viable'); }
+  } else {
+    if (ICP_TRADES.indexOf(p.trade_type) !== -1) { score += 25; good.push('Trade type matches ICP'); }
+    else if (p.trade_type) { score += 5; warn.push('Trade type is outside core focus'); }
+    var e2 = parseInt(p.employee_count) || 0;
+    if (e2 >= 5 && e2 <= 15) { score += 25; good.push('Employee count in sweet spot (5–15)'); }
+    else if (e2 >= 16 && e2 <= 25) { score += 15; good.push('Employee count in range (16–25)'); warn.push('Upper end — may have some office staff'); }
+    else if (e2 < 5 && e2 > 0) { score += 5; warn.push('Under 5 employees — owner may muscle through without systems'); }
+    else if (e2 > 25) { warn.push('Over 25 employees — likely has dedicated ops staff'); }
+    if (p.owner_operated) { score += 20; good.push('Owner-operated — owner is the bottleneck'); }
+    else { warn.push('Not confirmed owner-operated'); }
+    var cityMatch2 = ICP_CITIES.some(function(c){ return (p.city||'').toLowerCase().indexOf(c.toLowerCase()) !== -1; });
+    if (cityMatch2) { score += 15; good.push('Target geography match'); }
+    else { score += 5; warn.push('Outside primary target geo — still viable'); }
+  }
+  var leaks = p.leak_signals || [];
+  if (leaks.length > 0) { score += Math.min(15, leaks.length * 5); good.push(leaks.length + ' operational leak signal(s) identified'); }
+  var verdict = score >= 75 ? 'Qualified' : score >= 50 ? 'Borderline' : 'Not a Fit';
+  var vcss = score >= 75 ? 'var(--accent2)' : score >= 50 ? 'var(--warn)' : 'var(--danger)';
+  return { score: score, verdict: verdict, vcss: vcss, good: good, warn: warn };
+}
+
+function scoreAudit(answers) {
+  var areaScores = {};
+  AUDIT_AREAS.forEach(function(a) {
+    var ans = answers[a.id] || [];
+    var sc = ans.reduce(function(s, x){ return s + (x ? (x.s || 0) : 0); }, 0);
+    var max = a.questions.length * 4;
+    areaScores[a.id] = { score: sc, max: max, pct: max > 0 ? Math.round((sc / max) * 100) : 0 };
+  });
+  var ranked = AUDIT_AREAS.map(function(a) {
+    return { id: a.id, area: a, score: areaScores[a.id].score, max: areaScores[a.id].max, pct: areaScores[a.id].pct };
+  }).sort(function(a, b){ return b.score - a.score; });
+  var high = ranked.filter(function(a){ return a.pct >= 50; }).length;
+  var tier = high >= 5 ? 'full' : high >= 3 ? 'growth' : 'starter';
+  return { areaScores: areaScores, ranked: ranked, tier: tier };
+}
+
+function painLabel(pct) {
+  if (pct >= 75) return { l:'Critical', c:'var(--danger)' };
+  if (pct >= 50) return { l:'High',     c:'var(--warn)' };
+  if (pct >= 25) return { l:'Moderate', c:'var(--blue)' };
+  return { l:'Low', c:'var(--accent2)' };
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+
+var currentView = 'pipeline';
+var selectedProspectId = null;
+
+// Intake form state
+var intakeForm = {
+  company_name:'', owner_name:'', business_type:'Trade Contractor', trade_type:'',
+  employee_count:'', city:'', state:'', email:'', phone:'', website:'',
+  owner_operated: false, serves_contractors: false, leak_signals: [], notes: ''
+};
+var intakeEditId = null; // null = new, id = editing existing
+
+// Audit state (per-session, not persisted)
+var auditProspectId = null;
+var auditAreaIdx = 0;
+var auditAnswers = {};
+var auditResults = null;
+
+// Proposal state
+var proposalProspectId = '';
+var proposalNotes = '';
+
+// Objections state
+var objCatIdx = 0;
+var objOpenItem = null;
+
+// Close state
+var closeProspectId = null;
+var closeTab = 'pre';
+var closePreChecks = {};
+var closePostChecks = {};
+
+// ─── DATA HELPERS ─────────────────────────────────────────────────────────────
+
+function getProspects() {
+  return state.os_data.prospects || [];
+}
+function getProspect(id) {
+  return getProspects().find(function(p){ return p.id === id; });
+}
+function saveProspects() {
+  scheduleSave();
+}
+
+// ─── VIEW MANAGEMENT ─────────────────────────────────────────────────────────
+
+function showView(v) {
+  currentView = v;
+  document.querySelectorAll('.df-view').forEach(function(el){ el.classList.add('hidden'); });
+  var el = document.getElementById('view-' + v);
+  if (el) el.classList.remove('hidden');
+  document.querySelectorAll('.df-subnav-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.dataset.view === v);
+  });
+  if (v === 'pipeline')    renderPipeline();
+  else if (v === 'intake') renderIntake();
+  else if (v === 'audit')  renderAuditView();
+  else if (v === 'proposal') renderProposal();
+  else if (v === 'objections') renderObjections();
+  else if (v === 'close')  renderClose();
+}
+
+// ─── PIPELINE ─────────────────────────────────────────────────────────────────
+
+function renderPipeline() {
+  var prospects = getProspects();
+  var selected = selectedProspectId ? getProspect(selectedProspectId) : null;
+
+  // Detail panel
+  var detailHtml = '';
+  if (selected) {
+    var icp = scoreICP(selected);
+    var lastAudit = (selected.audits && selected.audits.length > 0) ? selected.audits[selected.audits.length - 1] : null;
+    var stageOpts = STAGES.map(function(s){
+      return '<option value="' + escAttr(s) + '"' + (selected.stage === s ? ' selected' : '') + '>' + escHtml(s) + '</option>';
     }).join('');
-    return '<div class="audit-item">' +
-      '<div class="audit-item-header">' +
-      '<span class="audit-item-title">' + escHtml(a.title||'Audit') + '</span>' +
-      '<span class="audit-item-date">' + (a.date||'').slice(0,10) + '</span>' +
-      '<span class="audit-status-badge ' + (a.status==='delivered'?'audit-delivered':'audit-draft') + '">' + (a.status||'draft') + '</span>' +
-      '<button class="btn btn-ghost btn-xs" onclick="editAudit(' + c.id + ',' + a.id + ')">Edit</button>' +
-      '<button class="btn btn-danger btn-xs" onclick="deleteAudit(' + c.id + ',' + a.id + ')">×</button>' +
+
+    var leakHtml = (selected.leak_signals && selected.leak_signals.length > 0)
+      ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">' +
+        selected.leak_signals.map(function(l){ return '<span class="audit-tool-tag" style="font-size:9px">' + escHtml(l) + '</span>'; }).join('') + '</div>'
+      : '';
+
+    detailHtml =
+      '<div class="pl-detail" id="pl-detail-panel">' +
+      '<div class="pl-detail-header">' +
+      '<div>' +
+      '<div class="pl-detail-name">' + escHtml(selected.company_name) + '</div>' +
+      '<div class="pl-detail-owner">' + escHtml(selected.owner_name || '—') + '</div>' +
+      (selected.business_type ? '<div class="pl-detail-biz">' + escHtml(selected.business_type) + '</div>' : '') +
       '</div>' +
-      (a.notes ? '<div class="audit-body" style="margin-bottom:6px">' + escHtml(a.notes) + '</div>' : '') +
-      bnHtml + '</div>';
-  }).join('');
-}
+      '<button class="btn btn-ghost btn-xs" onclick="selectedProspectId=null;renderPipeline()">×</button>' +
+      '</div>' +
 
-function buildDocsTab(c) {
-  var items = (c.documents||[]).map(function(d) {
-    var icons = { pdf:'📄', link:'🔗', doc:'📝', sheet:'📊', other:'📎' };
-    return '<div class="doc-item">' +
-      '<span class="doc-icon">' + (icons[d.type]||'📎') + '</span>' +
-      '<div class="flex-1"><div class="doc-name">' + escHtml(d.name) + '</div>' +
-      '<div class="doc-meta">' + escHtml(d.type||'file') + ' · ' + (d.date||'').slice(0,10) + '</div></div>' +
-      (d.url ? '<a href="' + escAttr(d.url) + '" target="_blank" class="btn btn-ghost btn-xs">Open</a>' : '') +
-      '<button class="doc-del" onclick="deleteDoc(' + c.id + ',' + d.id + ')">×</button>' +
+      '<div style="margin-bottom:12px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+      '<span class="intake-section-label" style="margin:0">ICP Match</span>' +
+      '<span style="font-family:\'DM Mono\',monospace;font-size:11px;color:' + icp.vcss + '">' + icp.score + '/100 — ' + escHtml(icp.verdict) + '</span>' +
+      '</div>' +
+      '<div class="pl-icp-bar-wrap"><div class="pl-icp-bar-fill" style="width:' + icp.score + '%;background:' + icp.vcss + '"></div></div>' +
+      '</div>' +
+
+      '<div class="pl-detail-grid">' +
+      '<div class="pl-detail-field"><div class="pl-detail-flabel">Trade</div><div class="pl-detail-fval">' + escHtml(selected.trade_type || '—') + '</div></div>' +
+      '<div class="pl-detail-field"><div class="pl-detail-flabel">Employees</div><div class="pl-detail-fval">' + escHtml(selected.employee_count || '—') + '</div></div>' +
+      '<div class="pl-detail-field"><div class="pl-detail-flabel">City</div><div class="pl-detail-fval">' + escHtml((selected.city || '') + (selected.state ? ', ' + selected.state : '') || '—') + '</div></div>' +
+      '<div class="pl-detail-field"><div class="pl-detail-flabel">Stage</div>' +
+      '<select class="form-select" style="padding:4px 6px;font-size:11px" onchange="moveStage(' + selected.id + ',this.value)">' + stageOpts + '</select>' +
+      '</div>' +
+      '</div>' +
+
+      (selected.email || selected.phone ? '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);margin-bottom:10px">' +
+        (selected.email ? escHtml(selected.email) + '<br>' : '') +
+        (selected.phone ? escHtml(selected.phone) : '') +
+      '</div>' : '') +
+
+      (selected.notes ? '<div style="font-size:11px;color:var(--muted);line-height:1.65;padding:8px 10px;background:var(--surface2);border-radius:5px;margin-bottom:12px">' + escHtml(selected.notes) + '</div>' : '') +
+
+      leakHtml +
+
+      (lastAudit ? '<div style="margin-top:10px;padding:8px 10px;background:var(--surface2);border-radius:5px;font-size:11px">' +
+        '<span style="color:var(--muted)">Last audit — </span><span style="color:var(--accent);text-transform:uppercase;font-family:\'DM Mono\',monospace;font-size:9px">' + escHtml(lastAudit.recommended_tier) + '</span>' +
+        '</div>' : '') +
+
+      '<div class="pl-detail-actions">' +
+      '<button class="btn btn-ghost btn-sm" onclick="editProspect(' + selected.id + ')">Edit</button>' +
+      '<button class="btn btn-secondary btn-sm" onclick="goToAudit(' + selected.id + ')">Audit →</button>' +
+      '<button class="btn btn-primary btn-sm" onclick="goToProposal(' + selected.id + ')">Proposal →</button>' +
+      '<button class="btn btn-danger btn-xs" onclick="deleteProspect(' + selected.id + ')">Delete</button>' +
+      '</div>' +
       '</div>';
-  }).join('');
+  }
 
-  var addRow = '<div class="doc-add-row">' +
-    '<input class="form-input" id="doc-name-' + c.id + '" placeholder="Document name" style="flex:2">' +
-    '<select class="form-select" id="doc-type-' + c.id + '" style="flex:1">' +
-    '<option value="pdf">PDF</option><option value="doc">Doc</option>' +
-    '<option value="sheet">Sheet</option><option value="link">Link</option><option value="other">Other</option>' +
-    '</select>' +
-    '<input class="form-input" id="doc-url-' + c.id + '" placeholder="URL (optional)" style="flex:2">' +
-    '<button class="btn btn-primary btn-sm" onclick="addDoc(' + c.id + ')">+ Add</button>' +
+  // Kanban columns
+  var boardHtml = '<div class="pl-board">';
+  STAGES.forEach(function(stage) {
+    var stageProspects = prospects.filter(function(p){ return (p.stage || 'Cold') === stage; });
+    var dotColor = STAGE_COLORS[stage];
+
+    boardHtml += '<div class="pl-col">' +
+      '<div class="pl-col-header">' +
+      '<div class="pl-col-dot" style="background:' + dotColor + '"></div>' +
+      '<span class="pl-col-label">' + escHtml(stage) + '</span>' +
+      '<span class="pl-col-count">' + stageProspects.length + '</span>' +
+      '</div>';
+
+    if (stageProspects.length === 0) {
+      boardHtml += '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--border);text-align:center;padding:16px 0">Empty</div>';
+    }
+
+    stageProspects.forEach(function(p) {
+      var icp = scoreICP(p);
+      var isSelected = p.id === selectedProspectId;
+      boardHtml += '<div class="pl-card' + (isSelected ? ' selected' : '') + '" onclick="selectProspect(' + p.id + ')">' +
+        (p.business_type === 'Building / Material Supplier' ? '<span class="pl-sup-badge">SUP</span>' : '') +
+        '<div class="pl-card-name">' + escHtml(p.company_name) + '</div>' +
+        '<div class="pl-card-owner">' + escHtml(p.owner_name || '—') + '</div>' +
+        '<div class="pl-card-trade">' + escHtml(p.trade_type || '—') + '</div>' +
+        '<div class="pl-card-icp">' +
+        '<div class="pl-card-bar"><div class="pl-card-bar-fill" style="width:' + icp.score + '%;background:' + icp.vcss + '"></div></div>' +
+        '<span class="pl-card-score" style="color:' + icp.vcss + '">' + icp.score + '</span>' +
+        '</div>' +
+        '</div>';
+    });
+
+    boardHtml += '</div>';
+  });
+  boardHtml += '</div>';
+
+  // Stats
+  var total = prospects.length;
+  var warm = prospects.filter(function(p){ return p.stage === 'Warm' || p.stage === 'Audit Scheduled' || p.stage === 'Proposal Sent'; }).length;
+  var closed = prospects.filter(function(p){ return p.stage === 'Closed'; }).length;
+  var qualified = prospects.filter(function(p){ return (scoreICP(p).verdict === 'Qualified'); }).length;
+
+  var statsHtml = '<div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">' +
+    stat('Total Leads', total) + stat('In Pipeline', warm, 'accent') +
+    stat('Closed', closed, 'green') + stat('Qualified ICP', qualified) +
     '</div>';
 
-  return '<div class="profile-tab-content">' +
-    (items || '<div class="cl-empty"><div class="cl-empty-icon">📁</div><div>No documents yet. Add links or files below.</div></div>') +
-    addRow + '</div>';
+  var el = document.getElementById('view-pipeline');
+  el.innerHTML = statsHtml +
+    '<div style="display:flex;justify-content:flex-end;margin-bottom:14px">' +
+    '<button class="btn btn-primary btn-sm" onclick="showView(\'intake\')">+ New Lead</button>' +
+    '</div>' +
+    detailHtml +
+    boardHtml;
 }
 
-// ── Build a full client card ───────────────────────────────────────────────
-function buildClientCard(c) {
-  var isOpen = !!openCards[c.id];
-  var tab = openTabs[c.id] || 'overview';
-  var statusCls = { prospect:'prospect-client', active:'active-client', completed:'completed-client' }[c.status] || '';
-  var badgeCls = { prospect:'status-prospect', active:'status-active', completed:'status-completed' }[c.status] || '';
+function stat(label, val, cls) {
+  return '<div class="stat-card"><div class="stat-label">' + escHtml(label) + '</div>' +
+    '<div class="stat-value ' + (cls || '') + '">' + val + '</div></div>';
+}
 
-  // Header
-  var header = '<div class="cfc-header" onclick="toggleCard(' + c.id + ')">' +
-    '<span class="cfc-name">' + escHtml(c.name) + '</span>' +
-    '<div class="cfc-meta">' +
-    '<span class="badge ' + badgeCls + '">' + (c.status||'prospect') + '</span>' +
-    (c.trade ? '<span class="cfc-detail">' + escHtml(c.trade) + '</span>' : '') +
-    (c.location ? '<span class="cfc-detail">📍 ' + escHtml(c.location) + '</span>' : '') +
-    (c.retainer ? '<span class="cfc-detail" style="color:var(--accent2)">$' + c.retainer + '/mo</span>' : '') +
+function selectProspect(id) {
+  selectedProspectId = (selectedProspectId === id) ? null : id;
+  renderPipeline();
+}
+
+function moveStage(id, stage) {
+  var p = getProspect(id);
+  if (p) { p.stage = stage; saveProspects(); renderPipeline(); }
+}
+
+function deleteProspect(id) {
+  if (!confirm('Remove this prospect and all their data?')) return;
+  state.os_data.prospects = getProspects().filter(function(p){ return p.id !== id; });
+  selectedProspectId = null;
+  saveProspects();
+  renderPipeline();
+}
+
+function goToAudit(id) {
+  auditProspectId = id;
+  auditAreaIdx = 0;
+  auditAnswers = {};
+  auditResults = null;
+  showView('audit');
+}
+
+function goToProposal(id) {
+  proposalProspectId = id;
+  showView('proposal');
+}
+
+function editProspect(id) {
+  var p = getProspect(id);
+  if (!p) return;
+  intakeEditId = id;
+  intakeForm = {
+    company_name: p.company_name || '',
+    owner_name: p.owner_name || '',
+    business_type: p.business_type || 'Trade Contractor',
+    trade_type: p.trade_type || '',
+    employee_count: p.employee_count ? String(p.employee_count) : '',
+    city: p.city || '',
+    state: p.state || '',
+    email: p.email || '',
+    phone: p.phone || '',
+    website: p.website || '',
+    owner_operated: !!p.owner_operated,
+    serves_contractors: !!p.serves_contractors,
+    leak_signals: p.leak_signals ? p.leak_signals.slice() : [],
+    notes: p.notes || ''
+  };
+  showView('intake');
+}
+
+// ─── INTAKE FORM ──────────────────────────────────────────────────────────────
+
+function renderIntake() {
+  var isSupplier = intakeForm.business_type === 'Building / Material Supplier';
+  var typeOptions = isSupplier ? SUPPLIER_TYPES : TRADE_TYPES;
+  var leakSignals = isSupplier ? LEAK_SIGNALS_SUPPLIER : LEAK_SIGNALS_CONTRACTOR;
+  var icp = scoreICP(intakeForm);
+  var isEdit = intakeEditId !== null;
+
+  var icpHtml =
+    '<div class="intake-icp-panel">' +
+    '<div class="intake-icp-row">' +
+    '<div>' +
+    '<div class="intake-icp-score" style="color:' + icp.vcss + '">' + icp.score + '</div>' +
+    '<div class="intake-icp-verdict" style="color:' + icp.vcss + '">' + escHtml(icp.verdict) + '</div>' +
     '</div>' +
-    '<div class="cfc-actions" onclick="event.stopPropagation()">' +
-    '<button class="btn btn-ghost btn-xs" onclick="startEdit(' + c.id + ')">Edit</button>' +
-    '<button class="btn btn-danger btn-xs" onclick="deleteClient(' + c.id + ')">Delete</button>' +
+    '<div style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--muted)">ICP Score / 100</div>' +
     '</div>' +
-    '<span class="cfc-chevron ' + (isOpen ? 'open' : '') + '">▼</span>' +
+    '<div class="intake-icp-bar"><div class="intake-icp-bar-fill" style="width:' + icp.score + '%;background:' + icp.vcss + '"></div></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">' +
+    icp.good.map(function(g){ return '<div style="font-size:10px;color:var(--accent2)">✓ ' + escHtml(g) + '</div>'; }).join('') +
+    icp.warn.map(function(w){ return '<div style="font-size:10px;color:var(--warn)">⚠ ' + escHtml(w) + '</div>'; }).join('') +
+    '</div>' +
     '</div>';
 
-  if (!isOpen) return '<div class="client-full-card ' + statusCls + '" id="cfc-' + c.id + '">' + header + '</div>';
+  var bizBtns = BUSINESS_TYPES.map(function(bt) {
+    return '<button class="intake-biz-btn' + (intakeForm.business_type === bt ? ' active' : '') + '" onclick="setBizType(\'' + escAttr(bt) + '\')">' + escHtml(bt) + '</button>';
+  }).join('');
 
-  // Profile tabs
-  var tabs = [
-    { id:'overview', label:'Overview' },
-    { id:'proposal', label:'Proposals' },
-    { id:'audits',   label:'Audits' },
-    { id:'docs',     label:'Documents' }
-  ];
-  var tabsHtml = '<div class="profile-tabs">' +
-    tabs.map(function(t) {
-      return '<button class="profile-tab ' + (tab === t.id ? 'active' : '') + '" onclick="switchTab(' + c.id + ',\'' + t.id + '\')">' + t.label + '</button>';
+  var typeOpts = '<option value="">Select...</option>' +
+    typeOptions.map(function(t){ return '<option value="' + escAttr(t) + '"' + (intakeForm.trade_type === t ? ' selected' : '') + '>' + escHtml(t) + '</option>'; }).join('');
+
+  var leakTagsHtml = leakSignals.map(function(s) {
+    var active = intakeForm.leak_signals.indexOf(s) !== -1;
+    return '<button class="leak-tag' + (active ? ' active' : '') + '" onclick="toggleLeak(\'' + escAttr(s) + '\')">' + escHtml(s) + '</button>';
+  }).join('');
+
+  var html =
+    '<div class="view-header">' +
+    '<div class="view-title">' + (isEdit ? 'Edit Lead' : 'New Lead Intake') + '</div>' +
+    '<div class="view-sub">ICP score updates live as you fill out the form.</div>' +
+    '</div>' +
+    '<div class="max-600">' +
+    icpHtml +
+
+    '<div class="intake-section-label">Business Type</div>' +
+    '<div class="intake-biz-row">' + bizBtns + '</div>' +
+
+    '<div class="intake-grid">' +
+    '<div class="intake-group" style="grid-column:1/-1"><label class="intake-section-label">Company Name *</label>' +
+    '<input class="form-input" id="if-company" value="' + escAttr(intakeForm.company_name) + '" placeholder="' + (isSupplier ? 'Windy Hill Metal Sales' : 'ABC Plumbing LLC') + '" oninput="intakeField(\'company_name\',this.value)"></div>' +
+    '<div class="intake-group"><label class="intake-section-label">Owner Name</label>' +
+    '<input class="form-input" id="if-owner" value="' + escAttr(intakeForm.owner_name) + '" placeholder="John Smith" oninput="intakeField(\'owner_name\',this.value)"></div>' +
+    '<div class="intake-group"><label class="intake-section-label">' + (isSupplier ? 'Supplier Type' : 'Trade Type') + '</label>' +
+    '<select class="form-select" id="if-trade" onchange="intakeField(\'trade_type\',this.value)">' + typeOpts + '</select></div>' +
+    '<div class="intake-group"><label class="intake-section-label">Employees</label>' +
+    '<input class="form-input" id="if-emp" type="number" value="' + escAttr(intakeForm.employee_count) + '" placeholder="8" oninput="intakeField(\'employee_count\',this.value)"></div>' +
+    '<div class="intake-group"><label class="intake-section-label">Pipeline Stage</label>' +
+    '<select class="form-select" id="if-stage" onchange="intakeField(\'stage\',this.value)">' +
+    STAGES.map(function(s){ return '<option value="' + escAttr(s) + '"' + ((intakeForm.stage||'Cold') === s ? ' selected' : '') + '>' + escHtml(s) + '</option>'; }).join('') +
+    '</select></div>' +
+    '<div class="intake-group"><label class="intake-section-label">City</label>' +
+    '<input class="form-input" id="if-city" value="' + escAttr(intakeForm.city) + '" placeholder="Dayton" oninput="intakeField(\'city\',this.value)"></div>' +
+    '<div class="intake-group"><label class="intake-section-label">State</label>' +
+    '<input class="form-input" id="if-state" value="' + escAttr(intakeForm.state) + '" placeholder="OH" oninput="intakeField(\'state\',this.value)"></div>' +
+    '<div class="intake-group"><label class="intake-section-label">Email</label>' +
+    '<input class="form-input" id="if-email" type="email" value="' + escAttr(intakeForm.email) + '" placeholder="owner@company.com" oninput="intakeField(\'email\',this.value)"></div>' +
+    '<div class="intake-group"><label class="intake-section-label">Phone</label>' +
+    '<input class="form-input" id="if-phone" value="' + escAttr(intakeForm.phone) + '" placeholder="(555) 000-0000" oninput="intakeField(\'phone\',this.value)"></div>' +
+    '<div class="intake-group" style="grid-column:1/-1"><label class="intake-section-label">Website</label>' +
+    '<input class="form-input" id="if-website" value="' + escAttr(intakeForm.website) + '" placeholder="https://..." oninput="intakeField(\'website\',this.value)"></div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:14px">' +
+    '<label class="intake-check-row" onclick="intakeToggle(\'owner_operated\')">' +
+    '<input type="checkbox" ' + (intakeForm.owner_operated ? 'checked' : '') + ' onchange="intakeToggle(\'owner_operated\')" onclick="event.stopPropagation()">' +
+    '<span style="font-size:13px">Owner-operated (owner handles sales, billing, or ops)</span></label>' +
+    (isSupplier ? '<label class="intake-check-row" onclick="intakeToggle(\'serves_contractors\')">' +
+    '<input type="checkbox" ' + (intakeForm.serves_contractors ? 'checked' : '') + ' onchange="intakeToggle(\'serves_contractors\')" onclick="event.stopPropagation()">' +
+    '<span style="font-size:13px">Primary customers are trade contractors</span></label>' : '') +
+    '</div>' +
+
+    '<div style="margin-bottom:14px">' +
+    '<div class="intake-section-label">Operational Leak Signals <span style="color:var(--border2)">(' + (isSupplier ? 'Supplier-specific' : 'Contractor-specific') + ')</span></div>' +
+    '<div class="leak-tags">' + leakTagsHtml + '</div>' +
+    '</div>' +
+
+    '<div style="margin-bottom:18px"><div class="intake-section-label">Notes</div>' +
+    '<textarea class="form-textarea" id="if-notes" rows="3" placeholder="Research notes, first contact context, referral source..." oninput="intakeField(\'notes\',this.value)">' + escHtml(intakeForm.notes) + '</textarea></div>' +
+
+    '<div style="display:flex;gap:8px">' +
+    '<button class="btn btn-primary" onclick="saveIntakeLead()" id="intake-save-btn">Save Lead</button>' +
+    '<button class="btn btn-ghost" onclick="cancelIntake()">Cancel</button>' +
+    '</div>' +
+    '</div>';
+
+  document.getElementById('view-intake').innerHTML = html;
+}
+
+function intakeField(key, value) {
+  intakeForm[key] = value;
+  updateICPDisplay();
+}
+
+function intakeToggle(key) {
+  intakeForm[key] = !intakeForm[key];
+  updateICPDisplay();
+}
+
+function setBizType(type) {
+  intakeForm.business_type = type;
+  intakeForm.trade_type = '';
+  intakeForm.leak_signals = [];
+  intakeForm.serves_contractors = false;
+  renderIntake();
+}
+
+function toggleLeak(signal) {
+  var idx = intakeForm.leak_signals.indexOf(signal);
+  if (idx === -1) intakeForm.leak_signals.push(signal);
+  else intakeForm.leak_signals.splice(idx, 1);
+  // Re-render just the leak tags and ICP
+  renderIntake();
+  // Restore focus / scroll position is lost but acceptable
+}
+
+function updateICPDisplay() {
+  // Lightweight update — re-render just the ICP panel
+  var icp = scoreICP(intakeForm);
+  var scoreEl = document.querySelector('.intake-icp-score');
+  var verdictEl = document.querySelector('.intake-icp-verdict');
+  var fillEl = document.querySelector('.intake-icp-bar-fill');
+  var signalsEl = document.querySelector('.intake-icp-panel > div:last-child');
+  if (scoreEl) { scoreEl.textContent = icp.score; scoreEl.style.color = icp.vcss; }
+  if (verdictEl) { verdictEl.textContent = icp.verdict; verdictEl.style.color = icp.vcss; }
+  if (fillEl) { fillEl.style.width = icp.score + '%'; fillEl.style.background = icp.vcss; }
+  if (signalsEl) {
+    signalsEl.innerHTML =
+      icp.good.map(function(g){ return '<div style="font-size:10px;color:var(--accent2)">✓ ' + escHtml(g) + '</div>'; }).join('') +
+      icp.warn.map(function(w){ return '<div style="font-size:10px;color:var(--warn)">⚠ ' + escHtml(w) + '</div>'; }).join('');
+  }
+}
+
+function saveIntakeLead() {
+  var name = intakeForm.company_name.trim();
+  if (!name) { showToast('⚠ Company name is required'); return; }
+  var icp = scoreICP(intakeForm);
+  var prospects = getProspects();
+
+  if (intakeEditId !== null) {
+    var existing = prospects.find(function(p){ return p.id === intakeEditId; });
+    if (existing) {
+      Object.assign(existing, {
+        company_name: name,
+        owner_name: intakeForm.owner_name.trim(),
+        business_type: intakeForm.business_type,
+        trade_type: intakeForm.trade_type,
+        employee_count: parseInt(intakeForm.employee_count) || null,
+        city: intakeForm.city.trim(),
+        state: intakeForm.state.trim(),
+        email: intakeForm.email.trim(),
+        phone: intakeForm.phone.trim(),
+        website: intakeForm.website.trim(),
+        owner_operated: intakeForm.owner_operated,
+        serves_contractors: intakeForm.serves_contractors,
+        leak_signals: intakeForm.leak_signals.slice(),
+        notes: intakeForm.notes.trim(),
+        stage: intakeForm.stage || existing.stage || 'Cold',
+        icp_score: icp.score,
+        icp_verdict: icp.verdict
+      });
+    }
+  } else {
+    prospects.push({
+      id: genId(),
+      company_name: name,
+      owner_name: intakeForm.owner_name.trim(),
+      business_type: intakeForm.business_type,
+      trade_type: intakeForm.trade_type,
+      employee_count: parseInt(intakeForm.employee_count) || null,
+      city: intakeForm.city.trim(),
+      state: intakeForm.state.trim(),
+      email: intakeForm.email.trim(),
+      phone: intakeForm.phone.trim(),
+      website: intakeForm.website.trim(),
+      owner_operated: intakeForm.owner_operated,
+      serves_contractors: intakeForm.serves_contractors,
+      leak_signals: intakeForm.leak_signals.slice(),
+      notes: intakeForm.notes.trim(),
+      stage: intakeForm.stage || 'Cold',
+      icp_score: icp.score,
+      icp_verdict: icp.verdict,
+      created_at: new Date().toISOString(),
+      audits: [],
+      proposals: []
+    });
+  }
+
+  saveProspects();
+  showToast('✓ Lead saved');
+  cancelIntake();
+  showView('pipeline');
+}
+
+function cancelIntake() {
+  intakeEditId = null;
+  intakeForm = {
+    company_name:'', owner_name:'', business_type:'Trade Contractor', trade_type:'',
+    employee_count:'', city:'', state:'', email:'', phone:'', website:'',
+    owner_operated: false, serves_contractors: false, leak_signals: [], notes: '', stage: 'Cold'
+  };
+}
+
+// ─── AUDIT TOOL ───────────────────────────────────────────────────────────────
+
+function renderAuditView() {
+  if (auditResults) { renderAuditResults(); return; }
+
+  var prospects = getProspects();
+  var area = AUDIT_AREAS[auditAreaIdx];
+  var aAnswers = auditAnswers[area.id] || [];
+  var answered = aAnswers.filter(function(x){ return x !== null && x !== undefined; }).length;
+
+  var prospectSel = '<select class="form-select" style="max-width:320px;margin-bottom:16px" onchange="auditProspectId=this.value||null">' +
+    '<option value="">Ad-hoc audit (not linked to prospect)</option>' +
+    prospects.map(function(p){
+      return '<option value="' + escAttr(String(p.id)) + '"' + (String(auditProspectId) === String(p.id) ? ' selected' : '') + '>' + escHtml(p.company_name) + (p.owner_name ? ' — ' + p.owner_name : '') + '</option>';
+    }).join('') + '</select>';
+
+  var progressHtml = '<div class="audit-progress">' +
+    AUDIT_AREAS.map(function(a, i) {
+      var done = (auditAnswers[a.id] || []).filter(function(x){ return x !== null && x !== undefined; }).length === a.questions.length;
+      var cls = done ? 'done' : (i === auditAreaIdx ? 'current' : '');
+      return '<div class="audit-prog-seg ' + cls + '" onclick="auditAreaIdx=' + i + ';renderAuditView()" title="' + escAttr(a.title) + '"></div>';
     }).join('') + '</div>';
 
-  var tabContent = '';
-  if (tab === 'overview') tabContent = buildOverviewTab(c);
-  else if (tab === 'proposal') tabContent = buildProposalTab(c);
-  else if (tab === 'audits')   tabContent = buildAuditTab(c);
-  else if (tab === 'docs')     tabContent = buildDocsTab(c);
-
-  return '<div class="client-full-card ' + statusCls + '" id="cfc-' + c.id + '">' +
-    header +
-    '<div class="cfc-body open">' + tabsHtml + tabContent + '</div>' +
-    '</div>';
-}
-
-// ── Add/Edit form ──────────────────────────────────────────────────────────
-function buildClientForm(c) {
-  var isNew = !c;
-  var v = c || { name:'', trade:'', location:'', status:'prospect', phase:'Phase I', auditFee:'', retainer:'', notes:'' };
-  var fid = isNew ? 'new' : String(c.id);
-  var statusOpts = ['prospect','active','completed'].map(function(s) {
-    return '<option value="' + s + '"' + (v.status===s?' selected':'') + '>' + s + '</option>';
-  }).join('');
-  var phaseOpts = ['Phase I','Phase II','Phase III'].map(function(p) {
-    return '<option value="' + p + '"' + (v.phase===p?' selected':'') + '>' + p + '</option>';
+  var questionsHtml = area.questions.map(function(q, qi) {
+    return '<div class="audit-question">' +
+      '<div class="audit-q-text">' + escHtml(q.q) + '</div>' +
+      '<div class="audit-opts">' +
+      q.opts.map(function(o) {
+        var sel = aAnswers[qi] && aAnswers[qi].l === o.l;
+        return '<button class="audit-opt' + (sel ? ' selected' : '') + '" onclick="setAuditAnswer(\'' + escAttr(area.id) + '\',' + qi + ',' + escAttr(JSON.stringify(o)) + ')">' + escHtml(o.l) + '</button>';
+      }).join('') +
+      '</div></div>';
   }).join('');
 
-  return '<div class="cl-add-form">' +
-    '<div class="cl-form-title">' + (isNew ? 'Add New Client' : 'Edit — ' + escHtml(v.name)) + '</div>' +
-    '<div class="cl-form-grid">' +
-    '<div class="cl-form-group"><label class="cl-form-label">Client Name *</label>' +
-    '<input class="form-input" id="f-name-' + fid + '" value="' + escAttr(v.name) + '" placeholder="Company or person name"></div>' +
-    '<div class="cl-form-group"><label class="cl-form-label">Trade / Industry</label>' +
-    '<input class="form-input" id="f-trade-' + fid + '" value="' + escAttr(v.trade||'') + '" placeholder="e.g. HVAC, Plumbing"></div>' +
-    '<div class="cl-form-group"><label class="cl-form-label">Location</label>' +
-    '<input class="form-input" id="f-location-' + fid + '" value="' + escAttr(v.location||'') + '" placeholder="City, State"></div>' +
-    '<div class="cl-form-group"><label class="cl-form-label">Status</label>' +
-    '<select class="form-select" id="f-status-' + fid + '">' + statusOpts + '</select></div>' +
-    '<div class="cl-form-group"><label class="cl-form-label">Phase</label>' +
-    '<select class="form-select" id="f-phase-' + fid + '">' + phaseOpts + '</select></div>' +
-    '<div class="cl-form-group"><label class="cl-form-label">Audit Fee $</label>' +
-    '<input class="form-input" id="f-audit-' + fid + '" type="number" value="' + escAttr(v.auditFee||'') + '" placeholder="500"></div>' +
-    '<div class="cl-form-group"><label class="cl-form-label">Retainer $/mo</label>' +
-    '<input class="form-input" id="f-retainer-' + fid + '" type="number" value="' + escAttr(v.retainer||'') + '" placeholder="750"></div>' +
-    '</div>' +
-    '<div class="cl-form-group" style="margin-bottom:12px"><label class="cl-form-label">Notes</label>' +
-    '<textarea class="form-textarea" id="f-notes-' + fid + '" placeholder="Discovery notes, context, goals...">' + escHtml(v.notes||'') + '</textarea></div>' +
-    '<div style="display:flex;gap:8px">' +
-    '<button class="btn btn-primary" onclick="saveClient(\'' + fid + '\')">' + (isNew ? 'Add Client' : 'Save Changes') + '</button>' +
-    '<button class="btn btn-ghost" onclick="cancelForm()">Cancel</button>' +
-    '</div></div>';
-}
-
-// ── Render client list ─────────────────────────────────────────────────────
-function renderClients() {
-  var listEl = document.getElementById('cl-list');
-  if (!listEl) return;
-  var search = (document.getElementById('cl-search') || {}).value || '';
-  var q = search.toLowerCase().trim();
-
-  var filtered = state.os_data.clients.filter(function(c) {
-    if (filterStatus !== 'all' && c.status !== filterStatus) return false;
-    if (q && !(c.name||'').toLowerCase().includes(q) && !(c.trade||'').toLowerCase().includes(q) && !(c.location||'').toLowerCase().includes(q)) return false;
-    return true;
+  var allComplete = AUDIT_AREAS.every(function(a) {
+    var ans = auditAnswers[a.id] || [];
+    return ans.filter(function(x){ return x !== null && x !== undefined; }).length === a.questions.length;
   });
 
-  if (filtered.length === 0) {
-    listEl.innerHTML = '<div class="cl-empty"><div class="cl-empty-icon">◎</div><div>No clients match this filter.<br><span style="font-size:12px">Try a different filter or add a new client.</span></div></div>';
+  var navHtml = '<div style="display:flex;gap:10px;margin-top:16px">' +
+    '<button class="btn btn-ghost" onclick="auditAreaIdx=Math.max(0,auditAreaIdx-1);renderAuditView()"' + (auditAreaIdx === 0 ? ' disabled' : '') + '>← Prev</button>' +
+    (auditAreaIdx < AUDIT_AREAS.length - 1
+      ? '<button class="btn btn-secondary" onclick="auditAreaIdx++;renderAuditView()"' + (answered < area.questions.length ? ' disabled style="opacity:0.4"' : '') + '>Next →</button>'
+      : '<button class="btn btn-primary" onclick="showAuditResults()"' + (!allComplete ? ' disabled style="opacity:0.4"' : '') + '>' + (allComplete ? 'View Results →' : 'Complete all areas first') + '</button>'
+    ) +
+    '</div>';
+
+  var html =
+    '<div class="view-header">' +
+    '<div class="view-title">Field-to-Office Audit</div>' +
+    '<div class="view-sub">6-area assessment · answers auto-score pain severity</div>' +
+    '</div>' +
+    '<div class="max-600">' +
+    prospectSel +
+    progressHtml +
+    '<div class="audit-area-card">' +
+    '<div class="audit-area-header">' +
+    '<span class="audit-area-icon">' + area.icon + '</span>' +
+    '<div><div class="audit-area-title">' + escHtml(area.title) + '</div><div class="audit-area-desc">' + escHtml(area.desc) + '</div></div>' +
+    '<span class="audit-area-count">' + answered + '/' + area.questions.length + '</span>' +
+    '</div>' +
+    questionsHtml +
+    '</div>' +
+    navHtml +
+    '</div>';
+
+  document.getElementById('view-audit').innerHTML = html;
+}
+
+function setAuditAnswer(areaId, qi, optJson) {
+  if (!auditAnswers[areaId]) {
+    var area = AUDIT_AREAS.find(function(a){ return a.id === areaId; });
+    auditAnswers[areaId] = new Array(area.questions.length).fill(null);
+  }
+  auditAnswers[areaId][qi] = typeof optJson === 'string' ? JSON.parse(optJson) : optJson;
+  renderAuditView();
+}
+
+function showAuditResults() {
+  auditResults = scoreAudit(auditAnswers);
+  renderAuditResults();
+}
+
+function renderAuditResults() {
+  var r = auditResults;
+  var tierNames = { starter:'Starter — $1,500', growth:'Growth — $2,250', full:'Full Integration — Custom' };
+  var tierSubs = { starter:'1 workflow · 30-day support', growth:'2–3 connected workflows · 60-day support', full:'All 6 areas · Full system rebuild · 90-day support' };
+  var tierColor = { starter:'var(--accent2)', growth:'var(--blue)', full:'var(--accent)' };
+
+  var rankingsHtml = r.ranked.map(function(item, i) {
+    var pl = painLabel(item.pct);
+    var rec = TOOL_RECS[item.id];
+    return '<div class="audit-ranking-card">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
+      '<div><span class="audit-rank-num">#' + (i+1) + '</span><span class="audit-rank-title">' + item.area.icon + ' ' + escHtml(item.area.title) + '</span></div>' +
+      '<span class="audit-rank-label" style="background:' + pl.c + '22;color:' + pl.c + '">' + pl.l + ' · ' + item.pct + '%</span>' +
+      '</div>' +
+      '<div class="audit-rank-bar"><div class="audit-rank-fill" style="width:' + item.pct + '%;background:' + pl.c + '"></div></div>' +
+      (rec ? '<div class="audit-rank-why">' + escHtml(rec.why) + '</div>' +
+        '<div>' + rec.tools.map(function(t){ return '<span class="audit-tool-tag">' + escHtml(t) + '</span>'; }).join('') + '</div>' : '') +
+      '</div>';
+  }).join('');
+
+  var savedAuditId = null;
+
+  var html =
+    '<div class="view-header">' +
+    '<div style="display:flex;align-items:center;gap:12px">' +
+    '<button class="btn btn-ghost btn-sm" onclick="auditResults=null;renderAuditView()">← Back</button>' +
+    '<div class="view-title" style="margin:0">Audit Results</div>' +
+    '</div>' +
+    '</div>' +
+    '<div class="max-600">' +
+    '<div class="audit-result-tier" style="border-color:' + tierColor[r.tier] + '">' +
+    '<div style="font-family:\'DM Mono\',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:6px">Recommended Tier</div>' +
+    '<div class="audit-tier-name">' + escHtml(tierNames[r.tier]) + '</div>' +
+    '<div class="audit-tier-sub">' + escHtml(tierSubs[r.tier]) + '</div>' +
+    '</div>' +
+    '<div class="intake-section-label" style="margin-bottom:10px">Pain Rankings</div>' +
+    rankingsHtml +
+    '<div style="display:flex;gap:8px;margin-top:16px">' +
+    '<button class="btn btn-primary" id="audit-save-btn" onclick="saveAuditResult()">Save to Prospect</button>' +
+    '<button class="btn btn-secondary" onclick="goToProposalFromAudit()">Build Proposal →</button>' +
+    '</div>' +
+    '</div>';
+
+  document.getElementById('view-audit').innerHTML = html;
+}
+
+function saveAuditResult() {
+  var prospectId = auditProspectId ? parseInt(auditProspectId) : null;
+  if (!prospectId) { showToast('⚠ Select a prospect first'); return; }
+  var p = getProspect(prospectId);
+  if (!p) return;
+  if (!p.audits) p.audits = [];
+  var auditEntry = {
+    id: genId(),
+    saved_at: new Date().toISOString(),
+    answers: auditAnswers,
+    area_scores: auditResults.areaScores,
+    ranked_bottlenecks: auditResults.ranked.map(function(r){ return { id: r.id, title: r.area.title, score: r.score, max: r.max, pct: r.pct }; }),
+    recommended_tier: auditResults.tier,
+    total_pain_score: auditResults.ranked.reduce(function(s, a){ return s + a.score; }, 0)
+  };
+  p.audits.push(auditEntry);
+  // Auto-advance stage to Audit Scheduled if still Cold/Warm
+  if (p.stage === 'Cold' || p.stage === 'Warm') p.stage = 'Audit Scheduled';
+  saveProspects();
+  var btn = document.getElementById('audit-save-btn');
+  if (btn) { btn.textContent = '✓ Saved'; btn.disabled = true; }
+  showToast('✓ Audit saved to ' + p.company_name);
+}
+
+function goToProposalFromAudit() {
+  if (auditProspectId) proposalProspectId = parseInt(auditProspectId);
+  showView('proposal');
+}
+
+// ─── PROPOSAL ────────────────────────────────────────────────────────────────
+
+function renderProposal() {
+  var prospects = getProspects();
+  var p = proposalProspectId ? getProspect(proposalProspectId) : null;
+  var lastAudit = p && p.audits && p.audits.length > 0 ? p.audits[p.audits.length - 1] : null;
+
+  var selOpts = '<option value="">Select prospect…</option>' +
+    prospects.map(function(pr){
+      return '<option value="' + escAttr(String(pr.id)) + '"' + (String(proposalProspectId) === String(pr.id) ? ' selected' : '') + '>' + escHtml(pr.company_name) + '</option>';
+    }).join('');
+
+  var controlsHtml =
+    '<div class="no-print" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">' +
+    '<select class="form-select" style="min-width:220px" onchange="proposalProspectId=this.value?parseInt(this.value):null;proposalNotes=\'\';renderProposal()">' + selOpts + '</select>' +
+    (lastAudit ? '<button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print / PDF</button>' : '') +
+    (lastAudit && p && p.stage !== 'Closed' ? '<button class="btn btn-secondary btn-sm" onclick="markProposalSent()">Mark Sent</button>' : '') +
+    '</div>';
+
+  if (!p) {
+    document.getElementById('view-proposal').innerHTML =
+      controlsHtml +
+      '<div class="df-empty"><div class="df-empty-icon">◻</div>Select a prospect to generate their proposal<br><span style="font-size:11px">Complete the Audit first if you haven\'t already.</span></div>';
     return;
   }
 
-  listEl.innerHTML = filtered.map(buildClientCard).join('');
+  if (!lastAudit) {
+    document.getElementById('view-proposal').innerHTML =
+      controlsHtml +
+      '<div class="df-empty"><div class="df-empty-icon">🔍</div>No audit found for ' + escHtml(p.company_name) + '<br><span style="font-size:11px">Complete the Audit first, then come back here.</span></div>';
+    return;
+  }
+
+  var tier = lastAudit.recommended_tier || 'starter';
+  var td = TIER_DATA[tier];
+  var bottlenecks = (lastAudit.ranked_bottlenecks || []).filter(function(b){ return b.pct >= 50; }).slice(0, 4);
+  var today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  var findingsHtml = bottlenecks.length > 0 ? (
+    '<div class="prop-section-label">What the Audit Revealed</div>' +
+    bottlenecks.map(function(b, i) {
+      var pl = painLabel(b.pct);
+      return '<div class="prop-finding">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between">' +
+        '<div class="prop-finding-title">#' + (i+1) + ' — ' + escHtml(b.title) + '</div>' +
+        '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:' + pl.c + '">' + pl.l + ' Pain Area</span>' +
+        '</div>' +
+        '<div class="prop-finding-why">' + escHtml((TOOL_RECS[b.id] || {}).why || '') + '</div>' +
+        '</div>';
+    }).join('') + '<div style="margin-bottom:20px"></div>'
+  ) : '';
+
+  var proposalHtml =
+    '<div class="prop-doc">' +
+    '<div class="prop-doc-header">' +
+    '<div><div class="prop-brand">StructTech LLC</div>' +
+    '<div class="prop-tagline">Field-to-Office Technology Integration</div>' +
+    '<div class="prop-contact">jacob@structtek.com · structtek.com · (937) 467-2660</div></div>' +
+    '<div class="prop-to">' + today + '<br>Prepared for: <strong>' + escHtml(p.company_name) + '</strong><br>Attn: ' + escHtml(p.owner_name || 'Owner') + '</div>' +
+    '</div>' +
+    '<hr class="prop-divider">' +
+
+    '<h2 style="font-size:18px;font-weight:700;margin-bottom:12px">Field-to-Office Integration Proposal</h2>' +
+    '<p class="prop-intro">' + (p.owner_name ? escHtml(p.owner_name) + ', based' : 'Based') + ' on the operational audit we completed for ' + escHtml(p.company_name) + ', I\'ve put together a focused implementation plan to address the specific gaps that are costing you the most time and revenue right now. This proposal outlines exactly what we found, what we\'ll fix, and what it looks like to work together.</p>' +
+
+    findingsHtml +
+
+    '<div class="prop-section-label">Scope of Work</div>' +
+    '<div class="prop-scope-box">' +
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">' +
+    '<div><div class="prop-tier-name">' + escHtml(td.name) + ' Package</div>' +
+    '<div style="font-size:11px;color:var(--muted)">Timeline: ' + escHtml(td.timeline) + ' · Support: ' + escHtml(td.support) + ' post-delivery</div></div>' +
+    '<div class="prop-price">' + escHtml(td.price) + '</div>' +
+    '</div></div>' +
+
+    '<div class="prop-section-label">What\'s Included</div>' +
+    '<ul class="prop-includes">' + td.includes.map(function(item){ return '<li>' + escHtml(item) + '</li>'; }).join('') + '</ul>' +
+
+    '<div class="prop-section-label" style="margin-top:20px">The Process</div>' +
+    '<div class="prop-process-steps">' +
+    ['Assessment & Planning','Build & Configure','Test & Import','Train & Hand Off'].map(function(s, i){
+      return '<div class="prop-step"><div class="prop-step-num">' + (i+1) + '</div><div class="prop-step-label">' + escHtml(s) + '</div></div>';
+    }).join('') +
+    '</div>' +
+
+    '<div class="no-print" style="margin:16px 0">' +
+    '<div class="intake-section-label">Custom notes (optional — will appear in proposal)</div>' +
+    '<textarea class="form-textarea" rows="3" placeholder="Any specific context, references, or next-step instructions..." oninput="proposalNotes=this.value">' + escHtml(proposalNotes) + '</textarea>' +
+    '</div>' +
+
+    (proposalNotes ? '<div class="prop-section-label">Additional Notes</div><p style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:20px">' + escHtml(proposalNotes) + '</p>' : '') +
+
+    '<hr class="prop-divider">' +
+    '<p style="font-size:12px;color:var(--text);line-height:1.75;margin-bottom:16px">If this looks right, the next step is a 30-minute kickoff call where we confirm scope, review your current tools, and get your first workflow on the build schedule. There\'s no lengthy contract — just a simple one-page agreement before we start.</p>' +
+    '<div><strong style="font-size:13px">Jacob Walker</strong><br>' +
+    '<span style="font-size:11px;color:var(--muted)">Founder, StructTech LLC<br>jacob@structtek.com · (937) 467-2660</span></div>' +
+    '</div>';
+
+  document.getElementById('view-proposal').innerHTML = controlsHtml + proposalHtml;
 }
 
-function renderAll() {
-  renderHeader();
-  renderStats();
-  renderClients();
+function markProposalSent() {
+  var p = proposalProspectId ? getProspect(proposalProspectId) : null;
+  if (!p) return;
+  p.stage = 'Proposal Sent';
+  saveProspects();
+  renderProposal();
+  showToast('✓ Stage updated to Proposal Sent');
 }
+
+// ─── OBJECTIONS ───────────────────────────────────────────────────────────────
+
+function renderObjections() {
+  var cat = OBJECTIONS[objCatIdx];
+
+  var sidebarHtml = '<div class="obj-sidebar">' +
+    OBJECTIONS.map(function(o, i) {
+      return '<button class="obj-cat-btn' + (i === objCatIdx ? ' active' : '') + '" onclick="objCatIdx=' + i + ';objOpenItem=null;renderObjections()">' + escHtml(o.cat) + '</button>';
+    }).join('') +
+    '</div>';
+
+  var itemsHtml = cat.items.map(function(obj, i) {
+    var isOpen = objOpenItem === i;
+    return '<div class="obj-item' + (isOpen ? ' open' : '') + '">' +
+      '<button class="obj-item-trigger" onclick="objOpenItem=' + (isOpen ? 'null' : i) + ';renderObjections()">' +
+      '<span class="obj-trigger-text">' + escHtml(obj.t) + '</span>' +
+      '<span class="obj-chevron">' + (isOpen ? '▲' : '▼') + '</span>' +
+      '</button>' +
+      (isOpen ?
+        '<div class="obj-body open">' +
+        '<div class="obj-response-label">Your Response</div>' +
+        '<div class="obj-response-text">' + escHtml(obj.r) + '</div>' +
+        '<div class="obj-followup-label">Follow-Up Move</div>' +
+        '<div class="obj-followup-text">' + escHtml(obj.f) + '</div>' +
+        '</div>' : '') +
+      '</div>';
+  }).join('');
+
+  document.getElementById('view-objections').innerHTML =
+    '<div class="view-header">' +
+    '<div class="view-title">Objection Handling</div>' +
+    '<div class="view-sub">Tap an objection to reveal the full response and follow-up move.</div>' +
+    '</div>' +
+    '<div class="obj-layout">' +
+    sidebarHtml +
+    '<div class="obj-content">' +
+    '<div style="font-size:14px;font-weight:600;margin-bottom:14px">' + escHtml(cat.cat) + '</div>' +
+    itemsHtml +
+    '</div></div>';
+}
+
+// ─── CLOSE GUIDE ─────────────────────────────────────────────────────────────
+
+function renderClose() {
+  var prospects = getProspects();
+  var activeProspects = prospects.filter(function(p){
+    var s = (p.stage||'').toLowerCase();
+    return s === 'warm' || s === 'audit scheduled' || s === 'proposal sent';
+  });
+  var p = closeProspectId ? getProspect(closeProspectId) : null;
+  var lastAudit = p && p.audits && p.audits.length > 0 ? p.audits[p.audits.length - 1] : null;
+  var tier = lastAudit ? lastAudit.recommended_tier : 'starter';
+  var script = CLOSING_SCRIPTS[tier] || CLOSING_SCRIPTS.starter;
+  var top3 = lastAudit ? (lastAudit.ranked_bottlenecks || []).slice(0, 3).map(function(b){ return b.title; }) : [];
+
+  var selOpts = '<option value="">Select an active prospect…</option>' +
+    activeProspects.map(function(pr){
+      return '<option value="' + escAttr(String(pr.id)) + '"' + (String(closeProspectId) === String(pr.id) ? ' selected' : '') + '>' + escHtml(pr.company_name) + ' · ' + escHtml(pr.stage) + '</option>';
+    }).join('');
+
+  // Tabs
+  var tabsHtml = '<div class="close-tabs">' +
+    ['pre','script','post'].map(function(t, i) {
+      var labels = { pre:'Pre-Close Checklist', script:'Closing Script', post:'Post-Close Actions' };
+      return '<button class="close-tab-btn' + (closeTab === t ? ' active' : '') + '" onclick="closeTab=\'' + t + '\';renderClose()">' + escHtml(labels[t]) + '</button>';
+    }).join('') + '</div>';
+
+  var contentHtml = '';
+  if (closeTab === 'pre') {
+    var preCount = Object.values(closePreChecks).filter(Boolean).length;
+    contentHtml = '<p style="font-size:11px;color:var(--muted);margin-bottom:12px">Before the closing call, confirm each item below.</p>' +
+      PRE_CLOSE_ITEMS.map(function(item, i) {
+        var checked = !!closePreChecks[i];
+        return '<div class="close-check-item' + (checked ? ' checked' : '') + '" onclick="closePreChecks[' + i + ']=!' + checked + ';renderClose()">' +
+          '<span class="close-check-icon">' + (checked ? '✓' : '○') + '</span>' +
+          '<span class="close-check-text">' + escHtml(item) + '</span></div>';
+      }).join('') +
+      '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);margin-top:8px">' + preCount + ' / ' + PRE_CLOSE_ITEMS.length + ' checked</div>';
+
+  } else if (closeTab === 'script') {
+    contentHtml = '<div class="close-script-setup">' +
+      '<div class="close-script-title">' + escHtml(script.title) + '</div>' +
+      '<div class="close-script-subtitle">' + escHtml(script.setup) + '</div>' +
+      '</div>' +
+      (top3.length > 0 ? '<div style="padding:8px 12px;background:var(--surface2);border-radius:5px;font-size:11px;margin-bottom:12px">' +
+        '<span style="color:var(--muted)">Fill in from audit: </span>' +
+        top3.map(function(t){ return '<span style="color:var(--accent)">' + escHtml(t) + '</span>'; }).join(' · ') + '</div>' : '') +
+      script.steps.map(function(step, i) {
+        return '<div class="close-step">' +
+          '<div class="close-step-label">Step ' + (i+1) + ' — ' + escHtml(step.label) + '</div>' +
+          '<div class="close-step-body">' + escHtml(step.s) + '</div>' +
+          '</div>';
+      }).join('');
+
+  } else if (closeTab === 'post') {
+    var postCount = Object.values(closePostChecks).filter(Boolean).length;
+    contentHtml = '<p style="font-size:11px;color:var(--muted);margin-bottom:12px">They said yes. Lock in every handoff step before the call ends.</p>' +
+      POST_CLOSE_ITEMS.map(function(item, i) {
+        var checked = !!closePostChecks[i];
+        return '<div class="close-check-item' + (checked ? ' checked' : '') + '" onclick="closePostChecks[' + i + ']=!' + checked + ';renderClose()">' +
+          '<span class="close-check-icon">' + (checked ? '✓' : '○') + '</span>' +
+          '<span class="close-check-text">' + escHtml(item) + '</span></div>';
+      }).join('') +
+      '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);margin-top:8px">' + postCount + ' / ' + POST_CLOSE_ITEMS.length + ' completed</div>';
+  }
+
+  document.getElementById('view-close').innerHTML =
+    '<div class="view-header">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between">' +
+    '<div class="view-title" style="margin:0">Close Guide</div>' +
+    (p ? '<button class="btn btn-primary btn-sm" onclick="markClosed()">Mark Closed 🎉</button>' : '') +
+    '</div>' +
+    '</div>' +
+    '<div class="max-600">' +
+    '<select class="form-select" style="margin-bottom:16px" onchange="closeProspectId=this.value?parseInt(this.value):null;closeTab=\'pre\';closePreChecks={};closePostChecks={};renderClose()">' + selOpts + '</select>' +
+    tabsHtml +
+    contentHtml +
+    '</div>';
+}
+
+function markClosed() {
+  var p = closeProspectId ? getProspect(closeProspectId) : null;
+  if (!p) return;
+  p.stage = 'Closed';
+  saveProspects();
+  renderClose();
+  showToast('🎉 Closed — ' + p.company_name);
+}
+
+// ─── HEADER ───────────────────────────────────────────────────────────────────
 
 function renderHeader() {
   var d = new Date();
@@ -537,251 +1630,16 @@ function renderHeader() {
   if (el) el.textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
 }
 
-// ── Toggle card open/closed ────────────────────────────────────────────────
-function toggleCard(id) {
-  openCards[id] = !openCards[id];
-  if (!openTabs[id]) openTabs[id] = 'overview';
-  renderClients();
-}
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 
-function switchTab(id, tab) {
-  openTabs[id] = tab;
-  renderClients();
-}
-
-// ── Add/Edit form toggles ──────────────────────────────────────────────────
-function toggleAddForm() {
-  showAddForm = !showAddForm;
-  editingId = null;
-  renderFormArea();
-  if (showAddForm) setTimeout(function() { var el = document.getElementById('f-name-new'); if(el) el.focus(); }, 50);
-}
-
-function startEdit(id) {
-  editingId = id;
-  showAddForm = false;
-  renderFormArea();
-  setTimeout(function() { var el = document.getElementById('f-name-' + id); if(el) el.focus(); }, 50);
-}
-
-function cancelForm() {
-  showAddForm = false;
-  editingId = null;
-  renderFormArea();
-}
-
-function renderFormArea() {
-  var wrap = document.getElementById('cl-form-wrap');
-  if (!wrap) return;
-  if (showAddForm) { wrap.innerHTML = buildClientForm(null); }
-  else if (editingId !== null) {
-    var c = state.os_data.clients.find(function(x) { return x.id === editingId; });
-    wrap.innerHTML = c ? buildClientForm(c) : '';
-  } else { wrap.innerHTML = ''; }
-}
-
-// ── Save / Delete client ───────────────────────────────────────────────────
-function saveClient(fid) {
-  var name     = (document.getElementById('f-name-' + fid)     || {}).value || '';
-  var trade    = (document.getElementById('f-trade-' + fid)    || {}).value || '';
-  var location = (document.getElementById('f-location-' + fid) || {}).value || '';
-  var status   = (document.getElementById('f-status-' + fid)   || {}).value || 'prospect';
-  var phase    = (document.getElementById('f-phase-' + fid)    || {}).value || 'Phase I';
-  var auditFee = (document.getElementById('f-audit-' + fid)    || {}).value || '';
-  var retainer = (document.getElementById('f-retainer-' + fid) || {}).value || '';
-  var notes    = (document.getElementById('f-notes-' + fid)    || {}).value || '';
-  if (!name.trim()) { showToast('⚠ Client name is required'); return; }
-
-  if (fid === 'new') {
-    state.os_data.clients.push({
-      id: genId(), name: name.trim(), trade: trade.trim(), location: location.trim(),
-      status: status, phase: phase, auditFee: auditFee, retainer: retainer,
-      notes: notes.trim(), proposals: [], audits: [], documents: []
-    });
-  } else {
-    var numId = parseInt(fid);
-    var c = state.os_data.clients.find(function(x) { return x.id === numId; });
-    if (c) {
-      c.name = name.trim(); c.trade = trade.trim(); c.location = location.trim();
-      c.status = status; c.phase = phase; c.auditFee = auditFee;
-      c.retainer = retainer; c.notes = notes.trim();
-    }
-  }
-  showAddForm = false; editingId = null;
-  scheduleSave(); renderFormArea(); renderAll();
-}
-
-function deleteClient(id) {
-  delete openCards[id];
-  state.os_data.clients = state.os_data.clients.filter(function(c) { return c.id !== id; });
-  scheduleSave(); renderAll();
-}
-
-// ── Proposal actions ───────────────────────────────────────────────────────
-function openProposalForm(clientId) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (!c) return;
-  var pid = genId();
-  var today = new Date().toISOString().slice(0,10);
-  // Build a proposal modal/inline form
-  var formHtml = buildProposalFormHtml(c, pid);
-  var tabContent = document.querySelector('#cfc-' + clientId + ' .profile-tab-content');
-  if (tabContent) tabContent.innerHTML = formHtml;
-}
-
-function buildProposalFormHtml(c, pid) {
-  return '<div style="padding:4px 0">' +
-    '<div class="proposal-section"><div class="proposal-label">Proposal Title</div>' +
-    '<input class="proposal-field" id="prop-title-' + pid + '" placeholder="e.g. Phase I Audit — ' + escAttr(c.name) + '"></div>' +
-    '<div class="proposal-row">' +
-    '<div class="proposal-section"><div class="proposal-label">Client Pain Point</div>' +
-    '<textarea class="proposal-textarea" id="prop-pain-' + pid + '" placeholder="What problem are we solving?"></textarea></div>' +
-    '<div class="proposal-section"><div class="proposal-label">Proposed Solution</div>' +
-    '<textarea class="proposal-textarea" id="prop-solution-' + pid + '" placeholder="How StructTech fixes it..."></textarea></div>' +
-    '</div>' +
-    '<div class="proposal-section"><div class="proposal-label">Deliverables</div>' +
-    '<textarea class="proposal-textarea" id="prop-deliverables-' + pid + '" placeholder="1. Workflow audit report&#10;2. Top 3 automation builds&#10;3. Team training session" style="min-height:60px"></textarea></div>' +
-    '<div class="proposal-row">' +
-    '<div class="proposal-section"><div class="proposal-label">Investment</div>' +
-    '<input class="proposal-field" id="prop-price-' + pid + '" placeholder="$500 audit + $750/mo retainer"></div>' +
-    '<div class="proposal-section"><div class="proposal-label">Timeline</div>' +
-    '<input class="proposal-field" id="prop-timeline-' + pid + '" placeholder="e.g. 2 weeks audit, 30 days build"></div>' +
-    '</div>' +
-    '<div style="display:flex;gap:8px;margin-top:12px">' +
-    '<button class="btn btn-primary btn-sm" onclick="saveProposal(' + c.id + ',' + pid + ',false)">Save Draft</button>' +
-    '<button class="btn btn-secondary btn-sm" onclick="saveProposal(' + c.id + ',' + pid + ',true)">Mark as Sent</button>' +
-    '<button class="btn btn-ghost btn-sm" onclick="switchTab(' + c.id + ',\'proposal\')">Cancel</button>' +
-    '</div></div>';
-}
-
-function saveProposal(clientId, pid, sent) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (!c) return;
-  var title       = (document.getElementById('prop-title-' + pid)       || {}).value || '';
-  var pain        = (document.getElementById('prop-pain-' + pid)        || {}).value || '';
-  var solution    = (document.getElementById('prop-solution-' + pid)    || {}).value || '';
-  var deliverables= (document.getElementById('prop-deliverables-' + pid)|| {}).value || '';
-  var price       = (document.getElementById('prop-price-' + pid)       || {}).value || '';
-  var timeline    = (document.getElementById('prop-timeline-' + pid)    || {}).value || '';
-  var summary = [pain, solution].filter(Boolean).join(' · ').slice(0, 120);
-  if (!c.proposals) c.proposals = [];
-  c.proposals.push({ id: pid, title: title, pain: pain, solution: solution, deliverables: deliverables, price: price, timeline: timeline, sent: sent, summary: summary, date: new Date().toISOString() });
-  scheduleSave();
-  openTabs[clientId] = 'proposal';
-  renderClients();
-}
-
-function deleteProposal(clientId, pid) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (c && c.proposals) { c.proposals = c.proposals.filter(function(p) { return p.id !== pid; }); scheduleSave(); renderClients(); }
-}
-
-function viewProposal(clientId, pid) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (!c) return;
-  var p = (c.proposals||[]).find(function(x) { return x.id === pid; });
-  if (!p) return;
-  var tabContent = document.querySelector('#cfc-' + clientId + ' .profile-tab-content');
-  if (!tabContent) return;
-  var today = new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'});
-  tabContent.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="switchTab(' + clientId + ',\'proposal\')" style="margin-bottom:12px">← Back to Proposals</button>' +
-    '<div class="proposal-preview">' +
-    '<div class="proposal-preview-title">' + escHtml(p.title || 'Proposal') + '</div>' +
-    '<div class="proposal-preview-meta">Prepared for: ' + escHtml(c.name) + ' &nbsp;|&nbsp; ' + today + ' &nbsp;|&nbsp; StructTech LLC</div>' +
-    (p.pain ? '<strong>The Challenge</strong>\n' + escHtml(p.pain) + '\n\n' : '') +
-    (p.solution ? '<strong>Our Approach</strong>\n' + escHtml(p.solution) + '\n\n' : '') +
-    (p.deliverables ? '<strong>Deliverables</strong>\n' + escHtml(p.deliverables) + '\n\n' : '') +
-    (p.price ? '<strong>Investment</strong>\n' + escHtml(p.price) + '\n\n' : '') +
-    (p.timeline ? '<strong>Timeline</strong>\n' + escHtml(p.timeline) : '') +
-    '</div>';
-}
-
-// ── Audit actions ──────────────────────────────────────────────────────────
-function addAudit(clientId) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (!c) return;
-  var aid = genId();
-  var tabContent = document.querySelector('#cfc-' + clientId + ' .profile-tab-content');
-  if (!tabContent) return;
-  tabContent.innerHTML = buildAuditFormHtml(c, aid, null);
-}
-
-function editAudit(clientId, aid) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (!c) return;
-  var a = (c.audits||[]).find(function(x) { return x.id === aid; });
-  var tabContent = document.querySelector('#cfc-' + clientId + ' .profile-tab-content');
-  if (tabContent && a) tabContent.innerHTML = buildAuditFormHtml(c, aid, a);
-}
-
-function buildAuditFormHtml(c, aid, existing) {
-  var v = existing || { title:'', notes:'', status:'draft', bottlenecks:[] };
-  var bns = (v.bottlenecks||[]).join('\n');
-  var statusOpts = ['draft','delivered'].map(function(s) {
-    return '<option value="' + s + '"' + (v.status===s?' selected':'') + '>' + s + '</option>';
-  }).join('');
-  return '<div style="padding:4px 0">' +
-    '<div class="proposal-section"><div class="proposal-label">Audit Title</div>' +
-    '<input class="proposal-field" id="aud-title-' + aid + '" value="' + escAttr(v.title) + '" placeholder="e.g. Workflow Audit — Round 1"></div>' +
-    '<div class="proposal-row">' +
-    '<div class="proposal-section"><div class="proposal-label">Status</div>' +
-    '<select class="proposal-field" id="aud-status-' + aid + '">' + statusOpts + '</select></div>' +
-    '</div>' +
-    '<div class="proposal-section"><div class="proposal-label">Bottlenecks Found (one per line)</div>' +
-    '<textarea class="proposal-textarea" id="aud-bns-' + aid + '" placeholder="Manual invoice entry taking 2hrs/wk&#10;No follow-up system for estimates&#10;Scheduling done by phone only">' + escHtml(bns) + '</textarea></div>' +
-    '<div class="proposal-section"><div class="proposal-label">Audit Notes / Findings</div>' +
-    '<textarea class="proposal-textarea" id="aud-notes-' + aid + '" style="min-height:100px" placeholder="Detailed findings, observations, recommendations...">' + escHtml(v.notes||'') + '</textarea></div>' +
-    '<div style="display:flex;gap:8px;margin-top:12px">' +
-    '<button class="btn btn-primary btn-sm" onclick="saveAudit(' + c.id + ',' + aid + ')">Save Audit</button>' +
-    '<button class="btn btn-ghost btn-sm" onclick="switchTab(' + c.id + ',\'audits\')">Cancel</button>' +
-    '</div></div>';
-}
-
-function saveAudit(clientId, aid) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (!c) return;
-  var title  = (document.getElementById('aud-title-' + aid)  || {}).value || '';
-  var status = (document.getElementById('aud-status-' + aid) || {}).value || 'draft';
-  var bnsRaw = (document.getElementById('aud-bns-' + aid)    || {}).value || '';
-  var notes  = (document.getElementById('aud-notes-' + aid)  || {}).value || '';
-  var bottlenecks = bnsRaw.split('\n').map(function(s){return s.trim();}).filter(Boolean);
-  if (!c.audits) c.audits = [];
-  var existing = c.audits.find(function(a) { return a.id === aid; });
-  if (existing) { existing.title = title; existing.status = status; existing.bottlenecks = bottlenecks; existing.notes = notes; }
-  else { c.audits.push({ id: aid, title: title, status: status, bottlenecks: bottlenecks, notes: notes, date: new Date().toISOString() }); }
-  scheduleSave(); openTabs[clientId] = 'audits'; renderClients();
-}
-
-function deleteAudit(clientId, aid) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (c && c.audits) { c.audits = c.audits.filter(function(a) { return a.id !== aid; }); scheduleSave(); renderClients(); }
-}
-
-// ── Document actions ───────────────────────────────────────────────────────
-function addDoc(clientId) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (!c) return;
-  var name = (document.getElementById('doc-name-' + clientId) || {}).value || '';
-  var type = (document.getElementById('doc-type-' + clientId) || {}).value || 'other';
-  var url  = (document.getElementById('doc-url-' + clientId)  || {}).value || '';
-  if (!name.trim()) { showToast('⚠ Document name required'); return; }
-  if (!c.documents) c.documents = [];
-  c.documents.push({ id: genId(), name: name.trim(), type: type, url: url.trim(), date: new Date().toISOString() });
-  scheduleSave(); renderClients();
-}
-
-function deleteDoc(clientId, did) {
-  var c = state.os_data.clients.find(function(x) { return x.id === clientId; });
-  if (c && c.documents) { c.documents = c.documents.filter(function(d) { return d.id !== did; }); scheduleSave(); renderClients(); }
-}
-
-// ── Init ───────────────────────────────────────────────────────────────────
 async function init() {
   await loadState();
-  seedClientData();
+  if (!state.os_data.prospects) state.os_data.prospects = [];
+  renderHeader();
   renderNav('clients');
-  renderAll();
+  showView('pipeline');
 }
+
 document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
