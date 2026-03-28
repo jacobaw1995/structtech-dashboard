@@ -408,40 +408,47 @@ function renderMilestones() {
 }
 
 // ── Render: Prospect item ──────────────────────────────────────────────────
-function renderProspectItem(p, idx) {
-  var stageCls = 'badge stage-' + p.stage.toLowerCase();
-  return '<div class="prospect-item">' +
-    '<div><div class="prospect-name">' + escHtml(p.name) + '</div>' +
-    '<div class="prospect-trade">' + escHtml(p.type) + '</div></div>' +
-    '<span class="' + stageCls + '" onclick="cycleStage(' + idx + ')" title="Click to advance stage">' + p.stage + '</span>' +
-    '<button class="prospect-del" onclick="deleteProspect(' + idx + ')" title="Remove">\u00d7</button>' +
-    '</div>';
-}
+// ── Pipeline stage config (mirrors clients.html) ───────────────────────────
+var PIPELINE_STAGE_COLORS = {
+  'Cold':             '#64748b',
+  'Warm':             '#60a5fa',
+  'Audit Scheduled':  '#f59e0b',
+  'Proposal Sent':    '#c084fc',
+  'Closed':           '#4ade80'
+};
 
 // ── Render: Prospects panel ────────────────────────────────────────────────
 function renderProspects() {
   var el = document.getElementById('prospects-panel');
   if (!el) return;
-  var addFormHtml = '';
-  if (showAddProspect) {
-    addFormHtml = '<div class="inline-form">' +
-      '<div class="inline-form-row">' +
-      '<input class="form-input" id="np-name" placeholder="Name / Company">' +
-      '<input class="form-input" id="np-trade" placeholder="Trade">' +
-      '</div>' +
-      '<div class="inline-form-row">' +
-      '<select class="form-select" id="np-stage"><option>Cold</option><option>Warm</option><option>Hot</option><option>Won</option></select>' +
-      '<button class="btn btn-primary btn-sm" onclick="saveProspect()">Add</button>' +
-      '<button class="btn btn-ghost btn-sm" onclick="cancelAddProspect()">Cancel</button>' +
-      '</div></div>';
-  }
+  var pp = (state.os_data.prospects || []).slice().sort(function(a, b) {
+    var order = { 'Proposal Sent': 0, 'Audit Scheduled': 1, 'Warm': 2, 'Closed': 3, 'Cold': 4 };
+    return (order[a.stage] ?? 5) - (order[b.stage] ?? 5);
+  });
   var items = '';
-  state.prospects.forEach(function(p, i) { items += renderProspectItem(p, i); });
+  pp.forEach(function(p) {
+    var color = PIPELINE_STAGE_COLORS[p.stage] || '#64748b';
+    var score = '';
+    // Show ICP score dot if available
+    if (p.icpScore !== undefined) {
+      var sc = p.icpScore;
+      var scColor = sc >= 70 ? 'var(--accent2)' : sc >= 45 ? 'var(--warn)' : 'var(--danger)';
+      score = '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:' + scColor + ';margin-left:6px">' + sc + '</span>';
+    }
+    items += '<div class="prospect-item">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="prospect-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtml(p.name) + '</div>' +
+        '<div class="prospect-trade">' + escHtml(p.bizType || p.tradeType || '') + (p.city ? ' · ' + escHtml(p.city) : '') + '</div>' +
+      '</div>' +
+      score +
+      '<span style="font-family:\'DM Mono\',monospace;font-size:9px;padding:3px 8px;border-radius:3px;background:' + color + '22;color:' + color + ';white-space:nowrap;margin-left:8px;flex-shrink:0">' + escHtml(p.stage) + '</span>' +
+    '</div>';
+  });
   el.innerHTML = '<div class="section-header">' +
     '<span class="section-title">Prospect Pipeline</span>' +
-    '<button class="btn btn-primary btn-sm" onclick="toggleAddProspect()">+ Add</button>' +
-    '</div>' + addFormHtml +
-    (items || '<div style="color:var(--muted);font-size:12px;padding:8px 0;">No prospects yet.</div>');
+    '<a href="clients.html" class="btn btn-ghost btn-sm" style="text-decoration:none">Open →</a>' +
+    '</div>' +
+    (items || '<div style="color:var(--muted);font-size:12px;padding:8px 0;">No prospects yet. <a href="clients.html" style="color:var(--accent)">Add in Clients →</a></div>');
 }
 
 // ── Render: Income entry ───────────────────────────────────────────────────
