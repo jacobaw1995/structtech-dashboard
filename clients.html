@@ -261,6 +261,45 @@
 .close-step-label { padding: 7px 12px; background: var(--surface2); font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .close-step-body { padding: 12px 14px; background: var(--bg); font-size: 12px; color: var(--text); line-height: 1.7; font-style: italic; }
 
+/* ── Proposal builder ── */
+.prop-builder {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 18px; margin-bottom: 20px; max-width: 760px;
+}
+.prop-builder-title { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 14px; }
+.prop-line-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.prop-line-item:last-of-type { border-bottom: none; }
+.prop-line-item-check { accent-color: var(--accent2); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+.prop-line-item-name { flex: 1; font-size: 13px; cursor: pointer; user-select: none; }
+.prop-line-item-name.dimmed { color: var(--muted); }
+.prop-line-item-desc { font-size: 10px; color: var(--muted); }
+.prop-price-input {
+  width: 80px; background: var(--bg); border: 1px solid var(--border);
+  color: var(--text); border-radius: 4px; padding: 4px 7px;
+  font-family: 'DM Mono', monospace; font-size: 12px; text-align: right; outline: none;
+}
+.prop-price-input:focus { border-color: var(--accent); }
+.prop-price-input:disabled { color: var(--muted); background: var(--surface2); }
+.prop-remove-btn { background: none; border: none; color: var(--border2); cursor: pointer; font-size: 14px; padding: 2px 5px; transition: color 0.15s; }
+.prop-remove-btn:hover { color: var(--danger); }
+.prop-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 12px; margin-top: 4px; border-top: 1px solid var(--border2); }
+.prop-total-label { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.prop-total-amount { font-family: 'Bebas Neue', cursive; font-size: 28px; color: var(--accent); }
+.prop-custom-row { display: flex; gap: 8px; margin-top: 12px; }
+
+/* ── Proposal itemized table ── */
+.prop-item-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.prop-item-table th { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 6px 0; border-bottom: 1px solid var(--border); text-align: left; }
+.prop-item-table th:last-child { text-align: right; }
+.prop-item-table td { padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12px; vertical-align: top; }
+.prop-item-table td:last-child { text-align: right; font-family: 'DM Mono', monospace; white-space: nowrap; }
+.prop-item-table tr.total-row td { border-bottom: none; border-top: 2px solid var(--border2); padding-top: 12px; font-weight: 700; font-size: 14px; }
+.prop-item-table tr.total-row td:last-child { font-family: 'Bebas Neue', cursive; font-size: 22px; color: var(--accent); }
+.prop-item-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
 /* ── Shared view styles ── */
 .view-header { margin-bottom: 20px; }
 .view-title { font-family: 'Bebas Neue', cursive; font-size: 22px; color: var(--text); letter-spacing: 0.04em; margin-bottom: 4px; }
@@ -276,10 +315,16 @@
 @media print {
   header, .df-subnav, #app-nav, .no-print { display: none !important; }
   body { background: #fff !important; color: #111 !important; }
-  .prop-doc { background: white; color: #111; border: none; padding: 0; }
+  .prop-doc { background: white; color: #111; border: none; padding: 0; max-width: 100%; }
   .prop-brand { color: #c25000 !important; }
   .prop-price { color: #c25000 !important; }
+  .prop-total-amount { color: #c25000 !important; }
   .prop-includes li::before { color: #1a7a3b !important; }
+  .prop-item-table th, .prop-item-table td { color: #111 !important; border-color: #ddd !important; }
+  .prop-item-table tr.total-row td:last-child { color: #c25000 !important; }
+  .prop-finding { background: #f8f8f8 !important; border-color: #ddd !important; }
+  .prop-scope-box { background: #f8f8f8 !important; border-color: #c25000 !important; }
+  .prop-step-num { background: #c25000 !important; }
 }
 
 @media (max-width: 640px) {
@@ -676,6 +721,17 @@ var TIER_DATA = {
     includes:['Full audit across all 6 Field-to-Office categories','Complete system design and build — every workflow, fully connected','Custom tool suite based on tech readiness and budget','Full team training with role-specific hands-on sessions','System admin handoff and backend documentation','Comprehensive SOPs and quick-reference guides','90-day post-delivery support window'] }
 };
 
+var AUTOMATION_CATALOG = [
+  { id:'scheduling',    name:'Job Scheduling & Dispatch System',    desc:'Automated crew assignments, digital dispatch, and real-time job status.',          price:750 },
+  { id:'communication', name:'Field-to-Office Communication Hub',   desc:'Centralized job feed for all field updates, photos, notes, and issues.',           price:500 },
+  { id:'invoicing',     name:'Invoicing & Payment Automation',      desc:'Auto-triggered invoices on job completion with timed payment reminder sequences.', price:500 },
+  { id:'jobcosting',    name:'Job Costing & Expense Tracking',      desc:'Labor, materials, and sub costs tied to job codes in real time.',                  price:600 },
+  { id:'materials',     name:'Materials & Procurement System',      desc:'Procurement tracking and inventory visibility across all active jobs.',             price:600 },
+  { id:'leads',         name:'Lead & CRM Follow-Up System',         desc:'Automated lead follow-up, estimate tracking, and past-client re-engagement.',      price:500 },
+  { id:'training',      name:'Team Training & Handoff',             desc:'Role-specific hands-on training sessions with recorded walkthroughs.',             price:350 },
+  { id:'sops',          name:'SOPs & Process Documentation',        desc:'Written standard operating procedures for each implemented workflow.',             price:250 },
+];
+
 var PRE_CLOSE_ITEMS = [
   'Audit completed and results shared with prospect',
   'Proposal delivered (email or in-person)',
@@ -784,6 +840,8 @@ var auditResults = null;
 // Proposal state
 var proposalProspectId = '';
 var proposalNotes = '';
+var proposalLineItems = [];    // [{id, name, desc, price, included, custom}]
+var proposalCustomCounter = 0; // for unique custom item ids
 
 // Objections state
 var objCatIdx = 0;
@@ -1383,6 +1441,147 @@ function goToProposalFromAudit() {
 
 // ─── PROPOSAL ────────────────────────────────────────────────────────────────
 
+function initProposalLineItems(lastAudit) {
+  proposalLineItems = AUTOMATION_CATALOG.map(function(item) {
+    var highPain = lastAudit && (lastAudit.ranked_bottlenecks || []).some(function(b) {
+      return b.id === item.id && b.pct >= 50;
+    });
+    return { id: item.id, name: item.name, desc: item.desc, price: item.price, included: !!highPain, custom: false };
+  });
+}
+
+function toggleProposalItem(id) {
+  var item = proposalLineItems.find(function(x){ return x.id === id; });
+  if (item) { item.included = !item.included; renderProposalBuilder(); renderProposalDoc(); }
+}
+
+function setProposalItemPrice(id, val) {
+  var item = proposalLineItems.find(function(x){ return x.id === id; });
+  if (item) { item.price = parseInt(val) || 0; renderProposalTotal(); renderProposalDoc(); }
+}
+
+function addCustomProposalItem() {
+  var nameEl = document.getElementById('prop-custom-name');
+  var priceEl = document.getElementById('prop-custom-price');
+  var name = nameEl ? nameEl.value.trim() : '';
+  var price = priceEl ? parseInt(priceEl.value) || 0 : 0;
+  if (!name) { showToast('⚠ Enter a name for the custom item'); return; }
+  proposalLineItems.push({ id: 'custom-' + (++proposalCustomCounter), name: name, desc: '', price: price, included: true, custom: true });
+  renderProposalBuilder();
+  renderProposalDoc();
+}
+
+function removeProposalItem(id) {
+  proposalLineItems = proposalLineItems.filter(function(x){ return x.id !== id; });
+  renderProposalBuilder();
+  renderProposalDoc();
+}
+
+function calcProposalTotal() {
+  return proposalLineItems.filter(function(x){ return x.included; }).reduce(function(sum, x){ return sum + (x.price || 0); }, 0);
+}
+
+function renderProposalTotal() {
+  var el = document.getElementById('prop-total-amount');
+  if (el) el.textContent = '$' + calcProposalTotal().toLocaleString();
+}
+
+function renderProposalBuilder() {
+  var el = document.getElementById('prop-builder-inner');
+  if (!el) return;
+
+  var itemsHtml = proposalLineItems.map(function(item) {
+    return '<div class="prop-line-item">' +
+      '<input type="checkbox" class="prop-line-item-check" ' + (item.included ? 'checked' : '') + ' onchange="toggleProposalItem(\'' + escAttr(item.id) + '\')">' +
+      '<div style="flex:1;cursor:pointer" onclick="toggleProposalItem(\'' + escAttr(item.id) + '\')">' +
+      '<div class="prop-line-item-name' + (!item.included ? ' dimmed' : '') + '">' + escHtml(item.name) + '</div>' +
+      (item.desc ? '<div class="prop-item-desc">' + escHtml(item.desc) + '</div>' : '') +
+      '</div>' +
+      '<input type="number" class="prop-price-input" value="' + (item.price || 0) + '" ' + (!item.included ? 'disabled' : '') + ' onchange="setProposalItemPrice(\'' + escAttr(item.id) + '\',this.value)" min="0" step="50">' +
+      (item.custom ? '<button class="prop-remove-btn" onclick="removeProposalItem(\'' + escAttr(item.id) + '\')">×</button>' : '<div style="width:22px"></div>') +
+      '</div>';
+  }).join('');
+
+  var total = calcProposalTotal();
+  var included = proposalLineItems.filter(function(x){ return x.included; }).length;
+
+  el.innerHTML = itemsHtml +
+    '<div class="prop-total-row">' +
+    '<div>' +
+    '<div class="prop-total-label">' + included + ' item' + (included !== 1 ? 's' : '') + ' selected</div>' +
+    '</div>' +
+    '<div class="prop-total-amount" id="prop-total-amount">$' + total.toLocaleString() + '</div>' +
+    '</div>' +
+    '<div class="prop-custom-row">' +
+    '<input class="form-input" id="prop-custom-name" placeholder="Custom line item name..." style="flex:2">' +
+    '<input class="form-input" id="prop-custom-price" type="number" placeholder="Price" style="width:90px" min="0" step="50">' +
+    '<button class="btn btn-ghost btn-sm" onclick="addCustomProposalItem()">+ Add</button>' +
+    '</div>';
+}
+
+function renderProposalDoc() {
+  var el = document.getElementById('prop-doc-inner');
+  if (!el) return;
+  var p = proposalProspectId ? getProspect(proposalProspectId) : null;
+  if (!p) return;
+  var lastAudit = p.audits && p.audits.length > 0 ? p.audits[p.audits.length - 1] : null;
+  var bottlenecks = lastAudit ? (lastAudit.ranked_bottlenecks || []).filter(function(b){ return b.pct >= 50; }).slice(0, 4) : [];
+  var today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  var included = proposalLineItems.filter(function(x){ return x.included; });
+  var total = calcProposalTotal();
+
+  var findingsHtml = bottlenecks.length > 0 ? (
+    '<div class="prop-section-label">What the Audit Revealed</div>' +
+    bottlenecks.map(function(b, i) {
+      var pl = painLabel(b.pct);
+      return '<div class="prop-finding">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between">' +
+        '<div class="prop-finding-title">#' + (i+1) + ' — ' + escHtml(b.title) + '</div>' +
+        '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:' + pl.c + '">' + pl.l + '</span>' +
+        '</div>' +
+        '<div class="prop-finding-why">' + escHtml((TOOL_RECS[b.id] || {}).why || '') + '</div>' +
+        '</div>';
+    }).join('') + '<div style="margin-bottom:20px"></div>'
+  ) : '';
+
+  var scopeHtml = included.length > 0 ? (
+    '<div class="prop-section-label">Scope of Work — Itemized</div>' +
+    '<table class="prop-item-table">' +
+    '<thead><tr><th>Deliverable</th><th style="text-align:right">Investment</th></tr></thead>' +
+    '<tbody>' +
+    included.map(function(item) {
+      return '<tr><td><div>' + escHtml(item.name) + '</div>' +
+        (item.desc ? '<div class="prop-item-desc">' + escHtml(item.desc) + '</div>' : '') +
+        '</td><td>$' + (item.price || 0).toLocaleString() + '</td></tr>';
+    }).join('') +
+    '<tr class="total-row"><td>Total Investment</td><td>$' + total.toLocaleString() + '</td></tr>' +
+    '</tbody></table>'
+  ) : '<div class="prop-section-label">Scope of Work</div><p style="font-size:12px;color:var(--muted);margin-bottom:20px">Select automations from the builder above to populate the scope.</p>';
+
+  el.innerHTML =
+    '<div class="prop-doc-header">' +
+    '<div><div class="prop-brand">StructTech LLC</div>' +
+    '<div class="prop-tagline">Field-to-Office Technology Integration</div>' +
+    '<div class="prop-contact">jacob@structtek.com · structtek.com · (937) 467-2660</div></div>' +
+    '<div class="prop-to">' + today + '<br>Prepared for: <strong>' + escHtml(p.company_name) + '</strong><br>Attn: ' + escHtml(p.owner_name || 'Owner') + '</div>' +
+    '</div>' +
+    '<hr class="prop-divider">' +
+    '<h2 style="font-size:18px;font-weight:700;margin-bottom:12px">Field-to-Office Integration Proposal</h2>' +
+    '<p class="prop-intro">' + (p.owner_name ? escHtml(p.owner_name) + ', based' : 'Based') + ' on the operational audit we completed for ' + escHtml(p.company_name) + ', I\'ve put together a focused implementation plan to address the specific gaps that are costing you the most time and revenue right now.</p>' +
+    findingsHtml +
+    scopeHtml +
+    '<div class="prop-section-label" style="margin-top:20px">The Process</div>' +
+    '<div class="prop-process-steps">' +
+    ['Assessment & Planning','Build & Configure','Test & Import','Train & Hand Off'].map(function(s, i){
+      return '<div class="prop-step"><div class="prop-step-num">' + (i+1) + '</div><div class="prop-step-label">' + escHtml(s) + '</div></div>';
+    }).join('') + '</div>' +
+    (proposalNotes ? '<div class="prop-section-label">Additional Notes</div><p style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:20px">' + escHtml(proposalNotes) + '</p>' : '') +
+    '<hr class="prop-divider">' +
+    '<p style="font-size:12px;color:var(--text);line-height:1.75;margin-bottom:16px">If this looks right, the next step is a 30-minute kickoff call where we confirm scope, review your current tools, and get your first workflow on the build schedule. There\'s no lengthy contract — just a simple one-page agreement before we start.</p>' +
+    '<div><strong style="font-size:13px">Jacob Walker</strong><br>' +
+    '<span style="font-size:11px;color:var(--muted)">Founder, StructTech LLC<br>jacob@structtek.com · (937) 467-2660</span></div>';
+}
+
 function renderProposal() {
   var prospects = getProspects();
   var p = proposalProspectId ? getProspect(proposalProspectId) : null;
@@ -1395,91 +1594,49 @@ function renderProposal() {
 
   var controlsHtml =
     '<div class="no-print" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px">' +
-    '<select class="form-select" style="min-width:220px" onchange="proposalProspectId=this.value?parseInt(this.value):null;proposalNotes=\'\';renderProposal()">' + selOpts + '</select>' +
-    (lastAudit ? '<button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print / PDF</button>' : '') +
-    (lastAudit && p && p.stage !== 'Closed' ? '<button class="btn btn-secondary btn-sm" onclick="markProposalSent()">Mark Sent</button>' : '') +
+    '<select class="form-select" style="min-width:220px" onchange="onProspectSelect(this.value)">' + selOpts + '</select>' +
+    (p ? '<button class="btn btn-ghost btn-sm" onclick="window.print()">🖨 Print / PDF</button>' : '') +
+    (p && p.stage !== 'Closed' ? '<button class="btn btn-secondary btn-sm" onclick="markProposalSent()">Mark Sent</button>' : '') +
     '</div>';
 
   if (!p) {
     document.getElementById('view-proposal').innerHTML =
       controlsHtml +
-      '<div class="df-empty"><div class="df-empty-icon">◻</div>Select a prospect to generate their proposal<br><span style="font-size:11px">Complete the Audit first if you haven\'t already.</span></div>';
+      '<div class="df-empty"><div class="df-empty-icon">◻</div>Select a prospect to build their proposal.<br><span style="font-size:11px">Run the Audit first to auto-populate high-pain areas.</span></div>';
     return;
   }
 
-  if (!lastAudit) {
-    document.getElementById('view-proposal').innerHTML =
-      controlsHtml +
-      '<div class="df-empty"><div class="df-empty-icon">🔍</div>No audit found for ' + escHtml(p.company_name) + '<br><span style="font-size:11px">Complete the Audit first, then come back here.</span></div>';
-    return;
+  // Init line items if empty (first load for this prospect)
+  if (proposalLineItems.length === 0) {
+    initProposalLineItems(lastAudit);
   }
 
-  var tier = lastAudit.recommended_tier || 'starter';
-  var td = TIER_DATA[tier];
-  var bottlenecks = (lastAudit.ranked_bottlenecks || []).filter(function(b){ return b.pct >= 50; }).slice(0, 4);
-  var today = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-
-  var findingsHtml = bottlenecks.length > 0 ? (
-    '<div class="prop-section-label">What the Audit Revealed</div>' +
-    bottlenecks.map(function(b, i) {
-      var pl = painLabel(b.pct);
-      return '<div class="prop-finding">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between">' +
-        '<div class="prop-finding-title">#' + (i+1) + ' — ' + escHtml(b.title) + '</div>' +
-        '<span style="font-family:\'DM Mono\',monospace;font-size:9px;color:' + pl.c + '">' + pl.l + ' Pain Area</span>' +
-        '</div>' +
-        '<div class="prop-finding-why">' + escHtml((TOOL_RECS[b.id] || {}).why || '') + '</div>' +
-        '</div>';
-    }).join('') + '<div style="margin-bottom:20px"></div>'
-  ) : '';
-
-  var proposalHtml =
-    '<div class="prop-doc">' +
-    '<div class="prop-doc-header">' +
-    '<div><div class="prop-brand">StructTech LLC</div>' +
-    '<div class="prop-tagline">Field-to-Office Technology Integration</div>' +
-    '<div class="prop-contact">jacob@structtek.com · structtek.com · (937) 467-2660</div></div>' +
-    '<div class="prop-to">' + today + '<br>Prepared for: <strong>' + escHtml(p.company_name) + '</strong><br>Attn: ' + escHtml(p.owner_name || 'Owner') + '</div>' +
+  var builderHtml =
+    '<div class="prop-builder no-print">' +
+    '<div class="prop-builder-title">Build Proposal — Select Automations &amp; Set Prices' +
+    (lastAudit ? '<span style="color:var(--accent2);margin-left:8px">· High-pain areas pre-selected from audit</span>' : '') +
     '</div>' +
-    '<hr class="prop-divider">' +
-
-    '<h2 style="font-size:18px;font-weight:700;margin-bottom:12px">Field-to-Office Integration Proposal</h2>' +
-    '<p class="prop-intro">' + (p.owner_name ? escHtml(p.owner_name) + ', based' : 'Based') + ' on the operational audit we completed for ' + escHtml(p.company_name) + ', I\'ve put together a focused implementation plan to address the specific gaps that are costing you the most time and revenue right now. This proposal outlines exactly what we found, what we\'ll fix, and what it looks like to work together.</p>' +
-
-    findingsHtml +
-
-    '<div class="prop-section-label">Scope of Work</div>' +
-    '<div class="prop-scope-box">' +
-    '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px">' +
-    '<div><div class="prop-tier-name">' + escHtml(td.name) + ' Package</div>' +
-    '<div style="font-size:11px;color:var(--muted)">Timeline: ' + escHtml(td.timeline) + ' · Support: ' + escHtml(td.support) + ' post-delivery</div></div>' +
-    '<div class="prop-price">' + escHtml(td.price) + '</div>' +
-    '</div></div>' +
-
-    '<div class="prop-section-label">What\'s Included</div>' +
-    '<ul class="prop-includes">' + td.includes.map(function(item){ return '<li>' + escHtml(item) + '</li>'; }).join('') + '</ul>' +
-
-    '<div class="prop-section-label" style="margin-top:20px">The Process</div>' +
-    '<div class="prop-process-steps">' +
-    ['Assessment & Planning','Build & Configure','Test & Import','Train & Hand Off'].map(function(s, i){
-      return '<div class="prop-step"><div class="prop-step-num">' + (i+1) + '</div><div class="prop-step-label">' + escHtml(s) + '</div></div>';
-    }).join('') +
-    '</div>' +
-
-    '<div class="no-print" style="margin:16px 0">' +
-    '<div class="intake-section-label">Custom notes (optional — will appear in proposal)</div>' +
-    '<textarea class="form-textarea" rows="3" placeholder="Any specific context, references, or next-step instructions..." oninput="proposalNotes=this.value">' + escHtml(proposalNotes) + '</textarea>' +
-    '</div>' +
-
-    (proposalNotes ? '<div class="prop-section-label">Additional Notes</div><p style="font-size:12px;color:var(--text);line-height:1.7;margin-bottom:20px">' + escHtml(proposalNotes) + '</p>' : '') +
-
-    '<hr class="prop-divider">' +
-    '<p style="font-size:12px;color:var(--text);line-height:1.75;margin-bottom:16px">If this looks right, the next step is a 30-minute kickoff call where we confirm scope, review your current tools, and get your first workflow on the build schedule. There\'s no lengthy contract — just a simple one-page agreement before we start.</p>' +
-    '<div><strong style="font-size:13px">Jacob Walker</strong><br>' +
-    '<span style="font-size:11px;color:var(--muted)">Founder, StructTech LLC<br>jacob@structtek.com · (937) 467-2660</span></div>' +
+    '<div id="prop-builder-inner"></div>' +
     '</div>';
 
-  document.getElementById('view-proposal').innerHTML = controlsHtml + proposalHtml;
+  var notesHtml =
+    '<div class="no-print" style="max-width:760px;margin-bottom:20px">' +
+    '<div class="intake-section-label">Custom notes (optional — appears in proposal)</div>' +
+    '<textarea class="form-textarea" rows="2" placeholder="Any specific context, timeline, or next steps to include..." oninput="proposalNotes=this.value;renderProposalDoc()">' + escHtml(proposalNotes) + '</textarea>' +
+    '</div>';
+
+  var docHtml = '<div class="prop-doc" id="prop-doc-inner"></div>';
+
+  document.getElementById('view-proposal').innerHTML = controlsHtml + builderHtml + notesHtml + docHtml;
+  renderProposalBuilder();
+  renderProposalDoc();
+}
+
+function onProspectSelect(val) {
+  proposalProspectId = val ? parseInt(val) : null;
+  proposalNotes = '';
+  proposalLineItems = [];
+  renderProposal();
 }
 
 function markProposalSent() {
