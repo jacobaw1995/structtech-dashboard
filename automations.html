@@ -714,17 +714,18 @@ function populateSpecClientDropdown() {
 function renderTriggerPalette() {
   var el = document.getElementById('trigger-palette');
   if (!el) return;
-  el.innerHTML = TRIGGER_PRESETS.map(function(t) {
+  el.innerHTML = TRIGGER_PRESETS.map(function(t, idx) {
     return '<button style="text-align:left;padding:6px 10px;border:1px solid var(--border);border-radius:5px;background:var(--surface2);color:var(--muted);font-size:11px;cursor:pointer;transition:all .12s" ' +
       'onmouseover="this.style.borderColor=\'var(--accent)\';this.style.color=\'var(--text)\'" ' +
       'onmouseout="this.style.borderColor=\'var(--border)\';this.style.color=\'var(--muted)\'" ' +
-      'onclick="addTriggerPreset(' + JSON.stringify(t) + ')">' +
+      'onclick="addTriggerPreset(' + idx + ')">' +
       '<span style="color:var(--accent);margin-right:6px">⚡</span>' + escHtml(t.label) + ' <span style="float:right;font-size:9px;opacity:.6">' + escHtml(t.tool) + '</span>' +
     '</button>';
   }).join('');
 }
 
-function addTriggerPreset(t) {
+function addTriggerPreset(idx) {
+  var t = TRIGGER_PRESETS[idx];
   if (flowSteps.length === 0 || flowSteps[0].type !== 'trigger') {
     flowSteps.unshift({ type: 'trigger', label: t.label, tool: t.tool, notes: '' });
   } else {
