@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>StructTech — Content</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ── Sub-nav ── */
+.df-subnav {
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 24px; height: 38px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  overflow-x: auto; flex-shrink: 0;
+}
+.df-subnav-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.07em; padding: 5px 12px; border-radius: 4px;
+  border: none; background: transparent; color: var(--muted);
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.df-subnav-btn:hover { color: var(--text); }
+.df-subnav-btn.active { background: var(--surface2); color: var(--accent); }
+
+.ct-view { display: none; }
+.ct-view.active { display: block; }
+
+/* ── Calendar ── */
+.ct-cal-wrap { padding: 24px; }
+.ct-cal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.ct-cal-header h2 { font-size: 18px; font-weight: 700; }
+.ct-week-nav { display: flex; align-items: center; gap: 6px; }
+.ct-week-btn {
+  width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text); cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; transition: background .12s;
+}
+.ct-week-btn:hover { border-color: var(--accent); }
+.ct-week-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; }
+
+.ct-cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+}
+.ct-day { }
+.ct-day-header {
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--muted); padding-bottom: 8px;
+  margin-bottom: 8px; border-bottom: 1px solid var(--border); text-align: center;
+}
+.ct-day-header.today { color: var(--accent); }
+.ct-day-num { font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 6px; }
+.ct-day-num.today { color: var(--accent); font-weight: 700; }
+
+.ct-post {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 5px; padding: 6px 8px; margin-bottom: 4px;
+  cursor: pointer; transition: border-color .12s; font-size: 11px;
+}
+.ct-post:hover { border-color: var(--border2); }
+.ct-post-title { font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ct-post-meta { font-size: 10px; color: var(--muted); }
+
+.ct-platform-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px;
+}
+.platform-li    { background: #0a66c2; }
+.platform-ig    { background: #e1306c; }
+.platform-fb    { background: #1877f2; }
+.platform-email { background: var(--accent); }
+.platform-other { background: var(--muted); }
+
+.ct-add-day-btn {
+  width: 100%; padding: 4px; font-size: 10px; color: var(--muted);
+  border: 1px dashed var(--border); border-radius: 5px; background: transparent;
+  cursor: pointer; transition: all .12s; margin-top: 2px;
+}
+.ct-add-day-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Post modal ── */
+.ct-modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.65); z-index: 200;
+  align-items: center; justify-content: center;
+}
+.ct-modal-backdrop.open { display: flex; }
+.ct-modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 24px; width: 480px; max-width: 95vw;
+  max-height: 90vh; overflow-y: auto;
+}
+.ct-modal-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+.ct-modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.ct-platform-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.ct-platform-btn {
+  padding: 5px 12px; border-radius: 4px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted); font-size: 11px;
+  cursor: pointer; transition: all .12s; font-family: 'DM Mono', monospace;
+}
+.ct-platform-btn.selected { border-color: var(--accent); color: var(--accent); background: rgba(200,240,96,.08); }
+
+.ct-status-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+.ct-status-btn {
+  padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted); font-size: 10px;
+  cursor: pointer; transition: all .12s; font-family: 'DM Mono', monospace;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.ct-status-btn.selected { border-color: var(--accent); color: var(--accent); }
+
+/* ── Templates ── */
+.ct-tmpl-wrap { padding: 24px; }
+.ct-tmpl-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.ct-tmpl-header h2 { font-size: 18px; font-weight: 700; }
+.ct-tmpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.ct-tmpl-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 16px; cursor: pointer; transition: border-color .12s;
+}
+.ct-tmpl-card:hover { border-color: var(--border2); }
+.ct-tmpl-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.ct-tmpl-card-title { font-size: 13px; font-weight: 600; }
+.ct-tmpl-card-category {
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--muted); padding: 2px 7px;
+  border-radius: 3px; background: var(--surface2); border: 1px solid var(--border);
+}
+.ct-tmpl-card-body { font-size: 12px; color: var(--muted); line-height: 1.55; }
+.ct-tmpl-card-footer { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+
+/* ── Outreach ── */
+.ct-out-wrap { padding: 24px; max-width: 800px; }
+.ct-out-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.ct-out-header h2 { font-size: 18px; font-weight: 700; }
+.ct-out-stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.ct-out-stat {
+  flex: 1; min-width: 110px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 7px; padding: 12px 14px;
+}
+.ct-out-stat-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 4px; }
+.ct-out-stat-val { font-size: 18px; font-weight: 700; }
+
+.ct-out-row {
+  display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 90px; gap: 8px;
+  padding: 12px 14px; margin-bottom: 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 7px; align-items: center; cursor: pointer; transition: border-color .12s;
+}
+.ct-out-row:hover { border-color: var(--border2); }
+.ct-out-row-header {
+  display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 90px; gap: 8px;
+  padding: 4px 14px; margin-bottom: 4px;
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--muted);
+}
+.ct-out-name { font-size: 13px; font-weight: 500; }
+.ct-out-meta { font-size: 11px; color: var(--muted); }
+
+.ct-resp-badge {
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: .06em; padding: 3px 7px; border-radius: 3px; display: inline-block;
+}
+.ct-resp-badge.pending  { background: rgba(100,116,139,.15); color: var(--muted); }
+.ct-resp-badge.replied  { background: rgba(74,222,128,.15);  color: var(--accent2); }
+.ct-resp-badge.booked   { background: rgba(200,240,96,.15);  color: var(--accent); }
+.ct-resp-badge.noreply  { background: rgba(248,113,113,.15); color: var(--danger); }
+.ct-resp-badge.nofit    { background: rgba(100,116,139,.15); color: var(--muted); }
+
+/* ── Outreach modal ── */
+.ct-out-modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 24px; width: 500px; max-width: 95vw;
+  max-height: 90vh; overflow-y: auto;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <span class="logo-main">STRUCTTECH</span>
+    <span class="logo-div">/</span>
+    <span class="logo-ops">OPS</span>
+  </div>
+  <div id="sync-status" class="sync-status sync-loading">● Loading</div>
+  <div id="header-date" class="header-date"></div>
+  <div id="week-badge" class="week-badge">W1</div>
+</header>
+
+<div id="app-nav" class="app-nav"></div>
+
+<div class="df-subnav">
+  <button class="df-subnav-btn active" id="subnav-calendar" onclick="showView('calendar')">✦ Calendar</button>
+  <button class="df-subnav-btn" id="subnav-templates" onclick="showView('templates')">≡ Templates</button>
+  <button class="df-subnav-btn" id="subnav-outreach" onclick="showView('outreach')">◎ Outreach</button>
+</div>
+
+<!-- ── Calendar ── -->
+<div id="view-calendar" class="ct-view active">
+  <div class="ct-cal-wrap">
+    <div class="ct-cal-header">
+      <h2>Content Calendar</h2>
+      <div class="ct-week-nav">
+        <button class="ct-week-btn" onclick="calNav(-1)">‹</button>
+        <span class="ct-week-label" id="cal-week-label"></span>
+        <button class="ct-week-btn" onclick="calNav(1)">›</button>
+      </div>
+    </div>
+    <div class="ct-cal-grid" id="cal-grid"></div>
+  </div>
+</div>
+
+<!-- ── Templates ── -->
+<div id="view-templates" class="ct-view">
+  <div class="ct-tmpl-wrap">
+    <div class="ct-tmpl-header">
+      <h2>Message Templates</h2>
+      <button class="btn btn-primary btn-sm" onclick="openTmplModal()">+ New Template</button>
+    </div>
+    <div class="ct-tmpl-grid" id="tmpl-grid"></div>
+  </div>
+</div>
+
+<!-- ── Outreach ── -->
+<div id="view-outreach" class="ct-view">
+  <div class="ct-out-wrap">
+    <div class="ct-out-header">
+      <h2>Outreach Tracker</h2>
+      <button class="btn btn-primary btn-sm" onclick="openOutModal()">+ Log Contact</button>
+    </div>
+    <div class="ct-out-stats" id="out-stats"></div>
+    <div class="ct-out-row-header">
+      <div>Contact</div><div>Company</div><div>Channel</div><div>Sent</div><div>Response</div>
+    </div>
+    <div id="out-list"></div>
+  </div>
+</div>
+
+<!-- ── Post/Content Modal ── -->
+<div class="ct-modal-backdrop" id="post-modal-backdrop" onclick="closePostModal(event)">
+  <div class="ct-modal" id="post-modal">
+    <div class="ct-modal-title" id="post-modal-title">New Post</div>
+    <input type="hidden" id="post-edit-id">
+    <input type="hidden" id="post-edit-date">
+
+    <div style="margin-bottom:12px">
+      <label class="form-label">Title / Hook</label>
+      <input type="text" class="form-input" id="post-title" placeholder="What's the hook?">
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Platform</label>
+      <div class="ct-platform-grid">
+        <button class="ct-platform-btn" id="plat-LI" onclick="togglePlatform('LI')">LinkedIn</button>
+        <button class="ct-platform-btn" id="plat-IG" onclick="togglePlatform('IG')">Instagram</button>
+        <button class="ct-platform-btn" id="plat-FB" onclick="togglePlatform('FB')">Facebook</button>
+        <button class="ct-platform-btn" id="plat-Email" onclick="togglePlatform('Email')">Email</button>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Content / Notes</label>
+      <textarea class="form-textarea" id="post-body" rows="4" placeholder="Outline, key points, or full copy…"></textarea>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Status</label>
+      <div class="ct-status-row">
+        <button class="ct-status-btn selected" id="pstat-idea" onclick="setPostStatus('idea')">Idea</button>
+        <button class="ct-status-btn" id="pstat-draft" onclick="setPostStatus('draft')">Draft</button>
+        <button class="ct-status-btn" id="pstat-ready" onclick="setPostStatus('ready')">Ready</button>
+        <button class="ct-status-btn" id="pstat-posted" onclick="setPostStatus('posted')">Posted</button>
+      </div>
+    </div>
+    <div class="ct-modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closePostModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="post-delete-btn" style="display:none" onclick="deletePost()">Delete</button>
+      <button class="btn btn-primary btn-sm" onclick="savePost()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Template Modal ── -->
+<div class="ct-modal-backdrop" id="tmpl-modal-backdrop" onclick="closeTmplModal(event)">
+  <div class="ct-modal" id="tmpl-modal">
+    <div class="ct-modal-title" id="tmpl-modal-title">New Template</div>
+    <input type="hidden" id="tmpl-edit-id">
+    <div style="margin-bottom:12px">
+      <label class="form-label">Template Name</label>
+      <input type="text" class="form-input" id="tmpl-name" placeholder="e.g. LinkedIn Cold DM — Contractor">
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Category</label>
+      <select class="form-select" id="tmpl-category">
+        <option value="outreach">Outreach</option>
+        <option value="followup">Follow-Up</option>
+        <option value="proposal">Proposal</option>
+        <option value="onboarding">Onboarding</option>
+        <option value="nurture">Nurture</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Message Body</label>
+      <textarea class="form-textarea" id="tmpl-body" rows="6" placeholder="Use {{name}}, {{company}}, {{pain_point}} as placeholders…"></textarea>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Notes</label>
+      <input type="text" class="form-input" id="tmpl-notes" placeholder="When to use, ideal ICP, etc.">
+    </div>
+    <div class="ct-modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeTmplModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="tmpl-delete-btn" style="display:none" onclick="deleteTmpl()">Delete</button>
+      <button class="btn btn-primary btn-sm" onclick="saveTmpl()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Outreach Log Modal ── -->
+<div class="ct-modal-backdrop" id="out-modal-backdrop" onclick="closeOutModal(event)">
+  <div class="ct-out-modal" id="out-modal">
+    <div class="ct-modal-title" id="out-modal-title">Log Outreach Contact</div>
+    <input type="hidden" id="out-edit-id">
+    <div class="inv-row-2" style="margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <label class="form-label">Contact Name</label>
+        <input type="text" class="form-input" id="out-contact" placeholder="First Last">
+      </div>
+      <div>
+        <label class="form-label">Company</label>
+        <input type="text" class="form-input" id="out-company" placeholder="ABC Plumbing">
+      </div>
+    </div>
+    <div class="inv-row-2" style="margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <label class="form-label">Channel</label>
+        <select class="form-select" id="out-channel">
+          <option value="LinkedIn">LinkedIn DM</option>
+          <option value="Email">Email</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Phone">Phone</option>
+          <option value="Referral">Referral</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Date Sent</label>
+        <input type="date" class="form-input" id="out-date">
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Message / Notes</label>
+      <textarea class="form-textarea" id="out-notes" rows="3" placeholder="What was said, template used, context…"></textarea>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Response Status</label>
+      <select class="form-select" id="out-response">
+        <option value="pending">Pending</option>
+        <option value="replied">Replied</option>
+        <option value="booked">Booked Call</option>
+        <option value="noreply">No Reply</option>
+        <option value="nofit">Not a Fit</option>
+      </select>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="form-label">Follow-Up Date</label>
+      <input type="date" class="form-input" id="out-followup">
+    </div>
+    <div class="ct-modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeOutModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="out-delete-btn" style="display:none" onclick="deleteOutreach()">Delete</button>
+      <button class="btn btn-primary btn-sm" onclick="saveOutreach()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script src="nav.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+var calWeekOffset = 0;
+var postPlatforms = [];
+var postStatus = 'idea';
+
+function getPosts()     { return state.os_data.content_posts    || []; }
+function setPosts(a)    { state.os_data.content_posts    = a; }
+function getTmpls()     { return state.os_data.content_templates || []; }
+function setTmpls(a)    { state.os_data.content_templates = a; }
+function getOutreach()  { return state.os_data.outreach   || []; }
+function setOutreach(a) { state.os_data.outreach   = a; }
+
+// ── View ───────────────────────────────────────────────────────────────────
+function showView(v) {
+  document.querySelectorAll('.ct-view').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.df-subnav-btn').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('view-' + v).classList.add('active');
+  document.getElementById('subnav-' + v).classList.add('active');
+  if (v === 'calendar')  renderCalendar();
+  if (v === 'templates') renderTemplates();
+  if (v === 'outreach')  renderOutreach();
+}
+
+// ── Calendar ───────────────────────────────────────────────────────────────
+var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function getWeekDates(offset) {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var dow = today.getDay();
+  var monday = new Date(today); monday.setDate(today.getDate() - dow + (dow === 0 ? -6 : 1) + offset * 7);
+  var days = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday); d.setDate(monday.getDate() + i);
+    days.push(d);
+  }
+  return days;
+}
+
+function dateStr(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function calNav(dir) { calWeekOffset += dir; renderCalendar(); }
+
+function renderCalendar() {
+  var days = getWeekDates(calWeekOffset);
+  var today = new Date(); today.setHours(0,0,0,0);
+  var label = MONTH_NAMES[days[0].getMonth()] + ' ' + days[0].getDate() + ' – ' +
+    (days[0].getMonth() !== days[6].getMonth() ? MONTH_NAMES[days[6].getMonth()] + ' ' : '') +
+    days[6].getDate() + ', ' + days[6].getFullYear();
+  document.getElementById('cal-week-label').textContent = label;
+
+  var posts = getPosts();
+  var platformColors = { LI: 'platform-li', IG: 'platform-ig', FB: 'platform-fb', Email: 'platform-email' };
+
+  var grid = document.getElementById('cal-grid');
+  grid.innerHTML = days.map(function(d) {
+    var ds = dateStr(d);
+    var isToday = d.getTime() === today.getTime();
+    var dayPosts = posts.filter(function(p) { return p.date === ds; });
+    var postsHtml = dayPosts.map(function(p) {
+      var plat = (p.platforms || [])[0] || 'other';
+      var platCls = platformColors[plat] || 'platform-other';
+      return '<div class="ct-post" onclick="openPostModal(\'' + escAttr(ds) + '\',\'' + escAttr(p.id) + '\')">' +
+        '<div class="ct-post-title"><span class="ct-platform-dot ' + platCls + '"></span>' + escHtml(p.title || '') + '</div>' +
+        '<div class="ct-post-meta">' + (p.status || 'idea') + (p.platforms && p.platforms.length > 1 ? ' +' + (p.platforms.length - 1) : '') + '</div>' +
+      '</div>';
+    }).join('');
+    return '<div class="ct-day">' +
+      '<div class="ct-day-header' + (isToday ? ' today' : '') + '">' + DAY_NAMES[d.getDay()] + '</div>' +
+      '<div class="ct-day-num' + (isToday ? ' today' : '') + '">' + d.getDate() + '</div>' +
+      postsHtml +
+      '<button class="ct-add-day-btn" onclick="openPostModal(\'' + escAttr(ds) + '\')">+</button>' +
+    '</div>';
+  }).join('');
+}
+
+function openPostModal(date, id) {
+  postPlatforms = [];
+  postStatus = 'idea';
+  document.getElementById('post-edit-id').value = id || '';
+  document.getElementById('post-edit-date').value = date || '';
+  document.getElementById('post-modal-title').textContent = id ? 'Edit Post' : 'New Post';
+  document.getElementById('post-delete-btn').style.display = id ? '' : 'none';
+
+  if (id) {
+    var post = getPosts().find(function(p) { return p.id == id; });
+    if (post) {
+      document.getElementById('post-title').value = post.title || '';
+      document.getElementById('post-body').value = post.body || '';
+      postPlatforms = post.platforms || [];
+      postStatus = post.status || 'idea';
+    }
+  } else {
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-body').value = '';
+  }
+  syncPlatformBtns();
+  syncStatusBtns();
+  document.getElementById('post-modal-backdrop').classList.add('open');
+}
+
+function closePostModal(e) {
+  if (e && e.target !== document.getElementById('post-modal-backdrop')) return;
+  document.getElementById('post-modal-backdrop').classList.remove('open');
+}
+
+function togglePlatform(p) {
+  var idx = postPlatforms.indexOf(p);
+  if (idx === -1) postPlatforms.push(p); else postPlatforms.splice(idx, 1);
+  syncPlatformBtns();
+}
+function syncPlatformBtns() {
+  ['LI','IG','FB','Email'].forEach(function(p) {
+    var btn = document.getElementById('plat-' + p);
+    if (btn) btn.classList.toggle('selected', postPlatforms.indexOf(p) !== -1);
+  });
+}
+function setPostStatus(s) { postStatus = s; syncStatusBtns(); }
+function syncStatusBtns() {
+  ['idea','draft','ready','posted'].forEach(function(s) {
+    var btn = document.getElementById('pstat-' + s);
+    if (btn) btn.classList.toggle('selected', postStatus === s);
+  });
+}
+
+function savePost() {
+  var title = document.getElementById('post-title').value.trim();
+  if (!title) { showToast('Add a title or hook'); return; }
+  var id = document.getElementById('post-edit-id').value;
+  var date = document.getElementById('post-edit-date').value;
+  var post = {
+    id: id || genId(),
+    date: date,
+    title: title,
+    body: document.getElementById('post-body').value,
+    platforms: postPlatforms.slice(),
+    status: postStatus,
+    createdAt: new Date().toISOString()
+  };
+  var posts = getPosts();
+  if (id) {
+    var idx = posts.findIndex(function(p) { return p.id == id; });
+    if (idx !== -1) posts[idx] = post; else posts.push(post);
+  } else { posts.push(post); }
+  setPosts(posts);
+  scheduleSave();
+  document.getElementById('post-modal-backdrop').classList.remove('open');
+  renderCalendar();
+  showToast('Post saved');
+}
+
+function deletePost() {
+  var id = document.getElementById('post-edit-id').value;
+  if (!id) return;
+  setPosts(getPosts().filter(function(p) { return p.id != id; }));
+  scheduleSave();
+  document.getElementById('post-modal-backdrop').classList.remove('open');
+  renderCalendar();
+  showToast('Post removed');
+}
+
+// ── Templates ──────────────────────────────────────────────────────────────
+var STARTER_TEMPLATES = [
+  {
+    id: 'st1', name: 'LinkedIn Cold DM — Contractor', category: 'outreach',
+    body: 'Hey {{name}},\n\nI work with {{trade}} contractors in {{city}} to eliminate the back-and-forth that kills jobs — scheduling chaos, chasing payments, guys waiting on info.\n\nI build automation systems that run those workflows for you. Worth a quick chat to see if there\'s a fit?\n\n— Jacob',
+    notes: 'Best for owner-operated contractors with 3–15 employees'
+  },
+  {
+    id: 'st2', name: 'LinkedIn Cold DM — Supplier', category: 'outreach',
+    body: 'Hey {{name}},\n\nI noticed {{company}} supplies to contractors in the field — I\'m guessing order intake, delivery tracking, and customer follow-up eat a lot of your team\'s time.\n\nI build automation systems for trade suppliers to streamline those workflows. Are you open to a quick call?\n\n— Jacob',
+    notes: 'For supplier sales reps or ops managers'
+  },
+  {
+    id: 'st3', name: 'Follow-Up #1 (3 days)', category: 'followup',
+    body: 'Hey {{name}} — just circling back on my last message.\n\nIf you\'re running a busy operation, admin overhead is usually the silent killer. Happy to share some examples of what we\'ve built for similar contractors.\n\nOpen to a 20-minute call this week?',
+    notes: 'Send 3 days after no reply'
+  },
+  {
+    id: 'st4', name: 'Follow-Up #2 (7 days)', category: 'followup',
+    body: 'Hey {{name}},\n\nLast one from me — just wanted to drop a case study.\n\n[Client Name] was spending 10+ hrs/week on scheduling and payment chasing. We cut that to under 2 hrs with one automation system.\n\nIf that sounds familiar, worth talking. Otherwise no worries.\n\n— Jacob',
+    notes: 'Final follow-up, attach or reference a case study'
+  }
+];
+
+function renderTemplates() {
+  var tmpls = getTmpls();
+  // Merge with starters if not already in state
+  var starterIds = STARTER_TEMPLATES.map(function(t) { return t.id; });
+  var existing = tmpls.map(function(t) { return t.id; });
+  var combined = STARTER_TEMPLATES.filter(function(t) { return existing.indexOf(t.id) === -1; }).concat(tmpls);
+
+  var el = document.getElementById('tmpl-grid');
+  if (!el) return;
+  if (combined.length === 0) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px">No templates yet. Create your first one.</div>';
+    return;
+  }
+  el.innerHTML = combined.map(function(t) {
+    var preview = (t.body || '').slice(0, 140) + ((t.body || '').length > 140 ? '…' : '');
+    var isStarter = starterIds.indexOf(t.id) !== -1;
+    return '<div class="ct-tmpl-card" onclick="openTmplModal(\'' + escAttr(t.id) + '\',' + isStarter + ')">' +
+      '<div class="ct-tmpl-card-header">' +
+        '<div class="ct-tmpl-card-title">' + escHtml(t.name) + '</div>' +
+        '<span class="ct-tmpl-card-category">' + escHtml(t.category || 'other') + '</span>' +
+      '</div>' +
+      '<div class="ct-tmpl-card-body">' + escHtml(preview) + '</div>' +
+      (t.notes ? '<div class="ct-tmpl-card-footer"><span style="font-size:10px;color:var(--muted)">' + escHtml(t.notes) + '</span></div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function openTmplModal(id, isStarter) {
+  document.getElementById('tmpl-edit-id').value = id || '';
+  document.getElementById('tmpl-modal-title').textContent = id ? 'Edit Template' : 'New Template';
+  var showDelete = id && !isStarter;
+  document.getElementById('tmpl-delete-btn').style.display = showDelete ? '' : 'none';
+  if (id) {
+    var all = STARTER_TEMPLATES.concat(getTmpls());
+    var t = all.find(function(x) { return x.id == id; });
+    if (t) {
+      document.getElementById('tmpl-name').value = t.name || '';
+      document.getElementById('tmpl-category').value = t.category || 'outreach';
+      document.getElementById('tmpl-body').value = t.body || '';
+      document.getElementById('tmpl-notes').value = t.notes || '';
+      if (isStarter) document.getElementById('tmpl-edit-id').value = '';
+    }
+  } else {
+    document.getElementById('tmpl-name').value = '';
+    document.getElementById('tmpl-category').value = 'outreach';
+    document.getElementById('tmpl-body').value = '';
+    document.getElementById('tmpl-notes').value = '';
+  }
+  document.getElementById('tmpl-modal-backdrop').classList.add('open');
+}
+
+function closeTmplModal(e) {
+  if (e && e.target !== document.getElementById('tmpl-modal-backdrop')) return;
+  document.getElementById('tmpl-modal-backdrop').classList.remove('open');
+}
+
+function saveTmpl() {
+  var name = document.getElementById('tmpl-name').value.trim();
+  if (!name) { showToast('Add a template name'); return; }
+  var id = document.getElementById('tmpl-edit-id').value;
+  var tmpl = {
+    id: id || genId(),
+    name: name,
+    category: document.getElementById('tmpl-category').value,
+    body: document.getElementById('tmpl-body').value,
+    notes: document.getElementById('tmpl-notes').value
+  };
+  var tmpls = getTmpls();
+  if (id) {
+    var idx = tmpls.findIndex(function(t) { return t.id == id; });
+    if (idx !== -1) tmpls[idx] = tmpl; else tmpls.push(tmpl);
+  } else { tmpls.push(tmpl); }
+  setTmpls(tmpls);
+  scheduleSave();
+  document.getElementById('tmpl-modal-backdrop').classList.remove('open');
+  renderTemplates();
+  showToast('Template saved');
+}
+
+function deleteTmpl() {
+  var id = document.getElementById('tmpl-edit-id').value;
+  if (!id) return;
+  setTmpls(getTmpls().filter(function(t) { return t.id != id; }));
+  scheduleSave();
+  document.getElementById('tmpl-modal-backdrop').classList.remove('open');
+  renderTemplates();
+  showToast('Template deleted');
+}
+
+// ── Outreach ───────────────────────────────────────────────────────────────
+function renderOutreach() {
+  var contacts = getOutreach();
+  var el = document.getElementById('out-list');
+  var statsEl = document.getElementById('out-stats');
+  if (!el) return;
+
+  var total = contacts.length;
+  var replied = contacts.filter(function(c) { return c.response === 'replied' || c.response === 'booked'; }).length;
+  var booked = contacts.filter(function(c) { return c.response === 'booked'; }).length;
+  var pending = contacts.filter(function(c) { return c.response === 'pending'; }).length;
+  var rate = total > 0 ? Math.round(replied / total * 100) : 0;
+
+  if (statsEl) {
+    statsEl.innerHTML =
+      oStat('Contacts', total) +
+      oStat('Pending', pending, pending > 0 ? 'color:var(--warn)' : '') +
+      oStat('Replied', replied, 'color:var(--accent2)') +
+      oStat('Booked', booked, 'color:var(--accent)') +
+      oStat('Reply Rate', rate + '%', rate > 20 ? 'color:var(--accent2)' : '');
+    function oStat(l, v, s) {
+      return '<div class="ct-out-stat"><div class="ct-out-stat-label">' + l + '</div><div class="ct-out-stat-val" style="' + (s||'') + '">' + v + '</div></div>';
+    }
+  }
+
+  if (contacts.length === 0) {
+    el.innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--muted);font-size:13px">No outreach logged yet. Track your DMs and emails here.</div>';
+    return;
+  }
+  var sorted = contacts.slice().sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+  el.innerHTML = sorted.map(function(c) {
+    var respCls = c.response || 'pending';
+    return '<div class="ct-out-row" onclick="openOutModal(\'' + escAttr(c.id) + '\')">' +
+      '<div><div class="ct-out-name">' + escHtml(c.contact || '') + '</div><div class="ct-out-meta">' + escHtml(c.notes ? c.notes.slice(0,40) + (c.notes.length > 40 ? '…' : '') : '') + '</div></div>' +
+      '<div><div style="font-size:12px;font-weight:500">' + escHtml(c.company || '—') + '</div></div>' +
+      '<div style="font-size:11px;color:var(--muted)">' + escHtml(c.channel || '') + '</div>' +
+      '<div style="font-size:11px;color:var(--muted)">' + escHtml(c.date || '') + '</div>' +
+      '<div><span class="ct-resp-badge ' + respCls + '">' + escHtml(c.response || 'pending') + '</span></div>' +
+    '</div>';
+  }).join('');
+}
+
+function openOutModal(id) {
+  document.getElementById('out-edit-id').value = id || '';
+  document.getElementById('out-modal-title').textContent = id ? 'Edit Contact' : 'Log Outreach Contact';
+  document.getElementById('out-delete-btn').style.display = id ? '' : 'none';
+  if (id) {
+    var c = getOutreach().find(function(x) { return x.id == id; });
+    if (c) {
+      document.getElementById('out-contact').value = c.contact || '';
+      document.getElementById('out-company').value = c.company || '';
+      document.getElementById('out-channel').value = c.channel || 'LinkedIn';
+      document.getElementById('out-date').value = c.date || '';
+      document.getElementById('out-notes').value = c.notes || '';
+      document.getElementById('out-response').value = c.response || 'pending';
+      document.getElementById('out-followup').value = c.followup || '';
+    }
+  } else {
+    document.getElementById('out-contact').value = '';
+    document.getElementById('out-company').value = '';
+    document.getElementById('out-channel').value = 'LinkedIn';
+    document.getElementById('out-date').value = new Date().toISOString().slice(0,10);
+    document.getElementById('out-notes').value = '';
+    document.getElementById('out-response').value = 'pending';
+    document.getElementById('out-followup').value = '';
+  }
+  document.getElementById('out-modal-backdrop').classList.add('open');
+}
+
+function closeOutModal(e) {
+  if (e && e.target !== document.getElementById('out-modal-backdrop')) return;
+  document.getElementById('out-modal-backdrop').classList.remove('open');
+}
+
+function saveOutreach() {
+  var contact = document.getElementById('out-contact').value.trim();
+  if (!contact) { showToast('Add a contact name'); return; }
+  var id = document.getElementById('out-edit-id').value;
+  var c = {
+    id: id || genId(),
+    contact: contact,
+    company: document.getElementById('out-company').value,
+    channel: document.getElementById('out-channel').value,
+    date: document.getElementById('out-date').value,
+    notes: document.getElementById('out-notes').value,
+    response: document.getElementById('out-response').value,
+    followup: document.getElementById('out-followup').value
+  };
+  var out = getOutreach();
+  if (id) {
+    var idx = out.findIndex(function(x) { return x.id == id; });
+    if (idx !== -1) out[idx] = c; else out.push(c);
+  } else { out.push(c); }
+  setOutreach(out);
+  scheduleSave();
+  document.getElementById('out-modal-backdrop').classList.remove('open');
+  renderOutreach();
+  showToast('Contact saved');
+}
+
+function deleteOutreach() {
+  var id = document.getElementById('out-edit-id').value;
+  if (!id) return;
+  setOutreach(getOutreach().filter(function(c) { return c.id != id; }));
+  scheduleSave();
+  document.getElementById('out-modal-backdrop').classList.remove('open');
+  renderOutreach();
+  showToast('Contact removed');
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function init() {
+  renderNav('content');
+  var d = new Date();
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('header-date').textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
+  document.getElementById('week-badge').textContent = 'W' + state.current_week;
+  await loadState();
+  document.getElementById('week-badge').textContent = 'W' + state.current_week;
+  renderCalendar();
+}
+
+init();
+</script>
+</body>
+</html>

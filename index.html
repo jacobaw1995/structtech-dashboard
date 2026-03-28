@@ -289,7 +289,11 @@ function renderStats() {
   el.innerHTML =
     card('Active Week', state.current_week, 'accent', 'of 16') +
     card('Tasks Complete', done + '/' + tasks.length, '', 'this week') +
-    card('Prospects', state.prospects.length, '', 'in pipeline') +
+    card('Prospects', (function() {
+      var pp = state.os_data.prospects || [];
+      var active = pp.filter(function(p) { return p.stage !== 'Closed' && p.stage !== 'Cold'; }).length;
+      return pp.length > 0 ? active + ' active / ' + pp.length + ' total' : '0';
+    })(), '', 'in pipeline') +
     card('Revenue MTD', '$' + Math.round(income.total).toLocaleString(), 'green', 'total logged') +
     card('Retainer MRR', '$' + Math.round(income.mrr).toLocaleString(), 'accent', 'recurring');
 }

@@ -44,10 +44,18 @@
 .pl-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 7px; padding: 11px 12px; margin-bottom: 8px;
-  cursor: pointer; transition: border-color 0.15s;
+  cursor: grab; transition: border-color 0.15s, opacity 0.15s;
 }
 .pl-card:hover { border-color: var(--border2); }
 .pl-card.selected { border-color: var(--accent); background: var(--surface2); }
+.pl-card.dragging { opacity: 0.35; cursor: grabbing; }
+.pl-drop-zone {
+  min-height: 48px; border-radius: 6px; padding: 2px;
+  border: 2px dashed transparent; transition: all 0.15s;
+}
+.pl-drop-zone.drag-over {
+  border-color: var(--accent); background: rgba(200,240,96,0.04);
+}
 .pl-card-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
 .pl-card-owner { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
 .pl-card-trade { font-size: 10px; color: var(--border2); margin-bottom: 8px; }
@@ -822,6 +830,7 @@ function painLabel(pct) {
 
 var currentView = 'pipeline';
 var selectedProspectId = null;
+var draggingProspectId = null;
 
 // Intake form state
 var intakeForm = {
@@ -959,12 +968,17 @@ function renderPipeline() {
     var stageProspects = prospects.filter(function(p){ return (p.stage || 'Cold') === stage; });
     var dotColor = STAGE_COLORS[stage];
 
+    var dropId = 'drop-' + stage.replace(/ /g,'_');
     boardHtml += '<div class="pl-col">' +
       '<div class="pl-col-header">' +
       '<div class="pl-col-dot" style="background:' + dotColor + '"></div>' +
       '<span class="pl-col-label">' + escHtml(stage) + '</span>' +
       '<span class="pl-col-count">' + stageProspects.length + '</span>' +
-      '</div>';
+      '</div>' +
+      '<div class="pl-drop-zone" id="' + dropId + '"' +
+      ' ondragover="colDragOver(event,\'' + escAttr(stage) + '\')"' +
+      ' ondragleave="colDragLeave(event,\'' + escAttr(stage) + '\')"' +
+      ' ondrop="colDrop(event,\'' + escAttr(stage) + '\')">';
 
     if (stageProspects.length === 0) {
       boardHtml += '<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--border);text-align:center;padding:16px 0">Empty</div>';
@@ -973,7 +987,12 @@ function renderPipeline() {
     stageProspects.forEach(function(p) {
       var icp = scoreICP(p);
       var isSelected = p.id === selectedProspectId;
-      boardHtml += '<div class="pl-card' + (isSelected ? ' selected' : '') + '" onclick="selectProspect(' + p.id + ')">' +
+      boardHtml += '<div class="pl-card' + (isSelected ? ' selected' : '') + '"' +
+        ' id="plcard-' + p.id + '"' +
+        ' draggable="true"' +
+        ' ondragstart="startDrag(event,' + p.id + ')"' +
+        ' ondragend="endDrag(event,' + p.id + ')"' +
+        ' onclick="selectProspect(' + p.id + ')">' +
         (p.business_type === 'Building / Material Supplier' ? '<span class="pl-sup-badge">SUP</span>' : '') +
         '<div class="pl-card-name">' + escHtml(p.company_name) + '</div>' +
         '<div class="pl-card-owner">' + escHtml(p.owner_name || '—') + '</div>' +
@@ -985,7 +1004,7 @@ function renderPipeline() {
         '</div>';
     });
 
-    boardHtml += '</div>';
+    boardHtml += '</div></div>';
   });
   boardHtml += '</div>';
 
@@ -1016,6 +1035,46 @@ function stat(label, val, cls) {
 
 function selectProspect(id) {
   selectedProspectId = (selectedProspectId === id) ? null : id;
+  renderPipeline();
+}
+
+// ── Drag-and-drop ──
+function startDrag(e, id) {
+  draggingProspectId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  // Slight delay so the card renders dimmed after drag starts
+  setTimeout(function() {
+    var el = document.getElementById('plcard-' + id);
+    if (el) el.classList.add('dragging');
+  }, 0);
+}
+function endDrag(e, id) {
+  draggingProspectId = null;
+  var el = document.getElementById('plcard-' + id);
+  if (el) el.classList.remove('dragging');
+  document.querySelectorAll('.pl-drop-zone').forEach(function(z){ z.classList.remove('drag-over'); });
+}
+function colDragOver(e, stage) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.pl-drop-zone').forEach(function(z){ z.classList.remove('drag-over'); });
+  var z = document.getElementById('drop-' + stage.replace(/ /g,'_'));
+  if (z) z.classList.add('drag-over');
+}
+function colDragLeave(e, stage) {
+  if (e.currentTarget.contains(e.relatedTarget)) return;
+  var z = document.getElementById('drop-' + stage.replace(/ /g,'_'));
+  if (z) z.classList.remove('drag-over');
+}
+function colDrop(e, stage) {
+  e.preventDefault();
+  document.querySelectorAll('.pl-drop-zone').forEach(function(z){ z.classList.remove('drag-over'); });
+  if (!draggingProspectId) return;
+  var p = getProspect(draggingProspectId);
+  if (!p || p.stage === stage) { draggingProspectId = null; return; }
+  p.stage = stage;
+  draggingProspectId = null;
+  saveProspects();
   renderPipeline();
 }
 

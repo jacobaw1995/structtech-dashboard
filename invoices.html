@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>StructTech — Invoices</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ── Sub-nav ── */
+.df-subnav {
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 24px; height: 38px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  overflow-x: auto; flex-shrink: 0;
+}
+.df-subnav-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.07em; padding: 5px 12px; border-radius: 4px;
+  border: none; background: transparent; color: var(--muted);
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.df-subnav-btn:hover { color: var(--text); }
+.df-subnav-btn.active { background: var(--surface2); color: var(--accent); }
+
+.inv-view { display: none; }
+.inv-view.active { display: block; }
+
+/* ── List ── */
+.inv-list-wrap { padding: 24px; max-width: 900px; }
+.inv-stats-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.inv-stat {
+  flex: 1; min-width: 140px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px;
+}
+.inv-stat-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 4px; }
+.inv-stat-value { font-size: 20px; font-weight: 700; }
+.inv-stat-value.green { color: var(--accent2); }
+.inv-stat-value.warn { color: var(--warn); }
+.inv-stat-value.accent { color: var(--accent); }
+
+.inv-table-header {
+  display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 100px;
+  gap: 8px; padding: 6px 12px; margin-bottom: 4px;
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--muted);
+}
+.inv-row {
+  display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 100px;
+  gap: 8px; padding: 12px 14px; margin-bottom: 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; align-items: center; cursor: pointer;
+  transition: border-color 0.12s;
+}
+.inv-row:hover { border-color: var(--border2); }
+.inv-row-client { font-size: 13px; font-weight: 500; }
+.inv-row-desc { font-size: 11px; color: var(--muted); }
+.inv-row-amount { font-family: 'DM Mono', monospace; font-size: 13px; }
+.inv-row-date { font-size: 11px; color: var(--muted); }
+.inv-row-due { font-size: 11px; }
+.inv-row-due.overdue { color: var(--danger); }
+.inv-row-due.soon { color: var(--warn); }
+
+.inv-status-badge {
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: .06em; padding: 3px 8px; border-radius: 3px; display: inline-block;
+}
+.inv-status-badge.draft    { background: rgba(100,116,139,.15); color: var(--muted); }
+.inv-status-badge.sent     { background: rgba(96,165,250,.15);  color: var(--blue); }
+.inv-status-badge.paid     { background: rgba(74,222,128,.15);  color: var(--accent2); }
+.inv-status-badge.overdue  { background: rgba(248,113,113,.15); color: var(--danger); }
+.inv-status-badge.partial  { background: rgba(245,158,11,.15);  color: var(--warn); }
+
+.inv-empty {
+  padding: 60px 24px; text-align: center;
+  color: var(--muted); font-size: 13px;
+}
+.inv-empty h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+
+/* ── Invoice Builder ── */
+.inv-builder-wrap { padding: 24px; max-width: 700px; }
+.inv-builder-wrap h2 { font-size: 18px; font-weight: 700; margin-bottom: 24px; }
+.inv-section { margin-bottom: 24px; }
+.inv-section-title {
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--muted); margin-bottom: 12px;
+}
+.inv-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.inv-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+.inv-line-header {
+  display: grid; grid-template-columns: 1fr 80px 90px 32px; gap: 8px;
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--muted); padding: 0 4px; margin-bottom: 6px;
+}
+.inv-line-item {
+  display: grid; grid-template-columns: 1fr 80px 90px 32px; gap: 8px;
+  margin-bottom: 6px; align-items: center;
+}
+.inv-line-desc { }
+.inv-line-qty, .inv-line-price { }
+.inv-line-remove {
+  width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--border);
+  background: transparent; color: var(--danger); cursor: pointer; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; transition: background .12s;
+}
+.inv-line-remove:hover { background: rgba(248,113,113,.1); }
+
+.inv-add-line-btn {
+  width: 100%; padding: 8px; border: 1px dashed var(--border); border-radius: 6px;
+  background: transparent; color: var(--muted); font-size: 12px; cursor: pointer;
+  transition: all .15s; margin-top: 4px;
+}
+.inv-add-line-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.inv-totals {
+  margin-top: 20px; padding: 16px; background: var(--surface2);
+  border-radius: 8px; border: 1px solid var(--border);
+}
+.inv-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 0; font-size: 13px;
+}
+.inv-total-row.grand {
+  border-top: 1px solid var(--border); margin-top: 8px; padding-top: 12px;
+  font-size: 16px; font-weight: 700;
+}
+.inv-total-row.grand .inv-total-val { color: var(--accent); }
+
+.inv-builder-actions { display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; }
+
+/* ── Invoice detail modal ── */
+.inv-modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.65); z-index: 200;
+  align-items: center; justify-content: center;
+}
+.inv-modal-backdrop.open { display: flex; }
+.inv-modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 12px; width: 540px; max-width: 95vw;
+  max-height: 90vh; overflow-y: auto; padding: 28px;
+}
+.inv-modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.inv-modal-title { font-size: 17px; font-weight: 700; }
+.inv-modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; }
+.inv-modal-client { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.inv-modal-lines { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 16px; }
+.inv-modal-line {
+  display: flex; gap: 8px; padding: 10px 14px;
+  border-bottom: 1px solid var(--border); font-size: 12px; align-items: center;
+}
+.inv-modal-line:last-child { border-bottom: none; }
+.inv-modal-line-desc { flex: 1; }
+.inv-modal-line-qty { color: var(--muted); width: 40px; text-align: right; }
+.inv-modal-line-price { font-family: 'DM Mono', monospace; width: 80px; text-align: right; }
+.inv-modal-total {
+  display: flex; justify-content: flex-end; font-size: 16px; font-weight: 700;
+  padding: 8px 4px; color: var(--accent);
+}
+.inv-modal-notes { font-size: 12px; color: var(--muted); padding: 10px 14px; background: var(--surface2); border-radius: 6px; margin-bottom: 16px; }
+.inv-modal-footer { display: flex; gap: 8px; flex-wrap: wrap; }
+.inv-status-select {
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  padding: 5px 8px; border: 1px solid var(--border); border-radius: 4px;
+  background: var(--surface2); color: var(--text); cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <span class="logo-main">STRUCTTECH</span>
+    <span class="logo-div">/</span>
+    <span class="logo-ops">OPS</span>
+  </div>
+  <div id="sync-status" class="sync-status sync-loading">● Loading</div>
+  <div id="header-date" class="header-date"></div>
+  <div id="week-badge" class="week-badge">W1</div>
+</header>
+
+<div id="app-nav" class="app-nav"></div>
+
+<div class="df-subnav">
+  <button class="df-subnav-btn active" id="subnav-list" onclick="showView('list')">≋ Invoices</button>
+  <button class="df-subnav-btn" id="subnav-new" onclick="showView('new')">+ New Invoice</button>
+</div>
+
+<!-- ── List View ── -->
+<div id="view-list" class="inv-view active">
+  <div class="inv-list-wrap">
+    <div class="inv-stats-row" id="inv-stats"></div>
+    <div id="inv-filter-row" style="display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;">
+      <select class="form-select" id="filter-status" onchange="renderInvoiceList()" style="max-width:140px;font-size:12px">
+        <option value="">All Statuses</option>
+        <option value="draft">Draft</option>
+        <option value="sent">Sent</option>
+        <option value="paid">Paid</option>
+        <option value="overdue">Overdue</option>
+        <option value="partial">Partial</option>
+      </select>
+    </div>
+    <div class="inv-table-header">
+      <div>Client</div><div>Description</div><div>Amount</div><div>Issued</div><div>Due</div><div>Status</div>
+    </div>
+    <div id="inv-list-body"></div>
+  </div>
+</div>
+
+<!-- ── New Invoice View ── -->
+<div id="view-new" class="inv-view">
+  <div class="inv-builder-wrap">
+    <h2 id="builder-title">New Invoice</h2>
+    <input type="hidden" id="edit-invoice-id" value="">
+
+    <div class="inv-section">
+      <div class="inv-section-title">Client</div>
+      <select class="form-select" id="inv-client" onchange="onClientChange()">
+        <option value="">Select client…</option>
+      </select>
+    </div>
+
+    <div class="inv-section">
+      <div class="inv-section-title">Details</div>
+      <div class="inv-row-2" style="margin-bottom:10px">
+        <div>
+          <label class="form-label">Invoice #</label>
+          <input type="text" class="form-input" id="inv-number" placeholder="INV-001" readonly>
+        </div>
+        <div>
+          <label class="form-label">Issue Date</label>
+          <input type="date" class="form-input" id="inv-issue-date">
+        </div>
+      </div>
+      <div class="inv-row-2">
+        <div>
+          <label class="form-label">Due Date</label>
+          <input type="date" class="form-input" id="inv-due-date">
+        </div>
+        <div>
+          <label class="form-label">Payment Terms</label>
+          <select class="form-select" id="inv-terms" onchange="applyTerms()">
+            <option value="net7">Net 7</option>
+            <option value="net14">Net 14</option>
+            <option value="net30" selected>Net 30</option>
+            <option value="due_receipt">Due on Receipt</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="inv-section">
+      <div class="inv-section-title">Line Items</div>
+      <div class="inv-line-header">
+        <div>Description</div><div>Qty</div><div>Unit Price</div><div></div>
+      </div>
+      <div id="inv-lines"></div>
+      <button class="inv-add-line-btn" onclick="addLine()">+ Add Line Item</button>
+      <div class="inv-totals">
+        <div class="inv-total-row">
+          <span>Subtotal</span>
+          <span class="inv-total-val" id="inv-subtotal">$0</span>
+        </div>
+        <div class="inv-total-row grand">
+          <span>Total Due</span>
+          <span class="inv-total-val" id="inv-grand">$0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="inv-section">
+      <div class="inv-section-title">Notes</div>
+      <textarea class="form-textarea" id="inv-notes" rows="3" placeholder="Payment instructions, terms, thank-you note…"></textarea>
+    </div>
+
+    <div class="inv-builder-actions">
+      <button class="btn btn-ghost btn-sm" onclick="resetBuilder()">Clear</button>
+      <button class="btn btn-sm" style="background:var(--surface2);color:var(--text)" onclick="saveInvoice('draft')">Save Draft</button>
+      <button class="btn btn-primary btn-sm" onclick="saveInvoice('sent')">Mark as Sent</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Invoice Detail Modal ── -->
+<div class="inv-modal-backdrop" id="inv-modal-backdrop" onclick="closeInvModal(event)">
+  <div class="inv-modal" id="inv-modal"></div>
+</div>
+
+<script src="shared.js"></script>
+<script src="nav.js"></script>
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+var lineItems = [];
+var editingInvId = null;
+
+function getInvoices() { return state.os_data.invoices || []; }
+function setInvoices(arr) { state.os_data.invoices = arr; }
+
+function nextInvNumber() {
+  var existing = getInvoices();
+  var max = 0;
+  existing.forEach(function(inv) {
+    var m = (inv.number || '').match(/(\d+)$/);
+    if (m) max = Math.max(max, parseInt(m[1]));
+  });
+  return 'INV-' + String(max + 1).padStart(3, '0');
+}
+
+// ── View ───────────────────────────────────────────────────────────────────
+function showView(v) {
+  document.querySelectorAll('.inv-view').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.df-subnav-btn').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('view-' + v).classList.add('active');
+  document.getElementById('subnav-' + v).classList.add('active');
+  if (v === 'list') renderInvoiceList();
+  if (v === 'new') initBuilder();
+}
+
+// ── Invoice List ───────────────────────────────────────────────────────────
+function renderStats() {
+  var invs = getInvoices();
+  var totalPaid = invs.filter(function(i) { return i.status === 'paid'; })
+    .reduce(function(s, i) { return s + calcInvTotal(i.lines); }, 0);
+  var totalOutstanding = invs.filter(function(i) { return i.status === 'sent' || i.status === 'overdue'; })
+    .reduce(function(s, i) { return s + calcInvTotal(i.lines); }, 0);
+  var overdue = invs.filter(function(i) { return i.status === 'overdue'; }).length;
+  var el = document.getElementById('inv-stats');
+  if (!el) return;
+  el.innerHTML =
+    stat('Total Invoiced', '$' + totalPaid.toLocaleString(), 'accent') +
+    stat('Outstanding', '$' + totalOutstanding.toLocaleString(), totalOutstanding > 0 ? 'warn' : '') +
+    stat('Overdue', overdue, overdue > 0 ? 'warn' : '') +
+    stat('All Time', invs.length + ' invoices', '');
+  function stat(l, v, cls) {
+    return '<div class="inv-stat"><div class="inv-stat-label">' + l + '</div><div class="inv-stat-value ' + cls + '">' + v + '</div></div>';
+  }
+}
+
+function renderInvoiceList() {
+  renderStats();
+  var invs = getInvoices();
+  var filterStatus = document.getElementById('filter-status') ? document.getElementById('filter-status').value : '';
+  if (filterStatus) invs = invs.filter(function(i) { return i.status === filterStatus; });
+  // Sort: overdue first, then by issue date desc
+  invs = invs.slice().sort(function(a, b) {
+    if (a.status === 'overdue' && b.status !== 'overdue') return -1;
+    if (b.status === 'overdue' && a.status !== 'overdue') return 1;
+    return (b.issueDate || '').localeCompare(a.issueDate || '');
+  });
+  var el = document.getElementById('inv-list-body');
+  if (!el) return;
+  if (invs.length === 0) {
+    el.innerHTML = '<div class="inv-empty"><h3>No invoices yet</h3><p>Create your first invoice using the New Invoice tab.</p></div>';
+    return;
+  }
+  var today = new Date(); today.setHours(0,0,0,0);
+  el.innerHTML = invs.map(function(inv) {
+    var total = calcInvTotal(inv.lines);
+    var due = inv.dueDate ? new Date(inv.dueDate) : null;
+    var dueCls = '';
+    var dueStr = inv.dueDate || '—';
+    if (due && inv.status !== 'paid') {
+      var diff = Math.ceil((due - today) / 86400000);
+      if (diff < 0) { dueCls = 'overdue'; }
+      else if (diff <= 7) { dueCls = 'soon'; }
+    }
+    return '<div class="inv-row" onclick="openInvModal(\'' + escAttr(inv.id) + '\')">' +
+      '<div><div class="inv-row-client">' + escHtml(inv.clientName || 'Unknown') + '</div><div class="inv-row-desc">' + escHtml(inv.number || '') + '</div></div>' +
+      '<div class="inv-row-desc">' + escHtml(inv.description || '—') + '</div>' +
+      '<div class="inv-row-amount">$' + total.toLocaleString() + '</div>' +
+      '<div class="inv-row-date">' + escHtml(inv.issueDate || '—') + '</div>' +
+      '<div class="inv-row-due ' + dueCls + '">' + escHtml(dueStr) + '</div>' +
+      '<div><span class="inv-status-badge ' + escAttr(inv.status || 'draft') + '">' + escHtml(inv.status || 'draft') + '</span></div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── Invoice total calc ─────────────────────────────────────────────────────
+function calcInvTotal(lines) {
+  if (!lines) return 0;
+  return lines.reduce(function(s, l) {
+    return s + ((parseFloat(l.qty) || 1) * (parseFloat(l.price) || 0));
+  }, 0);
+}
+
+// ── Builder ────────────────────────────────────────────────────────────────
+function initBuilder(inv) {
+  editingInvId = inv ? inv.id : null;
+  document.getElementById('builder-title').textContent = inv ? 'Edit Invoice' : 'New Invoice';
+  document.getElementById('edit-invoice-id').value = inv ? inv.id : '';
+
+  // Populate client dropdown from prospects
+  var clients = (state.os_data.prospects || []).filter(function(p) {
+    return p.stage === 'Closed' || p.stage === 'Proposal Sent' || p.stage === 'Audit Scheduled';
+  });
+  // Also include any existing invoice clients not in prospects
+  var existingClients = {};
+  getInvoices().forEach(function(i) { if (i.clientId) existingClients[i.clientId] = i.clientName; });
+  var clientSel = document.getElementById('inv-client');
+  clientSel.innerHTML = '<option value="">Select client…</option>' +
+    clients.map(function(c) {
+      return '<option value="' + escAttr(c.id) + '">' + escHtml(c.name) + '</option>';
+    }).join('');
+
+  var today = new Date();
+  var todayStr = today.toISOString().slice(0, 10);
+
+  if (inv) {
+    clientSel.value = inv.clientId || '';
+    document.getElementById('inv-number').value = inv.number || '';
+    document.getElementById('inv-issue-date').value = inv.issueDate || todayStr;
+    document.getElementById('inv-due-date').value = inv.dueDate || '';
+    document.getElementById('inv-notes').value = inv.notes || '';
+    lineItems = (inv.lines || []).map(function(l) { return Object.assign({}, l); });
+  } else {
+    clientSel.value = '';
+    document.getElementById('inv-number').value = nextInvNumber();
+    document.getElementById('inv-issue-date').value = todayStr;
+    applyTerms();
+    document.getElementById('inv-notes').value = '';
+    lineItems = [{ desc: '', qty: 1, price: 0 }];
+  }
+  renderLines();
+}
+
+function onClientChange() {}
+
+function applyTerms() {
+  var terms = document.getElementById('inv-terms').value;
+  var issue = document.getElementById('inv-issue-date').value;
+  if (!issue) return;
+  var d = new Date(issue);
+  var days = { net7: 7, net14: 14, net30: 30, due_receipt: 0 }[terms];
+  if (days === undefined) return;
+  d.setDate(d.getDate() + days);
+  document.getElementById('inv-due-date').value = d.toISOString().slice(0, 10);
+}
+
+function addLine() {
+  lineItems.push({ desc: '', qty: 1, price: 0 });
+  renderLines();
+}
+
+function removeLine(idx) {
+  lineItems.splice(idx, 1);
+  renderLines();
+}
+
+function updateLine(idx, field, val) {
+  lineItems[idx][field] = val;
+  updateTotals();
+}
+
+function renderLines() {
+  var el = document.getElementById('inv-lines');
+  if (!el) return;
+  el.innerHTML = lineItems.map(function(l, i) {
+    return '<div class="inv-line-item">' +
+      '<input type="text" class="form-input inv-line-desc" value="' + escAttr(l.desc) + '" placeholder="Description…" oninput="updateLine(' + i + ',\'desc\',this.value)">' +
+      '<input type="number" class="form-input inv-line-qty" value="' + (l.qty || 1) + '" min="1" step="1" style="text-align:center" oninput="updateLine(' + i + ',\'qty\',this.value)">' +
+      '<input type="number" class="form-input inv-line-price" value="' + (l.price || 0) + '" min="0" step="50" placeholder="0" oninput="updateLine(' + i + ',\'price\',this.value)">' +
+      '<button class="inv-line-remove" onclick="removeLine(' + i + ')">×</button>' +
+    '</div>';
+  }).join('');
+  updateTotals();
+}
+
+function updateTotals() {
+  var sub = calcInvTotal(lineItems);
+  document.getElementById('inv-subtotal').textContent = '$' + sub.toLocaleString();
+  document.getElementById('inv-grand').textContent = '$' + sub.toLocaleString();
+}
+
+function resetBuilder() {
+  editingInvId = null;
+  initBuilder();
+}
+
+function saveInvoice(status) {
+  var clientSel = document.getElementById('inv-client');
+  var clientId = clientSel.value;
+  var clientName = clientId ? (clientSel.options[clientSel.selectedIndex] || {}).text : '';
+  if (!clientName || !clientId) { showToast('Select a client first'); return; }
+  var lines = lineItems.filter(function(l) { return l.desc || l.price > 0; });
+  if (lines.length === 0) { showToast('Add at least one line item'); return; }
+
+  var inv = {
+    id: editingInvId || genId(),
+    number: document.getElementById('inv-number').value,
+    clientId: clientId,
+    clientName: clientName,
+    description: lines[0] ? lines[0].desc : '',
+    issueDate: document.getElementById('inv-issue-date').value,
+    dueDate: document.getElementById('inv-due-date').value,
+    notes: document.getElementById('inv-notes').value,
+    lines: lines,
+    status: status,
+    createdAt: new Date().toISOString()
+  };
+
+  var invs = getInvoices();
+  if (editingInvId) {
+    var idx = invs.findIndex(function(i) { return i.id == editingInvId; });
+    if (idx !== -1) { invs[idx] = inv; } else { invs.push(inv); }
+  } else {
+    invs.push(inv);
+  }
+  setInvoices(invs);
+  scheduleSave();
+  showToast(status === 'sent' ? 'Invoice marked as sent' : 'Draft saved');
+  showView('list');
+}
+
+// ── Invoice Modal ──────────────────────────────────────────────────────────
+function openInvModal(id) {
+  var inv = getInvoices().find(function(i) { return i.id == id; });
+  if (!inv) return;
+  var total = calcInvTotal(inv.lines);
+  var statusOpts = ['draft','sent','paid','overdue','partial'];
+  var modal = document.getElementById('inv-modal');
+  modal.innerHTML =
+    '<div class="inv-modal-header">' +
+      '<div>' +
+        '<div class="inv-modal-title">' + escHtml(inv.number || 'Invoice') + '</div>' +
+        '<span class="inv-status-badge ' + escAttr(inv.status || 'draft') + '">' + escHtml(inv.status || 'draft') + '</span>' +
+      '</div>' +
+      '<button class="inv-modal-close" onclick="closeInvModal()">×</button>' +
+    '</div>' +
+    '<div class="inv-modal-client">Client: <strong>' + escHtml(inv.clientName || '') + '</strong>' +
+      (inv.issueDate ? ' · Issued ' + escHtml(inv.issueDate) : '') +
+      (inv.dueDate ? ' · Due ' + escHtml(inv.dueDate) : '') +
+    '</div>' +
+    '<div class="inv-modal-lines">' +
+      (inv.lines || []).map(function(l) {
+        var lineTotal = (parseFloat(l.qty)||1) * (parseFloat(l.price)||0);
+        return '<div class="inv-modal-line">' +
+          '<span class="inv-modal-line-desc">' + escHtml(l.desc || '') + '</span>' +
+          '<span class="inv-modal-line-qty">×' + (l.qty||1) + '</span>' +
+          '<span class="inv-modal-line-price">$' + lineTotal.toLocaleString() + '</span>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+    '<div class="inv-modal-total">Total: $' + total.toLocaleString() + '</div>' +
+    (inv.notes ? '<div class="inv-modal-notes">' + escHtml(inv.notes) + '</div>' : '') +
+    '<div class="inv-modal-footer">' +
+      '<select class="inv-status-select" onchange="setInvStatus(\'' + escAttr(inv.id) + '\',this.value)">' +
+        statusOpts.map(function(s) {
+          return '<option value="' + s + '"' + (inv.status === s ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>';
+        }).join('') +
+      '</select>' +
+      '<button class="btn btn-sm btn-ghost" onclick="editInvoice(\'' + escAttr(inv.id) + '\')">Edit</button>' +
+      '<button class="btn btn-sm btn-danger" onclick="deleteInvoice(\'' + escAttr(inv.id) + '\')">Delete</button>' +
+    '</div>';
+  document.getElementById('inv-modal-backdrop').classList.add('open');
+}
+
+function closeInvModal(e) {
+  if (e && e.target !== document.getElementById('inv-modal-backdrop')) return;
+  document.getElementById('inv-modal-backdrop').classList.remove('open');
+}
+
+function setInvStatus(id, status) {
+  var invs = getInvoices();
+  var inv = invs.find(function(i) { return i.id == id; });
+  if (!inv) return;
+  inv.status = status;
+  setInvoices(invs);
+  scheduleSave();
+  document.getElementById('inv-modal-backdrop').classList.remove('open');
+  renderInvoiceList();
+  showToast('Status updated to ' + status);
+}
+
+function editInvoice(id) {
+  var inv = getInvoices().find(function(i) { return i.id == id; });
+  if (!inv) return;
+  document.getElementById('inv-modal-backdrop').classList.remove('open');
+  showView('new');
+  setTimeout(function() { initBuilder(inv); }, 50);
+}
+
+function deleteInvoice(id) {
+  if (!confirm('Delete this invoice? This cannot be undone.')) return;
+  var invs = getInvoices().filter(function(i) { return i.id != id; });
+  setInvoices(invs);
+  scheduleSave();
+  document.getElementById('inv-modal-backdrop').classList.remove('open');
+  renderInvoiceList();
+  showToast('Invoice deleted');
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+async function init() {
+  renderNav('invoices');
+  var d = new Date();
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('header-date').textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
+  document.getElementById('week-badge').textContent = 'W' + state.current_week;
+  await loadState();
+  document.getElementById('week-badge').textContent = 'W' + state.current_week;
+  renderInvoiceList();
+}
+
+init();
+</script>
+</body>
+</html>

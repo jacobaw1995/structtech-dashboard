@@ -1,10 +1,10 @@
 var NAV_PAGES = [
   { id: 'dashboard',   label: 'Dashboard',   href: 'index.html',       icon: '⊞', soon: false },
   { id: 'clients',     label: 'Clients',     href: 'clients.html',     icon: '◉', soon: false },
-  { id: 'automations', label: 'Automations', href: 'automations.html', icon: '⚡', soon: true  },
-  { id: 'invoices',    label: 'Invoices',    href: 'invoices.html',    icon: '≋', soon: true  },
+  { id: 'automations', label: 'Automations', href: 'automations.html', icon: '⚡', soon: false },
+  { id: 'invoices',    label: 'Invoices',    href: 'invoices.html',    icon: '≋', soon: false },
   { id: 'reports',     label: 'Reports',     href: 'reports.html',     icon: '≡', soon: true  },
-  { id: 'content',     label: 'Content',     href: 'content.html',     icon: '✦', soon: true  }
+  { id: 'content',     label: 'Content',     href: 'content.html',     icon: '✦', soon: false }
 ];
 
 // ── Toast ────────────────────────────────────────────────────────────────

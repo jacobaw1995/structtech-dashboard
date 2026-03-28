@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>StructTech — Automations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ── Sub-nav ── */
+.df-subnav {
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 24px; height: 38px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  overflow-x: auto; flex-shrink: 0;
+}
+.df-subnav-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.07em; padding: 5px 12px; border-radius: 4px;
+  border: none; background: transparent; color: var(--muted);
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.df-subnav-btn:hover { color: var(--text); }
+.df-subnav-btn.active { background: var(--surface2); color: var(--accent); }
+
+.au-view { display: none; }
+.au-view.active { display: block; }
+
+/* ── Library ── */
+.au-library-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px; padding: 24px;
+}
+.au-blueprint {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px; transition: border-color 0.15s;
+}
+.au-blueprint:hover { border-color: var(--border2); }
+.au-bp-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.au-bp-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: var(--surface2); display: flex; align-items: center;
+  justify-content: center; font-size: 16px; flex-shrink: 0;
+}
+.au-bp-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.au-bp-area {
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--muted);
+}
+.au-bp-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+.au-bp-footer { display: flex; align-items: center; justify-content: space-between; }
+.au-bp-price { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 500; }
+.au-bp-tools { display: flex; gap: 4px; flex-wrap: wrap; }
+.au-tool-tag {
+  font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 7px;
+  border-radius: 3px; background: var(--surface2); color: var(--muted);
+  border: 1px solid var(--border);
+}
+.au-bp-steps { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.au-bp-step {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 11px; color: var(--muted); padding: 3px 0;
+}
+.au-step-num {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text);
+  flex-shrink: 0; margin-top: 0px;
+}
+
+/* ── Tracker ── */
+.au-tracker-layout {
+  display: grid; grid-template-columns: 260px 1fr;
+  gap: 0; height: calc(100vh - 130px);
+}
+.au-client-list {
+  border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 16px;
+}
+.au-client-item {
+  padding: 10px 12px; border-radius: 7px; margin-bottom: 4px;
+  cursor: pointer; transition: background 0.12s; border: 1px solid transparent;
+}
+.au-client-item:hover { background: var(--surface2); }
+.au-client-item.selected { background: var(--surface2); border-color: var(--accent); }
+.au-client-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.au-client-meta { font-size: 11px; color: var(--muted); }
+.au-client-dots { display: flex; gap: 3px; margin-top: 5px; }
+.au-status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--border2);
+}
+.au-status-dot.active { background: var(--accent2); }
+.au-status-dot.inprogress { background: var(--warn); }
+
+.au-detail { overflow-y: auto; padding: 24px; }
+.au-detail-empty {
+  display: flex; align-items: center; justify-content: center;
+  height: 200px; color: var(--muted); font-size: 13px;
+}
+.au-detail-header { margin-bottom: 20px; }
+.au-detail-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.au-detail-meta { font-size: 12px; color: var(--muted); }
+
+.au-module-list { display: flex; flex-direction: column; gap: 10px; }
+.au-module {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.au-module-icon { font-size: 18px; flex-shrink: 0; }
+.au-module-info { flex: 1; }
+.au-module-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.au-module-status-line { font-size: 11px; color: var(--muted); }
+.au-module-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.au-module-price { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); }
+
+.au-status-badge {
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 3px 8px; border-radius: 3px;
+}
+.au-status-badge.planned   { background: rgba(100,116,139,0.15); color: var(--muted); }
+.au-status-badge.inprogress { background: rgba(245,158,11,0.15); color: var(--warn); }
+.au-status-badge.live      { background: rgba(74,222,128,0.15); color: var(--accent2); }
+.au-status-badge.paused    { background: rgba(248,113,113,0.15); color: var(--danger); }
+
+.au-status-select {
+  font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 3px 6px; border-radius: 3px;
+  border: 1px solid var(--border); background: var(--surface2); color: var(--text);
+  cursor: pointer;
+}
+
+.au-add-module-btn {
+  margin-top: 16px;
+  width: 100%; padding: 10px;
+  border: 1px dashed var(--border); border-radius: 8px;
+  background: transparent; color: var(--muted); font-size: 12px;
+  cursor: pointer; transition: all 0.15s;
+}
+.au-add-module-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.au-add-modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6); z-index: 200;
+  align-items: center; justify-content: center;
+}
+.au-add-modal-backdrop.open { display: flex; }
+.au-add-modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 24px; width: 500px; max-width: 95vw;
+  max-height: 80vh; overflow-y: auto;
+}
+.au-add-modal-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+.au-add-grid { display: flex; flex-direction: column; gap: 8px; }
+.au-add-row {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border: 1px solid var(--border); border-radius: 7px; cursor: pointer;
+  transition: border-color 0.12s; background: var(--surface2);
+}
+.au-add-row:hover { border-color: var(--accent); }
+.au-add-row.selected { border-color: var(--accent); background: rgba(200,240,96,0.06); }
+.au-add-row-name { font-size: 13px; font-weight: 500; flex: 1; }
+.au-add-row-price { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); }
+.au-notes-field {
+  width: 100%; min-height: 60px; resize: vertical;
+  font-family: 'DM Sans', sans-serif; font-size: 12px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 10px; color: var(--text);
+  margin-top: 12px;
+}
+.au-notes-field:focus { outline: none; border-color: var(--accent); }
+.au-modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+/* ── No-client placeholder ── */
+.au-empty-state {
+  padding: 40px 24px; text-align: center;
+}
+.au-empty-state h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.au-empty-state p { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <span class="logo-main">STRUCTTECH</span>
+    <span class="logo-div">/</span>
+    <span class="logo-ops">OPS</span>
+  </div>
+  <div id="sync-status" class="sync-status sync-loading">● Loading</div>
+  <div id="header-date" class="header-date"></div>
+  <div id="week-badge" class="week-badge">W1</div>
+</header>
+
+<div id="app-nav" class="app-nav"></div>
+
+<div class="df-subnav">
+  <button class="df-subnav-btn active" id="subnav-library" onclick="showView('library')">⚡ Library</button>
+  <button class="df-subnav-btn" id="subnav-tracker" onclick="showView('tracker')">◉ Client Tracker</button>
+</div>
+
+<!-- ── Library View ── -->
+<div id="view-library" class="au-view active">
+  <div class="au-library-grid" id="library-grid"></div>
+</div>
+
+<!-- ── Tracker View ── -->
+<div id="view-tracker" class="au-view">
+  <div class="au-tracker-layout">
+    <div class="au-client-list" id="tracker-client-list"></div>
+    <div class="au-detail" id="tracker-detail"></div>
+  </div>
+</div>
+
+<!-- ── Add Module Modal ── -->
+<div class="au-add-modal-backdrop" id="add-modal-backdrop" onclick="closeAddModal(event)">
+  <div class="au-add-modal" id="add-modal">
+    <div class="au-add-modal-title">Add Automation Module</div>
+    <div class="au-add-grid" id="add-module-grid"></div>
+    <textarea class="au-notes-field" id="add-module-notes" placeholder="Notes (optional)…"></textarea>
+    <div class="au-modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmAddModule()">Add Module</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script src="nav.js"></script>
+<script>
+// ── Blueprint catalog ────────────────────────────────────────────────────────
+var BLUEPRINTS = [
+  {
+    id: 'scheduling',
+    name: 'Job Scheduling & Dispatch',
+    area: 'Operations',
+    icon: '📅',
+    desc: 'Automated job booking, technician dispatch, and calendar sync between field and office. Eliminates double-booking and missed appointments.',
+    price: 750,
+    tools: ['Make.com', 'Jobber', 'Google Cal'],
+    steps: [
+      'Intake form triggers job creation in Jobber',
+      'Technician availability checked + assigned',
+      'Client confirmation SMS/email sent automatically',
+      'Job status updates push to office dashboard'
+    ]
+  },
+  {
+    id: 'communication',
+    name: 'Field-to-Office Communication',
+    area: 'Operations',
+    icon: '📡',
+    desc: 'Structured update flow between field techs and office. Job notes, photos, and status changes route to the right people without phone tag.',
+    price: 500,
+    tools: ['Make.com', 'Slack', 'Jobber'],
+    steps: [
+      'Field tech submits job update via form/app',
+      'Photos + notes auto-filed to job record',
+      'Office notified of status changes via Slack',
+      'Daily summary report generated end-of-day'
+    ]
+  },
+  {
+    id: 'invoicing',
+    name: 'Invoicing & Payment Automation',
+    area: 'Finance',
+    icon: '💳',
+    desc: 'Auto-generate invoices on job completion, send payment links, and track overdue accounts. Reduces collection time by 60%+.',
+    price: 500,
+    tools: ['Make.com', 'Jobber', 'Stripe'],
+    steps: [
+      'Job marked complete → invoice auto-generated',
+      'Payment link texted + emailed to client',
+      'Reminder sent at 3-day and 7-day overdue',
+      'Payment received → owner notification'
+    ]
+  },
+  {
+    id: 'jobcosting',
+    name: 'Job Costing & Expense Tracking',
+    area: 'Finance',
+    icon: '📊',
+    desc: 'Track labor, materials, and overhead per job. Know your actual margin in real time — not just at month-end.',
+    price: 600,
+    tools: ['Make.com', 'Airtable', 'Jobber'],
+    steps: [
+      'Techs log materials + time on job close',
+      'Costs auto-calculated against estimate',
+      'Margin report generated per job and crew',
+      'Monthly P&L summary to owner'
+    ]
+  },
+  {
+    id: 'materials',
+    name: 'Materials & Procurement',
+    area: 'Operations',
+    icon: '🏗️',
+    desc: 'Low-stock alerts, supplier order automation, and materials tracking by job. Stop running out of parts mid-project.',
+    price: 600,
+    tools: ['Make.com', 'Airtable', 'Email'],
+    steps: [
+      'Inventory levels tracked per item',
+      'Low-stock triggers purchase order draft',
+      'Materials assigned to job at dispatch',
+      'Usage report per week/month'
+    ]
+  },
+  {
+    id: 'leads',
+    name: 'Lead & CRM Follow-Up',
+    area: 'Sales',
+    icon: '🎯',
+    desc: 'New leads auto-enter your pipeline, get an instant response, and receive a follow-up sequence until they book or go cold.',
+    price: 500,
+    tools: ['Make.com', 'Airtable', 'SMS/Email'],
+    steps: [
+      'New lead form/inquiry captured + logged',
+      'Instant auto-reply sent within 2 minutes',
+      'Follow-up sequence over 7 days',
+      'Unresponsive leads tagged cold, owner notified'
+    ]
+  },
+  {
+    id: 'training',
+    name: 'Team Training & Handoff',
+    area: 'HR',
+    icon: '🎓',
+    desc: 'Onboarding checklist automation, role-based training task assignment, and progress tracking for new hires and promoted techs.',
+    price: 350,
+    tools: ['Make.com', 'Notion', 'Email'],
+    steps: [
+      'New hire added → onboarding sequence triggered',
+      'Training tasks assigned by role in Notion',
+      'Manager notified at each milestone',
+      'Completion tracked + documented'
+    ]
+  },
+  {
+    id: 'sops',
+    name: 'SOPs & Process Documentation',
+    area: 'Operations',
+    icon: '📋',
+    desc: 'Build out your standard operating procedures as living documents — accessible in the field, updatable in real time, linked to job types.',
+    price: 250,
+    tools: ['Notion', 'Make.com'],
+    steps: [
+      'SOP templates built per job type',
+      'Technicians access via mobile-friendly link',
+      'Update triggers notify affected team',
+      'Version history maintained automatically'
+    ]
+  }
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+var currentView = 'library';
+var selectedClientId = null;
+var addModalClientId = null;
+var selectedBlueprintIds = [];
+
+function showView(v) {
+  currentView = v;
+  document.querySelectorAll('.au-view').forEach(function(el) { el.classList.remove('active'); });
+  document.querySelectorAll('.df-subnav-btn').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById('view-' + v).classList.add('active');
+  document.getElementById('subnav-' + v).classList.add('active');
+  if (v === 'tracker') renderTracker();
+}
+
+// ── Library ─────────────────────────────────────────────────────────────────
+function renderLibrary() {
+  var el = document.getElementById('library-grid');
+  if (!el) return;
+  el.innerHTML = BLUEPRINTS.map(function(bp) {
+    var tools = bp.tools.map(function(t) { return '<span class="au-tool-tag">' + escHtml(t) + '</span>'; }).join('');
+    var steps = bp.steps.map(function(s, i) {
+      return '<div class="au-bp-step"><span class="au-step-num">' + (i+1) + '</span><span>' + escHtml(s) + '</span></div>';
+    }).join('');
+    return '<div class="au-blueprint">' +
+      '<div class="au-bp-header">' +
+        '<div class="au-bp-icon">' + bp.icon + '</div>' +
+        '<div><div class="au-bp-title">' + escHtml(bp.name) + '</div>' +
+        '<div class="au-bp-area">' + escHtml(bp.area) + '</div></div>' +
+      '</div>' +
+      '<div class="au-bp-desc">' + escHtml(bp.desc) + '</div>' +
+      '<div class="au-bp-footer">' +
+        '<div class="au-bp-price">$' + bp.price.toLocaleString() + '</div>' +
+        '<div class="au-bp-tools">' + tools + '</div>' +
+      '</div>' +
+      '<div class="au-bp-steps">' + steps + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ── Tracker ──────────────────────────────────────────────────────────────────
+function getClients() {
+  var pp = state.os_data.prospects || [];
+  return pp.filter(function(p) {
+    return p.stage === 'Closed' || p.stage === 'Proposal Sent' || p.stage === 'Audit Scheduled';
+  });
+}
+
+function getClientAutomations(clientId) {
+  var all = state.os_data.automations || {};
+  return all[clientId] || [];
+}
+
+function renderTracker() {
+  renderClientList();
+  renderDetail();
+}
+
+function renderClientList() {
+  var el = document.getElementById('tracker-client-list');
+  if (!el) return;
+  var clients = getClients();
+  if (clients.length === 0) {
+    el.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:12px;text-align:center">' +
+      'No active clients yet.<br><br>Prospects in Audit Scheduled, Proposal Sent, or Closed stages will appear here.' +
+    '</div>';
+    return;
+  }
+  el.innerHTML = '<div style="font-family:\'DM Mono\',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:10px;padding:0 4px">Clients (' + clients.length + ')</div>' +
+    clients.map(function(c) {
+      var mods = getClientAutomations(c.id);
+      var live = mods.filter(function(m) { return m.status === 'live'; }).length;
+      var inprog = mods.filter(function(m) { return m.status === 'inprogress'; }).length;
+      var dots = mods.map(function(m) {
+        var cls = m.status === 'live' ? 'active' : (m.status === 'inprogress' ? 'inprogress' : '');
+        return '<span class="au-status-dot ' + cls + '"></span>';
+      }).join('');
+      var sel = c.id === selectedClientId ? ' selected' : '';
+      return '<div class="au-client-item' + sel + '" onclick="selectClient(\'' + escAttr(c.id) + '\')">' +
+        '<div class="au-client-name">' + escHtml(c.name) + '</div>' +
+        '<div class="au-client-meta">' + escHtml(c.stage) + ' · ' + (mods.length ? mods.length + ' modules' : 'none yet') + '</div>' +
+        (dots ? '<div class="au-client-dots">' + dots + '</div>' : '') +
+      '</div>';
+    }).join('');
+}
+
+function selectClient(id) {
+  selectedClientId = id;
+  renderClientList();
+  renderDetail();
+}
+
+function renderDetail() {
+  var el = document.getElementById('tracker-detail');
+  if (!el) return;
+  if (!selectedClientId) {
+    var clients = getClients();
+    if (clients.length > 0) {
+      selectedClientId = clients[0].id;
+    } else {
+      el.innerHTML = '<div class="au-detail-empty">Select a client to manage their automations</div>';
+      return;
+    }
+  }
+  var pp = state.os_data.prospects || [];
+  var client = pp.find(function(p) { return p.id == selectedClientId; });
+  if (!client) { el.innerHTML = '<div class="au-detail-empty">Client not found</div>'; return; }
+
+  var mods = getClientAutomations(client.id);
+  var moduleHtml = '';
+  if (mods.length === 0) {
+    moduleHtml = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px">' +
+      'No modules added yet. Use the button below to add automation modules for this client.' +
+    '</div>';
+  } else {
+    var blueprintMap = {};
+    BLUEPRINTS.forEach(function(b) { blueprintMap[b.id] = b; });
+    moduleHtml = '<div class="au-module-list">' +
+      mods.map(function(m, idx) {
+        var bp = blueprintMap[m.blueprintId] || {};
+        var statusOpts = ['planned','inprogress','live','paused'];
+        var selectHtml = '<select class="au-status-select" onchange="setModuleStatus(\'' + escAttr(client.id) + '\',' + idx + ',this.value)">' +
+          statusOpts.map(function(s) {
+            return '<option value="' + s + '"' + (m.status === s ? ' selected' : '') + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>';
+          }).join('') +
+        '</select>';
+        return '<div class="au-module">' +
+          '<div class="au-module-icon">' + (bp.icon || '⚙️') + '</div>' +
+          '<div class="au-module-info">' +
+            '<div class="au-module-name">' + escHtml(bp.name || m.blueprintId) + '</div>' +
+            '<div class="au-module-status-line">' + (m.notes ? escHtml(m.notes) : escHtml(bp.area || '')) + '</div>' +
+          '</div>' +
+          '<div class="au-module-right">' +
+            selectHtml +
+            '<div class="au-module-price">$' + ((bp.price || 0)).toLocaleString() + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var totalLive = mods.filter(function(m) { return m.status === 'live'; }).length;
+  var totalVal = mods.reduce(function(sum, m) {
+    var bp = BLUEPRINTS.find(function(b) { return b.id === m.blueprintId; });
+    return sum + (bp ? bp.price : 0);
+  }, 0);
+
+  el.innerHTML =
+    '<div class="au-detail-header">' +
+      '<div class="au-detail-name">' + escHtml(client.name) + '</div>' +
+      '<div class="au-detail-meta">' + escHtml(client.bizType || '') + (client.city ? ' · ' + escHtml(client.city) : '') +
+        ' · <span style="color:var(--accent2)">' + totalLive + ' live</span>' +
+        ' · <span style="color:var(--muted)">$' + totalVal.toLocaleString() + ' contracted</span>' +
+      '</div>' +
+    '</div>' +
+    moduleHtml +
+    '<button class="au-add-module-btn" onclick="openAddModal(\'' + escAttr(client.id) + '\')">+ Add Automation Module</button>';
+}
+
+function setModuleStatus(clientId, idx, status) {
+  if (!state.os_data.automations) state.os_data.automations = {};
+  if (!state.os_data.automations[clientId]) state.os_data.automations[clientId] = [];
+  state.os_data.automations[clientId][idx].status = status;
+  scheduleSave();
+  renderDetail();
+  renderClientList();
+}
+
+// ── Add Module Modal ─────────────────────────────────────────────────────────
+function openAddModal(clientId) {
+  addModalClientId = clientId;
+  selectedBlueprintIds = [];
+  var existing = getClientAutomations(clientId).map(function(m) { return m.blueprintId; });
+  var grid = document.getElementById('add-module-grid');
+  grid.innerHTML = BLUEPRINTS.map(function(bp) {
+    var already = existing.indexOf(bp.id) !== -1;
+    if (already) return '';
+    return '<div class="au-add-row" id="addrow-' + bp.id + '" onclick="toggleBpSelect(\'' + bp.id + '\')">' +
+      '<span style="font-size:16px">' + bp.icon + '</span>' +
+      '<span class="au-add-row-name">' + escHtml(bp.name) + '</span>' +
+      '<span class="au-add-row-price">$' + bp.price.toLocaleString() + '</span>' +
+    '</div>';
+  }).filter(Boolean).join('');
+  if (!grid.innerHTML.trim()) {
+    grid.innerHTML = '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px">All modules already added for this client.</div>';
+  }
+  document.getElementById('add-module-notes').value = '';
+  document.getElementById('add-modal-backdrop').classList.add('open');
+}
+
+function toggleBpSelect(id) {
+  var idx = selectedBlueprintIds.indexOf(id);
+  if (idx === -1) { selectedBlueprintIds.push(id); }
+  else { selectedBlueprintIds.splice(idx, 1); }
+  document.querySelectorAll('.au-add-row').forEach(function(el) { el.classList.remove('selected'); });
+  selectedBlueprintIds.forEach(function(bid) {
+    var row = document.getElementById('addrow-' + bid);
+    if (row) row.classList.add('selected');
+  });
+}
+
+function closeAddModal(e) {
+  if (e && e.target !== document.getElementById('add-modal-backdrop')) return;
+  document.getElementById('add-modal-backdrop').classList.remove('open');
+  selectedBlueprintIds = [];
+  addModalClientId = null;
+}
+
+function confirmAddModule() {
+  if (!addModalClientId || selectedBlueprintIds.length === 0) {
+    showToast('Select at least one module');
+    return;
+  }
+  var notes = document.getElementById('add-module-notes').value.trim();
+  if (!state.os_data.automations) state.os_data.automations = {};
+  if (!state.os_data.automations[addModalClientId]) state.os_data.automations[addModalClientId] = [];
+  selectedBlueprintIds.forEach(function(bid) {
+    state.os_data.automations[addModalClientId].push({
+      blueprintId: bid,
+      status: 'planned',
+      notes: notes,
+      addedAt: new Date().toISOString()
+    });
+  });
+  scheduleSave();
+  document.getElementById('add-modal-backdrop').classList.remove('open');
+  selectedBlueprintIds = [];
+  addModalClientId = null;
+  renderTracker();
+  showToast('Module(s) added');
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  renderNav('automations');
+  var d = new Date();
+  var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('header-date').textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
+  document.getElementById('week-badge').textContent = 'W' + state.current_week;
+  await loadState();
+  document.getElementById('week-badge').textContent = 'W' + state.current_week;
+  renderLibrary();
+}
+
+init();
+</script>
+</body>
+</html>
