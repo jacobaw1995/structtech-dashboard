@@ -4,7 +4,8 @@ var NAV_PAGES = [
   { id: 'automations', label: 'Automations', href: 'automations.html', icon: '⚡', soon: false },
   { id: 'invoices',    label: 'Invoices',    href: 'invoices.html',    icon: '≋', soon: false },
   { id: 'reports',     label: 'Reports',     href: 'reports.html',     icon: '≡', soon: true  },
-  { id: 'content',     label: 'Content',     href: 'content.html',     icon: '✦', soon: false }
+  { id: 'content',     label: 'Content',     href: 'content.html',     icon: '✦', soon: false },
+  { id: 'marketing',   label: 'Marketing',   href: 'marketing.html',   icon: '◎', soon: false },
 ];
 
 // ── Toast ────────────────────────────────────────────────────────────────

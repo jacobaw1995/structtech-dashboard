@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StructTech — Marketing</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f0e;--surface:#141614;--surface2:#1a1d1a;--border:#2a2e2a;--border2:#363b36;--text:#e8ebe6;--muted:#7a8278;--accent:#c8f060;--accent2:#4ade80;--warn:#f59e0b;--danger:#f87171;--blue:#60a5fa;--teal:#2dd4bf;--purple:#a78bfa;--coral:#fb923c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;padding-bottom:80px}
+header{border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:100}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--accent)}
+.logo span{color:var(--muted)}
+.header-right{display:flex;align-items:center;gap:20px;font-size:12px;color:var(--muted);font-family:'DM Mono',monospace}
+.sync-status{font-size:11px;font-family:'DM Mono',monospace}
+.sync-saved{color:var(--accent2)}.sync-loading{color:var(--warn)}.sync-saving{color:var(--blue)}.sync-failed{color:var(--danger)}
+#app-nav{display:flex;align-items:center;gap:0}
+.nav-link{font-size:12px;color:var(--muted);text-decoration:none;padding:4px 14px;border-radius:20px;transition:all .15s;font-family:'DM Sans',sans-serif;letter-spacing:.03em}
+.nav-link:hover{color:var(--text)}.nav-link.active{color:var(--accent);background:rgba(200,240,96,.08);border:1px solid rgba(200,240,96,.2)}
+.nav-link.soon{opacity:.4;cursor:default}
+.nav-divider{width:1px;height:14px;background:var(--border);margin:0 2px}
+.main{padding:28px 32px;max-width:1400px;margin:0 auto}
+.page-header{margin-bottom:28px}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--text);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted)}
+.stats-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:28px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-color,var(--border2))}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.stat-value{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1.5px}
+.card-body{padding:20px}
+.tab-row{display:flex;gap:6px;flex-wrap:wrap}
+.tab-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:5px 14px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;transition:all .15s}
+.tab-btn:hover{border-color:var(--border2);color:var(--text)}
+.tab-btn.active{background:var(--accent);color:#0d0f0e;border-color:var(--accent);font-weight:500}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.script-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.script-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.script-name{font-size:13px;font-weight:500}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 9px;border-radius:20px;letter-spacing:.03em}
+.b-accent{background:rgba(200,240,96,.15);color:var(--accent)}
+.b-warn{background:rgba(245,158,11,.15);color:var(--warn)}
+.b-coral{background:rgba(251,146,60,.15);color:var(--coral)}
+.b-blue{background:rgba(96,165,250,.15);color:var(--blue)}
+.b-purple{background:rgba(167,139,250,.15);color:var(--purple)}
+.b-teal{background:rgba(45,212,191,.15);color:var(--teal)}
+.script-body{padding:14px 16px}
+.subject-line{font-size:11px;color:var(--muted);margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.subject-line strong{color:var(--text)}
+.script-text{font-size:13px;color:var(--text);line-height:1.85;white-space:pre-wrap;font-family:'DM Sans',sans-serif}
+.tip-note{background:rgba(45,212,191,.07);border:1px solid rgba(45,212,191,.18);border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:var(--teal);line-height:1.6}
+.obj-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.obj-q{padding:11px 16px;background:rgba(200,240,96,.05);border-bottom:1px solid var(--border);font-size:13px;font-weight:500;color:var(--accent)}
+.obj-a{padding:12px 16px;font-size:13px;color:var(--text);line-height:1.7}
+.flow-steps{display:flex;flex-direction:column;gap:10px}
+.flow-step{display:flex;align-items:flex-start;gap:12px}
+.flow-num{min-width:26px;height:26px;border-radius:50%;background:rgba(200,240,96,.12);border:1px solid rgba(200,240,96,.25);color:var(--accent);font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-family:'DM Mono',monospace}
+.flow-content{font-size:13px;color:var(--text);line-height:1.6;padding-top:3px}
+.flow-day{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.05em;display:block;margin-bottom:2px;text-transform:uppercase}
+.two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.three-col{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.channel-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;border-left:3px solid var(--accent-color,var(--border2))}
+.ch-name{font-size:13px;font-weight:500;margin-bottom:4px}
+.ch-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.ch-tip{font-size:12px;color:var(--muted);line-height:1.6}
+.source-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.source-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.source-name{font-size:13px;font-weight:500}
+.source-yield{font-size:11px;color:var(--muted);margin-bottom:6px}
+.source-how{font-size:12px;color:var(--muted);line-height:1.6}
+.source-time{font-size:11px;color:var(--teal);margin-top:6px}
+.mono-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1.9;margin-top:10px}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:11px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px}
+.kpi-val{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;line-height:1}
+.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.add-btn{background:var(--accent);color:#0d0f0e;border:none;border-radius:6px;padding:7px 16px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:13px;cursor:pointer;transition:opacity .15s}
+.add-btn:hover{opacity:.85}
+.ghost-btn{background:transparent;border:1px solid var(--border2);border-radius:6px;padding:7px 14px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .15s}
+.ghost-btn:hover{border-color:var(--border2);color:var(--text)}
+.prospect-form{display:none;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:16px}
+.form-row{display:flex;flex-direction:column;gap:8px}
+.add-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s}
+.add-input:focus{border-color:var(--accent)}
+.add-input::placeholder{color:var(--muted)}
+select.add-input option{background:var(--surface)}
+.prospect-list{display:flex;flex-direction:column;gap:8px}
+.prospect-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;gap:8px;flex-wrap:wrap}
+.p-name{font-size:13px;font-weight:500}
+.p-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.stage-badge{font-size:10px;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.stage-cold{background:rgba(122,130,120,.15);color:var(--muted)}
+.stage-warm{background:rgba(245,158,11,.15);color:var(--warn)}
+.stage-hot{background:rgba(200,240,96,.15);color:var(--accent)}
+.stage-won{background:rgba(74,222,128,.15);color:var(--accent2)}
+.empty-state{text-align:center;padding:28px 0;color:var(--muted);font-size:12px}
+.rhythm-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:4px}
+.rhythm-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.rhythm-day{font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px}
+.rhythm-title{font-size:13px;font-weight:500;margin-bottom:4px}
+.rhythm-body{font-size:12px;color:var(--muted);line-height:1.6}
+.week-tracker{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.week-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.week-row:last-child{border-bottom:none}
+.week-lbl{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);min-width:52px}
+.week-goal{flex:1;color:var(--text)}
+.week-sent{min-width:80px;text-align:right;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent)}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+@media(max-width:900px){.stats-row{grid-template-columns:repeat(2,1fr)}.two-col,.three-col{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.main{padding:16px}header{padding:0 16px}.stats-row{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">StructTech <span>/ MARKETING</span></div>
+  <div class="header-right">
+    <div id="app-nav"></div>
+    <span id="sync-status" class="sync-status">● Loading</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="page-header">
+    <div class="page-title">Marketing Suite</div>
+    <div class="page-sub">Lead generation engine · Outreach scripts · Pipeline tracker</div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="kpi-grid">
+    <div class="kpi-card" style="--accent-color:var(--accent)">
+      <div class="kpi-label">Prospects tracked</div>
+      <div class="kpi-val" id="kpi-prospects">0</div>
+      <div class="kpi-sub">in pipeline</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Emails sent (est.)</div>
+      <div class="kpi-val" id="kpi-emails">0</div>
+      <div class="kpi-sub">this campaign</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Hot leads</div>
+      <div class="kpi-val" id="kpi-hot">0</div>
+      <div class="kpi-sub">close now</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Won this month</div>
+      <div class="kpi-val" id="kpi-won">0</div>
+      <div class="kpi-sub">converted</div>
+    </div>
+  </div>
+
+  <!-- PROSPECT PIPELINE -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Prospect pipeline</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select class="add-input" id="filter-stage" style="width:120px;padding:5px 10px" onchange="renderProspects()">
+          <option value="">All stages</option>
+          <option value="cold">Cold</option>
+          <option value="warm">Warm</option>
+          <option value="hot">Hot</option>
+          <option value="won">Won</option>
+          <option value="nurture">Nurture</option>
+        </select>
+        <button class="add-btn" onclick="toggleProspectForm()">+ Add prospect</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="prospect-form" id="prospect-form">
+        <div class="form-row">
+          <input class="add-input" id="p-name" placeholder="Name or company..." />
+          <input class="add-input" id="p-trade" placeholder="Trade (e.g. Roofing, Asphalt)..." />
+          <input class="add-input" id="p-city" placeholder="City..." />
+          <input class="add-input" id="p-email" placeholder="Email..." />
+          <input class="add-input" id="p-phone" placeholder="Phone..." />
+          <select id="p-stage" class="add-input">
+            <option value="cold">Cold</option>
+            <option value="warm">Warm</option>
+            <option value="hot">Hot</option>
+            <option value="won">Won</option>
+            <option value="nurture">Nurture</option>
+          </select>
+          <input class="add-input" id="p-source" placeholder="Source (e.g. Google Maps, Facebook, Apollo)..." />
+          <textarea class="add-input" id="p-notes" placeholder="Notes..." rows="2" style="resize:vertical"></textarea>
+          <div style="display:flex;gap:8px">
+            <button class="add-btn" style="flex:1" onclick="saveProspect()">Save prospect</button>
+            <button class="ghost-btn" style="flex:1" onclick="toggleProspectForm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div id="prospect-list"></div>
+    </div>
+  </div>
+
+  <!-- OUTREACH SCRIPTS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">Outreach scripts</div>
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="switchTab('scripts','cold-email',this)">Cold email</button>
+        <button class="tab-btn" onclick="switchTab('scripts','linkedin',this)">LinkedIn</button>
+        <button class="tab-btn" onclick="switchTab('scripts','facebook',this)">Facebook DM</button>
+        <button class="tab-btn" onclick="switchTab('scripts','phone',this)">Phone</button>
+        <button class="tab-btn" onclick="switchTab('scripts','objections',this)">Objections</button>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div id="scripts-cold-email" class="tab-panel active">
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">Email 1 — First touch</span><span class="badge b-accent">Day 1</span></div>
+          <div class="script-body">
+            <div class="subject-line"><strong>Subject:</strong> Quick question about [Company Name]</div>
+            <div class="script-text">Hi [First Name],
+
+I came across [Company Name] on Google — looks like you guys do solid work in the [City] area.
+
+Quick question: are you still handling your estimates, follow-ups, and invoicing manually, or have you moved to any kind of system?
+
+I help small contractors around Dayton set up simple tools that cut the paperwork by 5+ hours a week and automatically follow up with leads so you stop losing jobs to guys who call back faster.
+
+Worth a 10-minute call to see if it'd help you?
+
+Jacob Walker
+StructTech — Tipp City, OH
+(937) 467-2660</div>
+            <div class="tip-note">Keep under 75 words. Subject uses company name — highest open rate trigger. No attachments or links on email #1.</div>
+          </div>
+        </div>
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">Email 2 — Follow-up bump</span><span class="badge b-warn">Day 3</span></div>
+          <div class="script-body">
+            <div class="subject-line"><strong>Subject:</strong> Re: Quick question about [Company Name]</div>
+            <div class="script-text">Hey [First Name],
+
+Just bumping this up — I know you're busy running jobs.
+
+One thing I see constantly with contractors your size: you're losing 2–3 leads a week just because you couldn't call back fast enough. My system texts them back in under 2 minutes automatically.
+
+Still worth a 10-minute call?
+
+Jacob</div>
+            <div class="tip-note">Reply to the same thread — shows as a conversation, doubles open rates. Ultra short — they're reading on their phone between jobs.</div>
+          </div>
+        </div>
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">Email 3 — Breakup email</span><span class="badge b-coral">Day 7</span></div>
+          <div class="script-body">
+            <div class="subject-line"><strong>Subject:</strong> Re: Quick question about [Company Name]</div>
+            <div class="script-text">Hi [First Name],
+
+I'll leave you alone after this — I promise.
+
+I'm only reaching out because I genuinely think what I do could save you real money. Most contractors I work with pick up 2–3 extra jobs a month just from the automated follow-up alone.
+
+If the timing's ever right, you can grab 10 minutes here: [Calendly link]
+
+Either way, hope business is going well.
+
+Jacob
+StructTech</div>
+            <div class="tip-note">Breakup emails get the highest reply rate of the sequence. "I'll leave you alone" disarms them. A surprising number respond to this one after ignoring the first two.</div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="two-col">
+          <div class="source-card" style="margin-bottom:0">
+            <div class="source-name" style="margin-bottom:6px">Subject line alternates</div>
+            <div class="mono-block" style="margin-top:0">"Saw [Company] on Google"<br>"Question for [Company]"<br>"Dayton contractor question"<br>"[First Name] — quick one"</div>
+          </div>
+          <div class="source-card" style="margin-bottom:0">
+            <div class="source-name" style="margin-bottom:6px">Send rules</div>
+            <div class="mono-block" style="margin-top:0">Days: Tue · Wed · Thu<br>Time: 6–9 AM or 6–9 PM<br>Volume: 10–15/day (wk 1) → 30–50/day (wk 4+)<br>Domain: cold outreach domain only</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="scripts-linkedin" class="tab-panel">
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">Connection request note</span><span class="badge b-purple">300 char max</span></div>
+          <div class="script-body">
+            <div class="script-text">Hi [First Name] — I help small contractors in the Dayton area set up simple systems to win more jobs without hiring office staff. Saw you're in [trade] — thought it'd be worth connecting.</div>
+            <div class="tip-note">Always reference their trade + local geography. No pitch in the request. Accept rate jumps significantly vs. generic requests. 10–15 requests/day max.</div>
+          </div>
+        </div>
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">Message 1 — After they accept</span><span class="badge b-purple">Within 24 hrs</span></div>
+          <div class="script-body">
+            <div class="script-text">Hey [First Name], thanks for connecting.
+
+Quick question — how are you currently handling lead follow-up when you're out on a job and can't pick up the phone?
+
+I ask because that's the #1 place contractors around here are losing money. Curious what your setup looks like.</div>
+            <div class="tip-note">Open with a question, not a pitch. Their answer tells you exactly how to position your service to them specifically.</div>
+          </div>
+        </div>
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">Message 2 — After their reply</span><span class="badge b-purple">Same day</span></div>
+          <div class="script-body">
+            <div class="script-text">Yeah, that's exactly what I see with most contractors — it's not a sales problem, it's a response-time problem.
+
+I set up a simple system that texts leads back within 2 minutes automatically, even when you're on the roof. Most guys pick up 2–3 jobs a month just from that.
+
+Would it be worth 10 minutes to see if it'd work for [Company Name]? Happy to share what I've set up for other [trade] guys around here.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="scripts-facebook" class="tab-panel">
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">DM after commenting on their post</span><span class="badge b-blue">Warm outreach</span></div>
+          <div class="script-body">
+            <div class="script-text">Hey [First Name] — I commented on your post in [Group Name] about [their topic].
+
+Sounds like you're dealing with [specific problem they mentioned]. That's exactly what I help contractors fix — I set up simple systems so the follow-up and paperwork happens automatically.
+
+Would it be worth a quick 10-minute call? No pitch, just want to see if what I do could actually help you.</div>
+            <div class="tip-note">Only DM people you've interacted with publicly first. Never cold-DM without a prior comment exchange.</div>
+          </div>
+        </div>
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">DM when they post a pain point</span><span class="badge b-blue">Problem-triggered</span></div>
+          <div class="script-body">
+            <div class="script-text">Hey [First Name], saw your post about [their problem].
+
+I deal with this exact thing with contractors all the time. Built a simple fix for it — automated text follow-up that goes out in under 2 minutes even when you're on the roof.
+
+Happy to show you how it works if you want. Takes 10 minutes and I'll tell you straight up if it makes sense for your operation.</div>
+          </div>
+        </div>
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">Group value post (post in the group, not a DM)</span><span class="badge b-blue">Week 3+</span></div>
+          <div class="script-body">
+            <div class="script-text">Question for the contractors in here:
+
+What's the biggest time-waster in your week that has nothing to do with actually doing the work?
+
+I ask because I've been setting up simple systems for contractors around Dayton and the answer is almost always the same — but curious what you guys are dealing with.</div>
+            <div class="tip-note">Posts like this get 20–50 comments and position you as someone who understands their world. Reply to each comment individually — that's where DMs come from.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="scripts-phone" class="tab-panel">
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">Opening — first 15 seconds</span><span class="badge b-teal">Best: 7–8 AM or 4–6 PM</span></div>
+          <div class="script-body">
+            <div class="script-text">Hey [First Name], this is Jacob from StructTech over in Tipp City — I help contractors around the Dayton area cut down on paperwork and set up systems that follow up with leads automatically. Did I catch you at an okay time?</div>
+          </div>
+        </div>
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">The one question that opens everything</span></div>
+          <div class="script-body">
+            <div class="script-text">Quick question — when you're out on a job and someone calls about a quote, what happens? Do you call them back that day, or does it sometimes slip through the cracks?</div>
+            <div class="tip-note">Almost every contractor will admit leads slip. Do not pitch until they confirm the problem. Let them say it first.</div>
+          </div>
+        </div>
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">After they confirm the problem</span></div>
+          <div class="script-body">
+            <div class="script-text">Yeah, that's the most common thing I hear. Here's what I do — I set up a simple system that texts them back within 2 minutes automatically, even when you're on the roof. No extra apps to learn, I set it all up for you.
+
+Most guys I've worked with pick up 2–3 extra jobs a month just from that. If you're doing [estimate their avg job price] a job, that pays for everything 10 times over.
+
+Would it be worth 10–15 minutes to walk you through how it works? I can show you on your phone.</div>
+          </div>
+        </div>
+        <div class="script-block">
+          <div class="script-hdr"><span class="script-name">Voicemail script</span><span class="badge b-teal">Under 25 seconds</span></div>
+          <div class="script-body">
+            <div class="script-text">Hey [First Name], this is Jacob from StructTech in Tipp City. I help contractors around Dayton set up systems that automatically follow up with leads so you stop losing jobs when you're on the job site.
+
+Gave you a ring because I think it could be worth 10 minutes of your time. Give me a call back at (937) 467-2660 — or I'll try you again [day]. Have a good one.</div>
+            <div class="tip-note">Send a text immediately after every voicemail: "Hey [First Name], just left you a voicemail — Jacob from StructTech. Happy to text if easier."</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="scripts-objections" class="tab-panel">
+        <div class="obj-card"><div class="obj-q">"I'm not really a tech person."</div><div class="obj-a">That's exactly why you need me instead of software. You don't touch anything — I set it all up, I run it, and it works like getting a text. You just show up to the calls it books for you.</div></div>
+        <div class="obj-card"><div class="obj-q">"I already have a system / we use [tool]."</div><div class="obj-a">Good — a lot of guys say that. Quick question: is it automatically following up with leads when you're on a job, or are you still doing that part manually? Because that's usually where the gap is.</div></div>
+        <div class="obj-card"><div class="obj-q">"I don't have the budget for this."</div><div class="obj-a">I get it — makes sense to be careful. What's one job worth to you? If I helped you pick up just one extra job a month that slipped through the cracks before, would that more than cover it? That's what I'd want you to judge me on.</div></div>
+        <div class="obj-card"><div class="obj-q">"I'm too busy right now."</div><div class="obj-a">Honestly, that tells me you might need this more than most. The busier you are, the more leads you're probably missing. What if I could get you set up in one afternoon and you never had to think about follow-up again?</div></div>
+        <div class="obj-card"><div class="obj-q">"Send me some information."</div><div class="obj-a">Happy to — though honestly the info makes a lot more sense after a quick call because I'd tailor it to what you're actually dealing with. What's 10 minutes look like for you this week — morning or afternoon better?</div></div>
+        <div class="obj-card"><div class="obj-q">"I need to think about it." / "Let me talk to my wife."</div><div class="obj-a">Of course — totally makes sense. Just so I'm not bugging you — is there a specific concern I can answer now that'd make it easier to decide? I'd rather you have all the info than wonder about something later.</div></div>
+        <div class="obj-card"><div class="obj-q">"That's not for guys like me / small operations."</div><div class="obj-a">You're right that most software isn't built for small crews — it's made for big companies with office managers. What I do is different. I set it up specifically for 1–5 person operations. The guys I work with are exactly your size.</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LIST BUILDING + SEQUENCE -->
+  <div class="two-col">
+
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header"><div class="card-title">List building sources</div></div>
+      <div class="card-body">
+        <div class="source-card">
+          <div class="source-hdr"><span class="source-name">Google Maps scrape</span><span class="badge b-accent">Free</span></div>
+          <div class="source-yield">20–35 verified local contacts/hr</div>
+          <div class="source-how">Search "roofing contractor Dayton Ohio" → click results → grab website → find Contact page → copy name + email into Google Sheet. Repeat for each trade.</div>
+          <div class="source-time">Time: 2–3 hrs for first 100 contacts</div>
+          <div class="mono-block">"roofing contractor [city] ohio"<br>"asphalt paving [city] ohio"<br>"siding contractor dayton ohio"<br>"gutter company dayton ohio"<br>"concrete contractor miami county ohio"</div>
+        </div>
+        <div class="source-card">
+          <div class="source-hdr"><span class="source-name">Apollo.io free tier</span><span class="badge b-accent">Free · 150 credits/mo</span></div>
+          <div class="source-yield">150 verified emails/month, exported to CSV</div>
+          <div class="source-how">Filter: Industry = Roofing/Paving/Specialty Trade, 1–10 employees, Dayton OH 50mi radius. Title filter: Owner, President, Founder only.</div>
+          <div class="source-time">Time: 30–45 min to set up and export first batch</div>
+        </div>
+        <div class="source-card">
+          <div class="source-hdr"><span class="source-name">Facebook business pages</span><span class="badge b-accent">Free</span></div>
+          <div class="source-yield">10–20 contacts/hr — catches small ops Apollo misses</div>
+          <div class="source-how">Search Facebook for "roofing Dayton Ohio" under Pages. Many 1–3 person operations list email only on Facebook.</div>
+          <div class="source-time">Time: 1–2 hrs per 50 contacts</div>
+        </div>
+        <div class="source-card">
+          <div class="source-hdr"><span class="source-name">Ohio contractor license database</span><span class="badge b-accent">Free</span></div>
+          <div class="source-yield">Verified licensed businesses — higher quality leads</div>
+          <div class="source-how">OCILB publishes searchable directory by trade + county. Pull names, Google each company to find email.</div>
+          <div class="source-time">Slower per-contact but better qualification</div>
+        </div>
+        <div class="source-card" style="margin-bottom:0">
+          <div class="source-hdr"><span class="source-name">Supply house drop-ins</span><span class="badge b-warn">In person</span></div>
+          <div class="source-yield">5 warm contacts beats 50 cold emails</div>
+          <div class="source-how">ABC Supply on Benchwood Rd, Beacon Roofing Supply — show up 6–8 AM when crews pick up materials. Introduce yourself. These are pre-warmed leads.</div>
+          <div class="source-time">Time: 1 hr, 1–2x per month</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header"><div class="card-title">Full outreach sequence</div></div>
+        <div class="card-body">
+          <div class="flow-steps">
+            <div class="flow-step"><div class="flow-num">1</div><div class="flow-content"><span class="flow-day">Day 1</span>Send cold email #1. Log in Airtable. Tag source (Google Maps / Apollo / Facebook).</div></div>
+            <div class="flow-step"><div class="flow-num">2</div><div class="flow-content"><span class="flow-day">Day 1 — same day</span>LinkedIn connection request with personalized note. Find Facebook profile too.</div></div>
+            <div class="flow-step"><div class="flow-num">3</div><div class="flow-content"><span class="flow-day">Day 3</span>Send cold email #2. If they opened #1 but didn't reply — try a cold call instead today.</div></div>
+            <div class="flow-step"><div class="flow-num">4</div><div class="flow-content"><span class="flow-day">Day 5</span>If LinkedIn accepted: send message #1. If not: no action yet.</div></div>
+            <div class="flow-step"><div class="flow-num">5</div><div class="flow-content"><span class="flow-day">Day 7</span>Send cold email #3 (breakup). Cold call attempt if not reached yet.</div></div>
+            <div class="flow-step"><div class="flow-num">6</div><div class="flow-content"><span class="flow-day">Day 9</span>LinkedIn message #2 if they replied to #1. Facebook DM if you've interacted in a group.</div></div>
+            <div class="flow-step"><div class="flow-num">7</div><div class="flow-content"><span class="flow-day">Day 14</span>Final cold call + voicemail. Text immediately after voicemail.</div></div>
+            <div class="flow-step"><div class="flow-num">8</div><div class="flow-content"><span class="flow-day">Day 21+</span>Mark "Nurture" in Airtable. Quarterly re-touch. Never delete — timing changes.</div></div>
+          </div>
+          <div class="divider"></div>
+          <div class="script-block" style="margin-bottom:8px">
+            <div class="script-hdr"><span class="script-name">Post-call follow-up text</span><span class="badge b-teal">Within 1 hr of call</span></div>
+            <div class="script-body"><div class="script-text">Hey [First Name], great talking to you. Sending over the proposal now — take a look and let me know if you have any questions. Looking forward to getting this set up for you.</div></div>
+          </div>
+          <div class="script-block" style="margin-bottom:0">
+            <div class="script-hdr"><span class="script-name">Referral ask — after first win</span><span class="badge b-teal">Say this to every client</span></div>
+            <div class="script-body"><div class="script-text">Hey [First Name], glad this is working out. Quick question — do you know any other contractors around here who might be dealing with the same headaches you were? Not looking for a formal referral, just an intro. Happy to take care of them the same way I've taken care of you.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0">
+        <div class="card-header"><div class="card-title">Weekly rhythm</div></div>
+        <div class="card-body">
+          <div class="rhythm-grid">
+            <div class="rhythm-card">
+              <div class="rhythm-day">Monday · 2 hrs</div>
+              <div class="rhythm-title">Content block</div>
+              <div class="rhythm-body">2 posts · 1 video · 1 visual · schedule across platforms</div>
+            </div>
+            <div class="rhythm-card">
+              <div class="rhythm-day">Tue–Thu · 30–60 min/day</div>
+              <div class="rhythm-title">Outreach</div>
+              <div class="rhythm-body">10–15 emails or follow-ups · 20 min in FB groups · LinkedIn connects</div>
+            </div>
+            <div class="rhythm-card">
+              <div class="rhythm-day">Friday · 1 hr</div>
+              <div class="rhythm-title">Review + pipeline</div>
+              <div class="rhythm-body">Check replies · update Airtable · follow up warm leads · plan next week</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="shared.js"></script>
+<script src="nav.js"></script>
+<script>
+var mktState = {
+  prospects: [],
+  emailsSent: 0
+};
+
+function switchTab(group, id, btn) {
+  document.querySelectorAll('#scripts-cold-email, #scripts-linkedin, #scripts-facebook, #scripts-phone, #scripts-objections').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('scripts-' + id).classList.add('active');
+  btn.closest('.card-header').querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function toggleProspectForm() {
+  var f = document.getElementById('prospect-form');
+  f.style.display = f.style.display === 'none' || f.style.display === '' ? 'block' : 'none';
+  if (f.style.display === 'block') document.getElementById('p-name').focus();
+}
+
+function saveProspect() {
+  var name = document.getElementById('p-name').value.trim();
+  if (!name) { document.getElementById('p-name').focus(); return; }
+  var prospect = {
+    id: genId(),
+    name: name,
+    trade: document.getElementById('p-trade').value.trim() || 'Contractor',
+    city: document.getElementById('p-city').value.trim() || '',
+    email: document.getElementById('p-email').value.trim() || '',
+    phone: document.getElementById('p-phone').value.trim() || '',
+    stage: document.getElementById('p-stage').value,
+    source: document.getElementById('p-source').value.trim() || '',
+    notes: document.getElementById('p-notes').value.trim() || '',
+    added: new Date().toISOString()
+  };
+  if (!state.os_data.marketing_prospects) state.os_data.marketing_prospects = [];
+  state.os_data.marketing_prospects.push(prospect);
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-trade').value = '';
+  document.getElementById('p-city').value = '';
+  document.getElementById('p-email').value = '';
+  document.getElementById('p-phone').value = '';
+  document.getElementById('p-notes').value = '';
+  document.getElementById('p-stage').value = 'cold';
+  document.getElementById('p-source').value = '';
+  document.getElementById('prospect-form').style.display = 'none';
+  scheduleSave();
+  renderProspects();
+  updateKPIs();
+}
+
+function deleteProspect(id) {
+  if (!state.os_data.marketing_prospects) return;
+  state.os_data.marketing_prospects = state.os_data.marketing_prospects.filter(function(p){ return p.id !== id; });
+  scheduleSave();
+  renderProspects();
+  updateKPIs();
+}
+
+function updateStage(id, stage) {
+  if (!state.os_data.marketing_prospects) return;
+  var p = state.os_data.marketing_prospects.find(function(x){ return x.id === id; });
+  if (p) { p.stage = stage; scheduleSave(); renderProspects(); updateKPIs(); }
+}
+
+function renderProspects() {
+  var list = document.getElementById('prospect-list');
+  var filter = document.getElementById('filter-stage').value;
+  var prospects = (state.os_data.marketing_prospects || []).filter(function(p){
+    return !filter || p.stage === filter;
+  });
+  if (prospects.length === 0) {
+    list.innerHTML = '<div class="empty-state">No prospects yet.<br>Add your first contact above.</div>';
+    return;
+  }
+  var stageLabels = { cold: 'Cold', warm: 'Warm', hot: 'Hot — close now', won: 'Won', nurture: 'Nurture' };
+  list.innerHTML = prospects.map(function(p) {
+    return '<div class="prospect-item">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div class="p-name">' + escHtml(p.name) + '</div>' +
+        '<div class="p-meta">' + escHtml(p.trade) + (p.city ? ' · ' + escHtml(p.city) : '') + (p.source ? ' · ' + escHtml(p.source) : '') + '</div>' +
+        (p.notes ? '<div class="p-meta" style="margin-top:4px;color:var(--muted)">' + escHtml(p.notes) + '</div>' : '') +
+      '</div>' +
+      '<select class="add-input" style="width:130px;padding:4px 8px;font-size:11px" onchange="updateStage(' + p.id + ', this.value)">' +
+        ['cold','warm','hot','won','nurture'].map(function(s){ return '<option value="' + s + '"' + (p.stage===s?' selected':'') + '>' + stageLabels[s] + '</option>'; }).join('') +
+      '</select>' +
+      '<button class="ghost-btn" style="font-size:11px;padding:4px 10px" onclick="deleteProspect(' + p.id + ')">Remove</button>' +
+    '</div>';
+  }).join('');
+}
+
+function updateKPIs() {
+  var prospects = state.os_data.marketing_prospects || [];
+  document.getElementById('kpi-prospects').textContent = prospects.length;
+  document.getElementById('kpi-hot').textContent = prospects.filter(function(p){ return p.stage === 'hot'; }).length;
+  document.getElementById('kpi-won').textContent = prospects.filter(function(p){ return p.stage === 'won'; }).length;
+}
+
+async function init() {
+  await loadState();
+  if (!state.os_data.marketing_prospects) state.os_data.marketing_prospects = [];
+  renderNav('marketing');
+  renderProspects();
+  updateKPIs();
+}
+
+init();
+</script>
+</body>
+</html>
