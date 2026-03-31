@@ -9,22 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
-/* ── Sub-nav ── */
-.df-subnav {
-  display: flex; align-items: center; gap: 2px;
-  padding: 0 24px; height: 38px;
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  overflow-x: auto; flex-shrink: 0;
-}
-.df-subnav-btn {
-  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
-  letter-spacing: 0.07em; padding: 5px 12px; border-radius: 4px;
-  border: none; background: transparent; color: var(--muted);
-  cursor: pointer; white-space: nowrap; transition: all 0.15s;
-}
-.df-subnav-btn:hover { color: var(--text); }
-.df-subnav-btn.active { background: var(--surface2); color: var(--accent); }
-
 .inv-view { display: none; }
 .inv-view.active { display: block; }
 
@@ -403,7 +387,7 @@ function initBuilder(inv) {
   var clientSel = document.getElementById('inv-client');
   clientSel.innerHTML = '<option value="">Select client…</option>' +
     clients.map(function(c) {
-      return '<option value="' + escAttr(c.id) + '">' + escHtml(c.name) + '</option>';
+      return '<option value="' + escAttr(c.id) + '">' + escHtml(c.company_name || c.name) + '</option>';
     }).join('');
 
   var today = new Date();
@@ -600,7 +584,6 @@ async function init() {
   var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('header-date').textContent = days[d.getDay()] + ', ' + months[d.getMonth()] + ' ' + d.getDate();
-  document.getElementById('week-badge').textContent = 'W' + state.current_week;
   await loadState();
   document.getElementById('week-badge').textContent = 'W' + state.current_week;
   renderInvoiceList();

@@ -237,7 +237,6 @@ var viewWeek = 1;
 var editingTask = null;
 var osOpen = false;
 var osTab = 'workspace';
-var showAddProspect = false;
 var showAddIncome = false;
 var showAddClient = false;
 var editingClientId = null;
@@ -428,19 +427,11 @@ function renderProspects() {
   var items = '';
   pp.forEach(function(p) {
     var color = PIPELINE_STAGE_COLORS[p.stage] || '#64748b';
-    var score = '';
-    // Show ICP score dot if available
-    if (p.icpScore !== undefined) {
-      var sc = p.icpScore;
-      var scColor = sc >= 70 ? 'var(--accent2)' : sc >= 45 ? 'var(--warn)' : 'var(--danger)';
-      score = '<span style="font-family:\'DM Mono\',monospace;font-size:10px;color:' + scColor + ';margin-left:6px">' + sc + '</span>';
-    }
     items += '<div class="prospect-item">' +
       '<div style="flex:1;min-width:0">' +
-        '<div class="prospect-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtml(p.name) + '</div>' +
-        '<div class="prospect-trade">' + escHtml(p.bizType || p.tradeType || '') + (p.city ? ' · ' + escHtml(p.city) : '') + '</div>' +
+        '<div class="prospect-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtml(p.company_name || p.name || '') + '</div>' +
+        '<div class="prospect-trade">' + escHtml(p.trade_type || p.bizType || '') + (p.city ? ' · ' + escHtml(p.city) : '') + '</div>' +
       '</div>' +
-      score +
       '<span style="font-family:\'DM Mono\',monospace;font-size:9px;padding:3px 8px;border-radius:3px;background:' + color + '22;color:' + color + ';white-space:nowrap;margin-left:8px;flex-shrink:0">' + escHtml(p.stage) + '</span>' +
     '</div>';
   });
@@ -567,11 +558,7 @@ function buildWorkspaceTab() {
     '<a class="quick-link" href="https://structtek.com" target="_blank">\u2197 structtek.com</a>' +
     '</div>';
 
-  var sql = '<div class="os-section"><div class="os-section-title">SQL Reminder</div>' +
-    '<div class="sql-box">alter table structtech_state<br>add column if not exists<br>os_data jsonb default \'{}\'::jsonb;</div>' +
-    '</div>';
-
-  return stats + tracker + links + sql;
+  return stats + tracker + links;
 }
 
 // ── OS Tab: Clients ────────────────────────────────────────────────────────
@@ -806,46 +793,6 @@ function setWeek(n) {
   renderMilestones();
 }
 
-// ── Event handlers: Prospects ──────────────────────────────────────────────
-function toggleAddProspect() {
-  showAddProspect = !showAddProspect;
-  renderProspects();
-  if (showAddProspect) {
-    setTimeout(function() { var el = document.getElementById('np-name'); if (el) el.focus(); }, 50);
-  }
-}
-
-function cancelAddProspect() { showAddProspect = false; renderProspects(); }
-
-function saveProspect() {
-  var name  = (document.getElementById('np-name')  || {}).value || '';
-  var type  = (document.getElementById('np-trade') || {}).value || '';
-  var stage = (document.getElementById('np-stage') || {}).value || 'Cold';
-  if (!name.trim()) return;
-  state.prospects.push({ name: name.trim(), type: type.trim(), stage: stage });
-  showAddProspect = false;
-  scheduleSave();
-  renderProspects();
-  renderStats();
-}
-
-function cycleStage(idx) {
-  var stages = ['Cold', 'Warm', 'Hot', 'Won'];
-  var p = state.prospects[idx];
-  if (!p) return;
-  var i = stages.indexOf(p.stage);
-  p.stage = stages[(i + 1) % stages.length];
-  scheduleSave();
-  renderProspects();
-}
-
-function deleteProspect(idx) {
-  state.prospects.splice(idx, 1);
-  scheduleSave();
-  renderProspects();
-  renderStats();
-}
-
 // ── Event handlers: Income ─────────────────────────────────────────────────
 function toggleAddIncome() {
   showAddIncome = !showAddIncome;
@@ -1002,7 +949,7 @@ async function init() {
   renderAll();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+init();
 </script>
 </body>
 </html>

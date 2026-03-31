@@ -9,21 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <style>
-.df-subnav {
-  display: flex; align-items: center; gap: 2px;
-  padding: 0 24px; height: 38px;
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  overflow-x: auto; flex-shrink: 0;
-}
-.df-subnav-btn {
-  font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase;
-  letter-spacing: 0.07em; padding: 5px 12px; border-radius: 4px;
-  border: none; background: transparent; color: var(--muted);
-  cursor: pointer; white-space: nowrap; transition: all 0.15s;
-}
-.df-subnav-btn:hover { color: var(--text); }
-.df-subnav-btn.active { background: var(--surface2); color: var(--accent); }
-
 .au-view { display: none; }
 .au-view.active { display: block; }
 
@@ -547,8 +532,8 @@ function renderCommand() {
     return '<div class="cmd-client-row' + (expanded ? ' expanded' : '') + '" id="ccrow-' + escAttr(p.id) + '">' +
       '<div class="cmd-client-summary" onclick="toggleClient(\'' + escAttr(p.id) + '\')">' +
         '<div style="flex:1;min-width:0">' +
-          '<div class="cmd-client-name">' + escHtml(p.name) + '</div>' +
-          '<div class="cmd-client-meta">' + escHtml(p.bizType || '') + (p.city ? ' · ' + escHtml(p.city) : '') + ' · ' + escHtml(p.stage || '') + '</div>' +
+          '<div class="cmd-client-name">' + escHtml(p.company_name || p.name || '') + '</div>' +
+          '<div class="cmd-client-meta">' + escHtml(p.trade_type || p.bizType || '') + (p.city ? ' · ' + escHtml(p.city) : '') + ' · ' + escHtml(p.stage || '') + '</div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;align-items:center;gap:6px;margin:0 16px">' +
           '<div class="cmd-stack-dots">' + (dots || '<span style="font-size:10px;color:var(--muted)">no modules</span>') + '</div>' +
@@ -624,7 +609,7 @@ function openAddModal(clientId) {
   var existing = (state.os_data.automations && state.os_data.automations[clientId] || []).map(function(m) { return m.blueprintId; });
   var grid = document.getElementById('add-module-grid');
   var pp = (state.os_data.prospects || []).find(function(p) { return p.id == clientId; });
-  document.getElementById('add-modal-title').textContent = 'Add Module' + (pp ? ' — ' + pp.name : '');
+  document.getElementById('add-modal-title').textContent = 'Add Module' + (pp ? ' — ' + (pp.company_name || pp.name) : '');
   grid.innerHTML = BLUEPRINTS.map(function(bp) {
     if (existing.indexOf(bp.id) !== -1) return '';
     return '<div class="au-add-row" id="addrow-' + bp.id + '" onclick="toggleBpSelect(\'' + bp.id + '\')">' +
@@ -860,7 +845,7 @@ function exportSpec() {
   var name = document.getElementById('spec-name').value || 'Untitled Spec';
   var clientId = document.getElementById('spec-client').value;
   var pp = (state.os_data.prospects || []).find(function(p) { return p.id == clientId; });
-  var clientName = pp ? pp.name : 'Unassigned';
+  var clientName = pp ? (pp.company_name || pp.name || 'Unassigned') : 'Unassigned';
   var stepsText = flowSteps.map(function(s, i) {
     return (i + 1) + '. [' + s.type.toUpperCase() + '] ' + s.label + (s.tool ? ' (' + s.tool + ')' : '') + (s.notes ? '\n   → ' + s.notes : '');
   }).join('\n');
@@ -890,7 +875,7 @@ function renderSavedSpecs() {
     var client = pp.find(function(p) { return p.id == s.clientId; });
     return '<div class="build-spec-item' + (s.id == currentSpecId ? ' active' : '') + '" onclick="loadSpec(\'' + escAttr(s.id) + '\')">' +
       '<div class="build-spec-item-name">' + escHtml(s.name) + '</div>' +
-      '<div class="build-spec-item-meta">' + (client ? escHtml(client.name) : 'Unassigned') + ' · ' + (s.steps || []).length + ' steps</div>' +
+      '<div class="build-spec-item-meta">' + (client ? escHtml(client.company_name || client.name) : 'Unassigned') + ' · ' + (s.steps || []).length + ' steps</div>' +
     '</div>';
   }).join('');
 }
@@ -963,7 +948,7 @@ function assignBpToClient(bpId) {
   var grid = document.getElementById('add-module-grid');
   grid.innerHTML = '<div style="margin-bottom:8px"><label class="form-label">Select Client</label>' +
     '<select class="form-select" id="assign-client-sel">' +
-      pp.map(function(p) { return '<option value="' + escAttr(p.id) + '">' + escHtml(p.name) + '</option>'; }).join('') +
+      pp.map(function(p) { return '<option value="' + escAttr(p.id) + '">' + escHtml(p.company_name || p.name) + '</option>'; }).join('') +
     '</select></div>';
   document.getElementById('add-module-notes').value = '';
   // Patch confirmAddModule for this flow
